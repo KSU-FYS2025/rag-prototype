@@ -4,7 +4,6 @@ from pymilvus import model
 client = MilvusClient("vectorDB.db")
 embedding_fn = model.DefaultEmbeddingFunction()
 
-
 def instantiate_db(settings):
     if client.has_collection(settings.collection_name):
         client.drop_collection(settings.collection_name)
@@ -14,7 +13,7 @@ def embed_file(file_path):
     docs = []
     with open(file_path, "r") as file:
         docs = file.readlines()
-        print("file sucessfully loaded")
+        print("file successfully loaded")
 
     vectors = embedding_fn.encode_documents(docs)
     data = [
