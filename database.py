@@ -1,7 +1,11 @@
-from pymilvus import MilvusClient
-from pymilvus import model
+from qdrant_client import QdrantClient
+import os
 
-client = MilvusClient("vectorDB.db")
+client = QdrantClient(
+    url=os.environ.get("QDRANT_URL"),
+    api_key=os.environ.get("QDRANT_API_KEY")
+)
+
 embedding_fn = model.DefaultEmbeddingFunction()
 
 

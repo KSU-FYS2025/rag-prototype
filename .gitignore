@@ -1,1 +1,4 @@
 .idea
+
+# For privacy reasons
+.env
