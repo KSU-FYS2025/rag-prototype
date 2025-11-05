@@ -15,12 +15,12 @@ fill_create_db(
 def retrieve(query, top_n = 3):
     query_vectors = embedding_fn.encode_queries([query])
     res = client.search(
-        collection_name="cat-facts",
+        collection_name="cat_facts",
         data=query_vectors,
         limit=top_n,
         output_fields=["texts", "subject"]
     )
-    return [(x["entity"], x["distance"]) for x in res]
+    return [(x[0]["entity"], x[0]["distance"]) for x in res]
 
 input_query = input("Ask me a question: ")
 retrieved_knowledge = retrieve(input_query)
