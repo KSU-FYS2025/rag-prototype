@@ -46,7 +46,7 @@ pipx install uv
 
 #### Post-uv installation
 Once uv is installed run `uv sync` to make sure that you have the correct packages installed.
-Then, you're done!
+Then, you're done! You can run `main.py` using `uv run main.py`.
 
 ## Note:
 The installation steps may change drastically once I fully get fastapi going. Be
