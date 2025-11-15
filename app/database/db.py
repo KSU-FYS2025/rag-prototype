@@ -5,6 +5,11 @@ from pymilvus import model
 
 client = MilvusClient("vectorDB.db")
 
+"""
+This file outlines basic functions to get the database up and running. These
+functions are referenced in the api.py file to support all CRUD operations.
+"""
+
 
 def create_schema(schema: list[Dict]) -> CollectionSchema:
     """
