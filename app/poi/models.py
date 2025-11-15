@@ -1,4 +1,8 @@
+from typing import Optional, Any
+
 from pydantic import BaseModel
+from pymilvus.model.dense import OnnxEmbeddingFunction
+
 
 class Pos(BaseModel):
     x: float
@@ -16,4 +20,12 @@ class POI(BaseModel):
     tags: list[str]
     position: Pos
     description: str
-    vector_embedding: list[float]
+    vector_embedding: Optional[list[float]]
+
+    def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
+        embedding_str = f"label: {self.label} | "
+        f"tags: {",".join(self.tags)} | "
+        f"description: {self.description} | "
+
+        embedding = embedding_fn.encode_documents([embedding_str])
+        self.vector_embedding = embedding[0]

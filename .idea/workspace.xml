@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0995fd77-c379-4e98-9e3b-157cfdec90fd" name="Changes" comment="Base framework for structuring the api">
-      <change afterPath="$PROJECT_DIR$/app/poi/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/poi/api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/poi/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/poi/types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/RagPrototype.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RagPrototype.iml" afterDir="false" />
+    <list default="true" id="0995fd77-c379-4e98-9e3b-157cfdec90fd" name="Changes" comment="Added documentation to OneOrMore type">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/dependencies.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/dependencies.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vectorDB.db" beforeDir="false" afterPath="$PROJECT_DIR$/vectorDB.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/poi/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/poi/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/poi/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/poi/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,11 +90,29 @@
       <option name="project" value="LOCAL" />
       <updated>1763227451654</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="added route for getting items (UNTESTED)">
+      <option name="closed" value="true" />
+      <created>1763230679699</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1763230679699</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Added documentation to OneOrMore type">
+      <option name="closed" value="true" />
+      <created>1763230746857</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1763230746857</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Base framework for structuring the api" />
-    <option name="LAST_COMMIT_MESSAGE" value="Base framework for structuring the api" />
+    <MESSAGE value="added route for getting items (UNTESTED)" />
+    <MESSAGE value="Added documentation to OneOrMore type" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added documentation to OneOrMore type" />
   </component>
 </project>
