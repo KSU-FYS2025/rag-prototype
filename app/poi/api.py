@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Body
 from typing import Annotated
 from pymilvus import model
 
-from app.poi.models import POI
+from app.poi.models import POI, POIOptional
 from app.poi.types import OneOrMore
 from app.dependencies import DbDep
 
@@ -66,6 +66,26 @@ def insert_poi(
     res = db.insert(
         collection_name="poi",
         data=data
+    )
+
+    return res
+
+@router.put("/poi/", tags=["poi"])
+def update_poi(
+        _id: Annotated[int, Body()],
+        poi: Annotated[POIOptional, Body()],
+        db: DbDep
+):
+    if poi.vector_embedding is None:
+        poi.generate_embedding(embedding_fn)
+
+    data = {"id": _id} | poi.model_dump()
+    res = db.upsert(
+        collection_name="poi",
+        data=data,
+        # This should be in the version of milvus we're using, I don't know why
+        # it's not
+        partial_update=True
     )
 
     return res

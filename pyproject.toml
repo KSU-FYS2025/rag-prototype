@@ -7,6 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]",
     "ollama",
-    "pymilvus",
+    "pymilvus>=2.6.2",
     "pymilvus-model",
 ]

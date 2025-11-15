@@ -9,13 +9,20 @@ class Pos(BaseModel):
     y: float
     z: float
 
+def generate_embedding(obj, embedding_fn: OnnxEmbeddingFunction):
+    embedding_str = f"label: {obj.label} | "
+    f"tags: {",".join(obj.tags)} | "
+    f"description: {obj.description} | "
+
+    embedding = embedding_fn.encode_documents([embedding_str])
+    obj.vector_embedding = embedding[0]
+
 class POI(BaseModel):
     """
     Please keep up to date with the implementation of this! This is very subject
     to change once I learn more about how to data is structured. As of right now,
     this is based off the information in the shared doc from the first meeting.
     """
-    id: str
     label: str
     tags: list[str]
     position: Pos
@@ -23,9 +30,14 @@ class POI(BaseModel):
     vector_embedding: Optional[list[float]]
 
     def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
-        embedding_str = f"label: {self.label} | "
-        f"tags: {",".join(self.tags)} | "
-        f"description: {self.description} | "
+        generate_embedding(self, embedding_fn)
 
-        embedding = embedding_fn.encode_documents([embedding_str])
-        self.vector_embedding = embedding[0]
+class POIOptional(BaseModel):
+    label: Optional[str]
+    tags: Optional[list[str]]
+    position: Optional[Pos]
+    description: Optional[str]
+    vector_embedding: Optional[list[float]]
+
+    def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
+        generate_embedding(self, embedding_fn)

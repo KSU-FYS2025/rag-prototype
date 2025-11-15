@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0995fd77-c379-4e98-9e3b-157cfdec90fd" name="Changes" comment="Added documentation to OneOrMore type">
+    <list default="true" id="0995fd77-c379-4e98-9e3b-157cfdec90fd" name="Changes" comment="Code for inserting data to poi collection (UNTESTED)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/dependencies.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/dependencies.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/poi/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/poi/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/poi/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/poi/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,13 +106,22 @@
       <option name="project" value="LOCAL" />
       <updated>1763230746857</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Code for inserting data to poi collection (UNTESTED)">
+      <option name="closed" value="true" />
+      <created>1763235365075</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1763235365075</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Base framework for structuring the api" />
     <MESSAGE value="added route for getting items (UNTESTED)" />
     <MESSAGE value="Added documentation to OneOrMore type" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added documentation to OneOrMore type" />
+    <MESSAGE value="Code for inserting data to poi collection (UNTESTED)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Code for inserting data to poi collection (UNTESTED)" />
   </component>
 </project>

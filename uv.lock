@@ -884,7 +884,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", extras = ["standard"] },
     { name = "ollama" },
-    { name = "pymilvus" },
+    { name = "pymilvus", specifier = ">=2.6.2" },
     { name = "pymilvus-model" },
 ]
 
