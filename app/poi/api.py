@@ -1,6 +1,6 @@
 from pymilvus import MilvusClient
 from fastapi import APIRouter, Depends, Body
-from typing import Annotated
+from typing import Annotated, Optional
 from pymilvus import model
 
 from app.poi.models import POI, POIOptional
@@ -89,3 +89,26 @@ def update_poi(
     )
 
     return res
+
+@router.delete("/poi/", tags=["poi"])
+def delete_poi(
+        _id: Annotated[Optional[int], Body()],
+        _filter: Annotated[Optional[str], Body()],
+        db: DbDep
+):
+    if _id is not None and _filter is None:
+        res = db.delete(
+            collection_name="poi",
+            ids=[_id]
+        )
+
+        return res
+    elif _id is not None and _filter is not None:
+        res = db.delete(
+            collection_name="poi",
+            filter=_filter
+        )
+
+        return res
+    else:
+        return {"error": "No value for id or filter found!"}
