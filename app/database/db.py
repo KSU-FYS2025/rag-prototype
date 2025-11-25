@@ -1,9 +1,10 @@
 from typing import Dict, Optional
+from pathlib import Path
 
 from pymilvus import MilvusClient, CollectionSchema
 from pymilvus import model
 
-client = MilvusClient("vectorDB.db")
+client = MilvusClient(Path(Path.cwd(), "vectorDB.db").__str__())
 
 """
 This file outlines basic functions to get the database up and running. These
@@ -22,11 +23,11 @@ def create_schema(schema: list[Dict]) -> CollectionSchema:
     return _schema
 
 
-def create_collection(name: str, schema: Optional[CollectionSchema] = None):
-    if client.has_collection(name):
-        client.drop_collection(name)
+def create_collection(settings: Dict, schema: Optional[CollectionSchema] = None):
+    if client.has_collection(settings["collection_name"]):
+        client.drop_collection(settings["collection_name"])
 
     client.create_collection(
-        collection_name=name,
-        schema=schema
+        schema=schema,
+        **settings
     )

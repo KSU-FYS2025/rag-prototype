@@ -9,4 +9,6 @@ dependencies = [
     "ollama",
     "pymilvus>=2.6.2",
     "pymilvus-model",
+    "pymilvus[milvus_lite]",
+    "Flax"
 ]
