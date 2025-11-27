@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from pymilvus import MilvusClient
 from pathlib import Path
+import requests
 
 
 def get_db_gen():
@@ -17,12 +18,18 @@ def get_db_gen():
     finally:
         client.close()
 
-def get_db():
-    #return client
-    ...
-
-DbDep = Annotated[MilvusClient, Depends(get_db_gen)]
+NeedsDb = Annotated[MilvusClient, Depends(get_db_gen)]
 """
 Declares database dependency as an easy to use type.
 Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session-dependency
 """
+
+def needs_ollama():
+    try:
+        res = requests.get("http://localhost:11434")
+        if res.text != "Ollama is running":
+            raise HTTPException(status_code=404, detail="Ollama is not running!")
+    except:
+        raise HTTPException(status_code=404, detail="Ollama is not running!")
+
+NeedsOllama = Depends(needs_ollama)

@@ -1,12 +1,16 @@
 from contextlib import asynccontextmanager
+from typing import Union
+from httpx import ConnectError
 
 import ollama
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from urllib3.exceptions import ResponseError
 
 from app.database.db import client, create_collection
 from pymilvus import model
 
-from app.dependencies import DbDep
+from app.dependencies import NeedsDb, NeedsOllama
 
 """
 This file contains the example code from the hugging face article.
@@ -56,21 +60,26 @@ async def lifespan(app: FastAPI):
 
 subapp = FastAPI(lifespan=lifespan)
 
-@subapp.get("/query/")
-def get_query(query: str, db: DbDep) -> str:
+@subapp.get("/query/", dependencies=[NeedsOllama])
+async def get_query(query: str, db: NeedsDb) -> StreamingResponse:
     retrieved_knowledge = retrieve(query, db)
 
     instruction_prompt = f"""You are a helpful chatbot.
-    Use only the following pieces of context to answer the question. Don't make up any new information:
-    {"\n".join([f" - {chunk}" for chunk, similarity in retrieved_knowledge])}
-    """
+        Use only the following pieces of context to answer the question. Don't make up any new information:
+        {"\n".join([f" - {chunk}" for chunk, similarity in retrieved_knowledge])}
+        """
 
-    response = ollama.chat(
+    stream = ollama.chat(
         model=LANGUAGE_MODEL,
         messages=[
             {"role": "system", "content": instruction_prompt},
             {"role": "user", "content": query},
-        ]
+        ],
+        stream=True
     )
 
-    return response["message"]["content"]
+    async def response():
+        for chunk in stream:
+            yield chunk["message"]["content"]
+
+    return StreamingResponse(response())
