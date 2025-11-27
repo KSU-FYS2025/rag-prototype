@@ -32,9 +32,9 @@ def embed_file(file_path):
 
     return data
 
-def retrieve(query, top_n = 3):
+def retrieve(query, db, top_n = 3):
     query_vectors = embedding_fn.encode_queries([query])
-    res = client.search(
+    res = db.search(
         collection_name="cat_facts",
         data=query_vectors,
         limit=top_n,
@@ -45,20 +45,20 @@ def retrieve(query, top_n = 3):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Running lifespan manager")
-    create_collection({
-        "collection_name": "cat_facts",
-        "dimension": 768
-    })
-    data = embed_file("cat-facts.txt")
-    client.insert(collection_name="cat_facts", data=data)
+    if not client.has_collection("cat_facts"):
+        create_collection({
+            "collection_name": "cat_facts",
+            "dimension": 768
+        })
+        data = embed_file("cat-facts.txt")
+        client.insert(collection_name="cat_facts", data=data)
     yield
-
 
 subapp = FastAPI(lifespan=lifespan)
 
 @subapp.get("/query/")
-def get_query(query: str) -> str:
-    retrieved_knowledge = retrieve(query)
+def get_query(query: str, db: DbDep) -> str:
+    retrieved_knowledge = retrieve(query, db)
 
     instruction_prompt = f"""You are a helpful chatbot.
     Use only the following pieces of context to answer the question. Don't make up any new information:
