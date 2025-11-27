@@ -25,11 +25,13 @@ Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session
 """
 
 def needs_ollama():
+    error = HTTPException(status_code=404, detail="""Ollama is not running!
+            ensure ollama is running on the server before querying this route!""")
     try:
         res = requests.get("http://localhost:11434")
         if res.text != "Ollama is running":
-            raise HTTPException(status_code=404, detail="Ollama is not running!")
+            raise error
     except:
-        raise HTTPException(status_code=404, detail="Ollama is not running!")
+        raise error
 
 NeedsOllama = Depends(needs_ollama)
