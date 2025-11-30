@@ -1,22 +1,35 @@
 from pymilvus import MilvusClient
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, FastAPI
 from typing import Annotated, Optional
 from pymilvus import model
+from contextlib import asynccontextmanager
 
-from app.poi.models import POI, POIOptional
+from app.poi.models import POI, POIOptional, poiSchema, index_params
 from app.poi.types import OneOrMore
-from app.dependencies import DbDep
+from app.dependencies import NeedsDb, get_db_gen
+from app.database.db import create_schema, create_collection
 
 # Consider moving this somewhere else
 embedding_fn = model.DefaultEmbeddingFunction()
 
-router = APIRouter()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = get_db_gen()
+    if not db.has_collection("poi"):
+        create_collection({
+            "collection_name": "poi",
+            "schema": poiSchema,
+            "index_params": index_params,
+        })
+    yield
+
+router = APIRouter(lifespan=lifespan)
 
 @router.get("/poi/", tags=["poi"])
 def get_poi(
         poi_id: Annotated[OneOrMore[POI], Body()],
         fields: Annotated[list[str], Body()],
-        db: DbDep
+        db: NeedsDb
 ) -> OneOrMore[dict]:
     """
 
@@ -40,7 +53,7 @@ def get_poi(
 @router.post("/poi/", tags=["poi"])
 def insert_poi(
         poi: Annotated[OneOrMore[POI], Body()],
-        db: DbDep
+        db: NeedsDb
 ) -> dict:
     """
     Inserts POI object(s) into poi collection. If vectors are not pre-specified,
@@ -73,8 +86,9 @@ def insert_poi(
 @router.put("/poi/", tags=["poi"])
 def update_poi(
         _id: Annotated[int, Body()],
+        # May be moved to the url. Not certain.
         poi: Annotated[POIOptional, Body()],
-        db: DbDep
+        db: NeedsDb
 ):
     if poi.vector_embedding is None:
         poi.generate_embedding(embedding_fn)
@@ -83,8 +97,8 @@ def update_poi(
     res = db.upsert(
         collection_name="poi",
         data=data,
-        # This should be in the version of milvus we're using, I don't know why
-        # it's not
+        # This should be in the version of milvus we're using, I don't know why it's not.
+        # Update: it's in the **kwargs, but I'm pretty sure I'm passing it in right.
         partial_update=True
     )
 
@@ -94,7 +108,7 @@ def update_poi(
 def delete_poi(
         _id: Annotated[Optional[int], Body()],
         _filter: Annotated[Optional[str], Body()],
-        db: DbDep
+        db: NeedsDb
 ):
     if _id is not None and _filter is None:
         res = db.delete(
