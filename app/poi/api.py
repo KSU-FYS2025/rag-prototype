@@ -1,5 +1,5 @@
 from pymilvus import MilvusClient
-from fastapi import APIRouter, Depends, Body, FastAPI
+from fastapi import APIRouter, Body, FastAPI
 from typing import Annotated, Optional
 from pymilvus import model
 from contextlib import asynccontextmanager
@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from app.poi.models import POI, POIOptional, poiSchema, index_params
 from app.poi.types import OneOrMore
 from app.dependencies import NeedsDb, get_db_gen
-from app.database.db import create_schema, create_collection
+from app.database.db import create_collection
 
 # Consider moving this somewhere else
 embedding_fn = model.DefaultEmbeddingFunction()
@@ -85,7 +85,7 @@ def insert_poi(
 
 @router.put("/poi/", tags=["poi"])
 def update_poi(
-        _id: Annotated[int, Body()],
+        poi_id: Annotated[int, Body()],
         # May be moved to the url. Not certain.
         poi: Annotated[POIOptional, Body()],
         db: NeedsDb
@@ -93,7 +93,7 @@ def update_poi(
     if poi.vector_embedding is None:
         poi.generate_embedding(embedding_fn)
 
-    data = {"id": _id} | poi.model_dump()
+    data = {"id": poi_id} | poi.model_dump()
     res = db.upsert(
         collection_name="poi",
         data=data,
@@ -106,21 +106,21 @@ def update_poi(
 
 @router.delete("/poi/", tags=["poi"])
 def delete_poi(
-        _id: Annotated[Optional[int], Body()],
-        _filter: Annotated[Optional[str], Body()],
+        poi_id: Annotated[Optional[int], Body()],
+        poi_filter: Annotated[Optional[str], Body()],
         db: NeedsDb
 ):
-    if _id is not None and _filter is None:
+    if poi_id is not None and poi_filter is None:
         res = db.delete(
             collection_name="poi",
-            ids=[_id]
+            ids=[poi_id]
         )
 
         return res
-    elif _id is not None and _filter is not None:
+    elif poi_id is not None and poi_filter is not None:
         res = db.delete(
             collection_name="poi",
-            filter=_filter
+            filter=poi_filter
         )
 
         return res

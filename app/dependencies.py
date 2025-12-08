@@ -9,7 +9,7 @@ import requests
 def get_db_gen():
     """
     Base function from
-    https://www.getorchestra.io/guides/fastapi-and-sql-databases-a-detailed-tutorial\
+    https://www.getorchestra.io/guides/fastapi-and-sql-databases-a-detailed-tutorial
     """
 
     client = MilvusClient(Path(Path.cwd(), "vectorDB.db").__str__())
