@@ -50,42 +50,45 @@ posSchema = (client.create_struct_field_schema()
              .add_field("x", DataType.FLOAT)
              .add_field("y", DataType.FLOAT)
              .add_field("z", DataType.FLOAT))
+def get_poi_schema():
+    poiSchema = client.create_schema()
+    poiSchema.add_field(
+        field_name="id",
+        datatype=DataType.INT64,
+        is_primary=True,
+        auto_id=True,
+    )
+    poiSchema.add_field(
+        field_name="label",
+        datatype=DataType.ARRAY,
+        element_type=DataType.VARCHAR,
+        max_capacity=10,
+        max_length=25,
+    )
+    # poiSchema.add_field(
+    #     field_name="pos",
+    #     datatype=DataType.STRUCT,
+    #     struct_schema=posSchema,
+    # )
+    poiSchema.add_field(
+        field_name="description",
+        datatype=DataType.VARCHAR,
+        max_length=300,
+    )
+    poiSchema.add_field(
+        field_name="vector",
+        datatype=DataType.FLOAT_VECTOR,
+        dim=768,
+    )
+    return poiSchema
 
-poiSchema = (client.create_schema()
-            .add_field(
-                field_name="id",
-                datatype=DataType.INT32,
-                is_primary=True,
-                auto_id=True,
-            )
-            .add_field(
-                field_name="label",
-                datatype=DataType.ARRAY,
-                element_type=DataType.VARCHAR,
-                max_capacity=10,
-                max_length=25,
-            )
-            .add_field(
-                field_name="pos",
-                datatype=DataType.STRUCT,
-                struct_schema=posSchema,
-            )
-            .add_field(
-                field_name="description",
-                datatype=DataType.VARCHAR,
-                max_length=300,
-            )
-            .add_field(
-                field_name="vector",
-                datatype=DataType.FLOAT_VECTOR,
-                dim=768,
-))
+def get_index_params():
+    index_params = client.prepare_index_params()
 
-index_params = client.prepare_index_params()
-
-index_params.add_index(
-    field_name="vector",
-    index_type="vector_index",
-    index_name="AUTOINDEX",
-    metric_type="COSINE",
-)
+    index_params.add_index(
+        field_name="dense_vector",
+        index_type="dense_vector_index",
+        index_name="AUTOINDEX",
+        metric_type="COSINE",
+    )
+    return index_params

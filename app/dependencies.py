@@ -3,9 +3,11 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from pymilvus import MilvusClient
 from pathlib import Path
+from contextlib import contextmanager
 import requests
 
 
+@contextmanager
 def get_db_gen():
     """
     Base function from

@@ -4,7 +4,7 @@ from typing import Annotated, Optional
 from pymilvus import model
 from contextlib import asynccontextmanager
 
-from app.poi.models import POI, POIOptional, poiSchema, index_params
+from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params
 from app.poi.types import OneOrMore
 from app.dependencies import NeedsDb, get_db_gen
 from app.database.db import create_collection
@@ -14,13 +14,12 @@ embedding_fn = model.DefaultEmbeddingFunction()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db = get_db_gen()
-    if not db.has_collection("poi"):
-        create_collection({
-            "collection_name": "poi",
-            "schema": poiSchema,
-            "index_params": index_params,
-        })
+    with get_db_gen() as db:
+        if not db.has_collection("poi"):
+            create_collection({
+                "collection_name": "poi",
+                "index_params": get_index_params(),
+            }, get_poi_schema())
     yield
 
 router = APIRouter(lifespan=lifespan)
