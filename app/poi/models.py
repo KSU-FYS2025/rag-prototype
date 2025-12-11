@@ -70,6 +70,13 @@ def get_poi_schema():
     #     datatype=DataType.STRUCT,
     #     struct_schema=posSchema,
     # )
+    # I do not like this, but I have to do it this way because milvus only supports
+    poiSchema.add_field(
+        field_name="pos",
+        datatype=DataType.ARRAY,
+        element_type=DataType.FLOAT,
+        max_capacity=3
+    )
     poiSchema.add_field(
         field_name="description",
         datatype=DataType.VARCHAR,
@@ -86,9 +93,9 @@ def get_index_params():
     index_params = client.prepare_index_params()
 
     index_params.add_index(
-        field_name="dense_vector",
-        index_type="dense_vector_index",
-        index_name="AUTOINDEX",
+        field_name="vector",
+        index_name="vector_index",
+        index_type="AUTOINDEX",
         metric_type="COSINE",
     )
     return index_params

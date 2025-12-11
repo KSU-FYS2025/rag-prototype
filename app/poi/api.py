@@ -1,8 +1,11 @@
+import logging
+
 from pymilvus import MilvusClient
 from fastapi import APIRouter, Body, FastAPI
 from typing import Annotated, Optional
 from pymilvus import model
 from contextlib import asynccontextmanager
+from logging import Logger
 
 from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params
 from app.poi.types import OneOrMore
@@ -16,6 +19,7 @@ embedding_fn = model.DefaultEmbeddingFunction()
 async def lifespan(app: FastAPI):
     with get_db_gen() as db:
         if not db.has_collection("poi"):
+
             create_collection({
                 "collection_name": "poi",
                 "index_params": get_index_params(),
