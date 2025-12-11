@@ -38,12 +38,13 @@ def embed_file(file_path):
 
 def retrieve(query, db, top_n = 3):
     query_vectors = embedding_fn.encode_queries([query])
-    res = db.search(
-        collection_name="cat_facts",
-        data=query_vectors,
-        limit=top_n,
-        output_fields=["texts", "subject"]
-    )
+    with db as db:
+        res = db.search(
+            collection_name="cat_facts",
+            data=query_vectors,
+            limit=top_n,
+            output_fields=["texts", "subject"]
+        )
     return [(x[0]["entity"], x[0]["distance"]) for x in res]
 
 @asynccontextmanager
