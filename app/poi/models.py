@@ -1,6 +1,8 @@
 from typing import Optional, Any
 
+import pydantic.v1.main
 from pydantic import BaseModel
+from pydantic.v1.main import ModelMetaclass
 from pydantic.v1.schema import schema
 from pymilvus import DataType
 from pymilvus.model.dense import OnnxEmbeddingFunction
@@ -8,10 +10,20 @@ from pymilvus.model.dense import OnnxEmbeddingFunction
 from app.database.db import create_schema, client
 
 
+# From https://stackoverflow.com/a/75011200
+class AllOptional(pydantic.v1.main.ModelMetaclass):
+    def __new__(mcls, name, bases, namespaces, **kwargs):
+        cls = super().__new__(mcls, name, bases, namespaces, **kwargs)
+        for field in cls.__fields__.values():
+            field.required = False
+        return cls
+
+
 class Pos(BaseModel):
     x: float
     y: float
     z: float
+
 
 def generate_embedding(obj, embedding_fn: OnnxEmbeddingFunction):
     embedding_str = f"label: {obj.label} | "
@@ -20,6 +32,7 @@ def generate_embedding(obj, embedding_fn: OnnxEmbeddingFunction):
 
     embedding = embedding_fn.encode_documents([embedding_str])
     obj.vector_embedding = embedding[0]
+
 
 class POI(BaseModel):
     """
@@ -36,20 +49,17 @@ class POI(BaseModel):
     def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
         generate_embedding(self, embedding_fn)
 
-class POIOptional(BaseModel):
-    label: Optional[str]
-    tags: Optional[list[str]]
-    position: Optional[Pos]
-    description: Optional[str]
-    vector_embedding: Optional[list[float]]
 
-    def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
-        generate_embedding(self, embedding_fn)
+class POIOptional(POI, metaclass=AllOptional):
+    pass
+
 
 posSchema = (client.create_struct_field_schema()
              .add_field("x", DataType.FLOAT)
              .add_field("y", DataType.FLOAT)
              .add_field("z", DataType.FLOAT))
+
+
 def get_poi_schema():
     poiSchema = client.create_schema()
     poiSchema.add_field(
@@ -88,6 +98,7 @@ def get_poi_schema():
         dim=768,
     )
     return poiSchema
+
 
 def get_index_params():
     index_params = client.prepare_index_params()
