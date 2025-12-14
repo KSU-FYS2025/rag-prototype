@@ -42,7 +42,12 @@ class POI(BaseModel):
     vector_embedding: Optional[list[float]]
 
     def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
-        generate_embedding(self, embedding_fn)
+        embedding_str = f"label: {self.label} | "
+        f"tags: {",".join(self.tags)} | "
+        f"description: {self.description} | "
+
+        embedding = embedding_fn.encode_documents([embedding_str])
+        self.vector_embedding = embedding[0]
 
 
 class POIOptional(POI, metaclass=AllOptional):
