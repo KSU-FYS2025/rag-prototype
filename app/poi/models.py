@@ -11,6 +11,7 @@ from app.database.db import create_schema, client
 
 
 # From https://stackoverflow.com/a/75011200
+# If this approach doesn't work, I will replace it using this https://stackoverflow.com/a/76560886
 class AllOptional(pydantic.v1.main.ModelMetaclass):
     def __new__(mcls, name, bases, namespaces, **kwargs):
         cls = super().__new__(mcls, name, bases, namespaces, **kwargs)
