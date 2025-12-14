@@ -25,14 +25,8 @@ class Pos(BaseModel):
     y: float
     z: float
 
-
-def generate_embedding(obj, embedding_fn: OnnxEmbeddingFunction):
-    embedding_str = f"label: {obj.label} | "
-    f"tags: {",".join(obj.tags)} | "
-    f"description: {obj.description} | "
-
-    embedding = embedding_fn.encode_documents([embedding_str])
-    obj.vector_embedding = embedding[0]
+    def generate_vector(self) -> list[float]:
+        return [self.x, self.y, self.z]
 
 
 class POI(BaseModel):
