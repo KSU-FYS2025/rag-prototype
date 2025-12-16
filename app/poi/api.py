@@ -30,8 +30,8 @@ router = APIRouter(lifespan=lifespan)
 
 @router.get("/poi/", tags=["poi"])
 def get_poi(
-        poi_id: Annotated[OneOrMore[POI], Body()],
-        fields: Annotated[list[str], Body()],
+        poi_id: int,
+        # fields: Optional[str],
         db: NeedsDb
 ) -> OneOrMore[dict]:
     """
@@ -41,12 +41,13 @@ def get_poi(
     :param db:
     :return:
     """
-    res = db.get(
-        collection_name="poi",
-        ids=poi_id,
-        output_fields=fields
-        # TODO: Change this field when you have more information about schema
-    )
+    with db as db:
+        res = db.get(
+            collection_name="poi",
+            ids=poi_id,
+            # output_fields=fields
+            # TODO: Change this field when you have more information about schema
+        )
 
     if type(poi_id) is str:
         return res[0]
@@ -86,21 +87,21 @@ def insert_poi(
     :return:
     """
     if type(poi) is POI:
-        if poi.vector_embedding is None:
+        if poi.vector is None:
             poi.generate_embedding(embedding_fn)
         data = [poi.model_dump()]
     else:
         data = []
         for _poi in poi:
-            if _poi.vector_embedding is None:
+            if _poi.vector is None:
                 _poi.generate_embedding(embedding_fn)
-            data.append(_poi)
+            data.append(_poi.model_dump(mode="json"))
 
-
-    res = db.insert(
-        collection_name="poi",
-        data=data
-    )
+    with db as db:
+        res = db.insert(
+            collection_name="poi",
+            data=data
+        )
 
     return res
 

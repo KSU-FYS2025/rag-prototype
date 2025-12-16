@@ -20,7 +20,7 @@ def partial_model(model: Type[BaseModel]):
         new.annotation = Optional[field.annotation]  # type: ignore
         return new.annotation, new
     return create_model(
-        f'Partial{model.__name__}',
+        model.__name__,
         __base__=model,
         __module__=model.__module__,
         **{
@@ -38,26 +38,6 @@ class Pos(BaseModel):
     def generate_vector(self) -> list[float]:
         return [self.x, self.y, self.z]
 
-    def model_dump(
-        self,
-        *,
-        mode: Literal['json', 'python'] | str = 'python',
-        include: IncEx | None = None,
-        exclude: IncEx | None = None,
-        context: Any | None = None,
-        by_alias: bool | None = None,
-        exclude_unset: bool = False,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        exclude_computed_fields: bool = False,
-        round_trip: bool = False,
-        warnings: bool | Literal['none', 'warn', 'error'] = True,
-        fallback: Callable[[Any], Any] | None = None,
-        serialize_as_any: bool = False,
-    ) -> list[float]:
-        return [self.x, self.y, self.z]
-
-
 
 class POI(BaseModel):
     """
@@ -65,11 +45,11 @@ class POI(BaseModel):
     to change once I learn more about how to data is structured. As of right now,
     this is based off the information in the shared doc from the first meeting.
     """
-    label: str
-    tags: list[str]
-    position: Pos | list[float]
     description: str
-    vector_embedding: Optional[list[float]]
+    label: list[str]
+    pos: list[float]
+    description: str
+    vector: Optional[list[float]]
 
     def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
         embedding_str = f"label: {self.label} | "
@@ -77,7 +57,7 @@ class POI(BaseModel):
         f"description: {self.description} | "
 
         embedding = embedding_fn.encode_documents([embedding_str])
-        self.vector_embedding = embedding[0]
+        self.vector = embedding[0]
 
 @partial_model
 class POIOptional(POI):
