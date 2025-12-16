@@ -53,6 +53,24 @@ def get_poi(
     else:
         return res
 
+@router.get("/poi/all", tags=["poi"])
+def get_poi(
+        db: NeedsDb
+) -> OneOrMore[dict]:
+    """
+
+    :param db:
+    :return:
+    """
+    with db as db:
+        res = db.query(
+            collection_name="poi",
+            filter="id >= 0",
+            # output_fields=fields
+            # TODO: Change this field when you have more information about schema
+        )
+    return res
+
 @router.post("/poi/", tags=["poi"])
 def insert_poi(
         poi: Annotated[OneOrMore[POI], Body()],
