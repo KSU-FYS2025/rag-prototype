@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from urllib3.exceptions import ResponseError
 
-from app.database.db import client, create_collection
+from app.database.db import create_collection, get_db_gen
 from pymilvus import model
 
 from app.dependencies import NeedsDb, NeedsOllama
@@ -50,13 +50,14 @@ def retrieve(query, db, top_n = 3):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Running lifespan manager")
-    if not client.has_collection("cat_facts"):
-        create_collection({
-            "collection_name": "cat_facts",
-            "dimension": 768
-        })
-        data = embed_file("cat-facts.txt")
-        client.insert(collection_name="cat_facts", data=data)
+    with get_db_gen() as client:
+        if not client.has_collection("cat_facts"):
+            create_collection({
+                "collection_name": "cat_facts",
+                "dimension": 768
+            })
+            data = embed_file("cat-facts.txt")
+            client.insert(collection_name="cat_facts", data=data)
     yield
 
 subapp = FastAPI(lifespan=lifespan)

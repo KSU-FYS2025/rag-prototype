@@ -2,23 +2,10 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from pymilvus import MilvusClient
-from pathlib import Path
-from contextlib import contextmanager
+
 import requests
 
-
-@contextmanager
-def get_db_gen():
-    """
-    Base function from
-    https://www.getorchestra.io/guides/fastapi-and-sql-databases-a-detailed-tutorial
-    """
-
-    client = MilvusClient(Path(Path.cwd(), "vectorDB.db").__str__())
-    try:
-        yield client
-    finally:
-        client.close()
+from app.database.db import get_db_gen
 
 NeedsDb = Annotated[MilvusClient, Depends(get_db_gen)]
 """

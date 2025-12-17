@@ -7,10 +7,10 @@ from pydantic.fields import FieldInfo
 from pydantic.main import IncEx
 from pydantic.v1.main import ModelMetaclass
 from pydantic.v1.schema import schema
-from pymilvus import DataType
+from pymilvus import DataType, MilvusClient
 from pymilvus.model.dense import OnnxEmbeddingFunction
 
-from app.database.db import create_schema, client
+from app.database.db import create_schema
 
 # https://stackoverflow.com/a/76560886
 def partial_model(model: Type[BaseModel]):
@@ -64,14 +64,14 @@ class POIOptional(POI):
     pass
 
 
-posSchema = (client.create_struct_field_schema()
+posSchema = (MilvusClient.create_struct_field_schema()
              .add_field("x", DataType.FLOAT)
              .add_field("y", DataType.FLOAT)
              .add_field("z", DataType.FLOAT))
 
 
 def get_poi_schema():
-    poiSchema = client.create_schema()
+    poiSchema = MilvusClient.create_schema()
     poiSchema.add_field(
         field_name="id",
         datatype=DataType.INT64,
@@ -111,7 +111,7 @@ def get_poi_schema():
 
 
 def get_index_params():
-    index_params = client.prepare_index_params()
+    index_params = MilvusClient.prepare_index_params()
 
     index_params.add_index(
         field_name="vector",
