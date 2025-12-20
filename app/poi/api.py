@@ -89,12 +89,15 @@ def insert_poi(
     if type(poi) is POI:
         if not hasattr(poi, "vector") or poi.vector is None or poi.vector == []:
             poi.generate_embedding(embedding_fn)
+        # idk how I feel about this, but it's needed
+        delattr(poi, "id")
         data = [poi.model_dump()]
     else:
         data = []
         for _poi in poi:
             if _poi.vector is None:
                 _poi.generate_embedding(embedding_fn)
+            delattr(poi, "id")
             data.append(_poi.model_dump(mode="json"))
 
     with db as db:

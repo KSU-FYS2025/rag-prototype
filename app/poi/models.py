@@ -54,8 +54,7 @@ class POI(BaseModel):
 
     def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
         embedding_str = f"label: {self.label} | "
-        # TODO: Sort this out. Need to readd title for POIs
-        # f"tags: {",".join(self.label)} | "
+        f"tags: {",".join(self.tags)} | "
         f"description: {self.description} | "
 
         embedding = embedding_fn.encode_documents([embedding_str])
