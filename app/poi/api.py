@@ -57,7 +57,7 @@ def get_poi(
 @router.get("/poi/all", tags=["poi"])
 def get_all_poi(
         db: NeedsDb
-) -> list[dict]:
+) -> str:
     """
 
     :param db:
@@ -70,7 +70,7 @@ def get_all_poi(
             # output_fields=fields
             # TODO: Change this field when you have more information about schema
         )
-    return list(res)
+    return str(res)
 
 @router.post("/poi/", tags=["poi"])
 def insert_poi(
