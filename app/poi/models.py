@@ -45,19 +45,21 @@ class POI(BaseModel):
     to change once I learn more about how to data is structured. As of right now,
     this is based off the information in the shared doc from the first meeting.
     """
-    description: str
-    label: list[str]
+    id: Optional[int] = None
+    label: str
+    tags: list[str]
     pos: list[float]
     description: str
-    vector: Optional[list[float]]
+    vector: Optional[list[float]] = None
 
     def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
         embedding_str = f"label: {self.label} | "
-        f"tags: {",".join(self.tags)} | "
+        # TODO: Sort this out. Need to readd title for POIs
+        # f"tags: {",".join(self.label)} | "
         f"description: {self.description} | "
 
         embedding = embedding_fn.encode_documents([embedding_str])
-        self.vector = embedding[0]
+        self.vector = embedding[0].tolist()
 
 @partial_model
 class POIOptional(POI):

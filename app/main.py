@@ -8,7 +8,7 @@ app = FastAPI(lifespan=lifespan)
 # change this later to a routers file to make this easier
 app.include_router(api.router)
 
-app.mount("/test", subapp)
+# app.mount("/test", subapp)
 
 @app.get("/ping")
 async def pong():

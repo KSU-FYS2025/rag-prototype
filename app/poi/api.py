@@ -55,9 +55,9 @@ def get_poi(
         return res
 
 @router.get("/poi/all", tags=["poi"])
-def get_poi(
+def get_all_poi(
         db: NeedsDb
-) -> OneOrMore[dict]:
+) -> list[dict]:
     """
 
     :param db:
@@ -70,13 +70,13 @@ def get_poi(
             # output_fields=fields
             # TODO: Change this field when you have more information about schema
         )
-    return res
+    return list(res)
 
 @router.post("/poi/", tags=["poi"])
 def insert_poi(
         poi: Annotated[OneOrMore[POI], Body()],
         db: NeedsDb
-) -> dict:
+) -> str:
     """
     Inserts POI object(s) into poi collection. If vectors are not pre-specified,
     it will convert it to vectors automatically.
@@ -87,7 +87,7 @@ def insert_poi(
     :return:
     """
     if type(poi) is POI:
-        if poi.vector is None:
+        if not hasattr(poi, "vector") or poi.vector is None or poi.vector == []:
             poi.generate_embedding(embedding_fn)
         data = [poi.model_dump()]
     else:
@@ -103,7 +103,7 @@ def insert_poi(
             data=data
         )
 
-    return res
+    return str(res)
 
 @router.put("/poi/", tags=["poi"])
 def update_poi(
