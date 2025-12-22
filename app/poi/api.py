@@ -7,7 +7,7 @@ from pymilvus import model
 from contextlib import asynccontextmanager
 from logging import Logger
 
-from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params
+from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params, dump_and_trim_none
 from app.poi.types import OneOrMore
 from app.dependencies import NeedsDb, get_db_gen
 from app.database.db import create_collection
@@ -115,17 +115,25 @@ def update_poi(
         poi: Annotated[POIOptional, Body()],
         db: NeedsDb
 ):
-    if poi.vector_embedding is None:
-        poi.generate_embedding(embedding_fn)
+    with db as db:
+        prev_poi = db.get(
+            collection_name="poi",
+            ids=[poi_id]
+        )
 
-    data = {"id": poi_id} | poi.model_dump()
-    res = db.upsert(
-        collection_name="poi",
-        data=data,
-        # This should be in the version of milvus we're using, I don't know why it's not.
-        # Update: it's in the **kwargs, but I'm pretty sure I'm passing it in right.
-        partial_update=True
-    )
+        poi_dump = dump_and_trim_none(poi)
+        prev_poi = prev_poi[0].copy()
+
+        prev_poi.update(poi_dump)
+        new_poi = POI(**prev_poi)
+
+        if not hasattr(new_poi, "vector") or new_poi.vector is None or new_poi.vector == []:
+            new_poi.generate_embedding(embedding_fn)
+
+        res = db.upsert(
+            collection_name="poi",
+            data=new_poi.model_dump()
+        )
 
     return res
 

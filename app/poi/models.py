@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional, Any, Literal, Callable, Type, Tuple
+from typing import Optional, Any, Literal, Callable, Type, Tuple, TypeVar
 
 import pydantic.v1.main
 from pydantic import BaseModel, create_model
@@ -121,3 +121,10 @@ def get_index_params():
         metric_type="COSINE",
     )
     return index_params
+
+
+def dump_and_trim_none(obj: BaseModel) -> dict:
+    print(f"items: {obj.model_dump().items()}")
+    new = {key: value for key, value in obj.model_dump().items() if value is not None}
+    return new
+
