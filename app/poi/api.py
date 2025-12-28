@@ -121,22 +121,23 @@ def update_poi(
     with db as db:
         prev_poi = db.get(
             collection_name="poi",
-            ids=[poi_id]
+            ids=poi_id
         )
-        print(f"{prev_poi=}")
+        print(f"{prev_poi=}\n")
 
         poi_dump = dump_and_trim_none(poi)
-        print(f"{poi_dump=}")
+        print(f"{poi_dump=}\n")
         prev_poi = prev_poi[0].copy()
-        print(f"{prev_poi=}")
+        print(f"{prev_poi=}\n")
 
         prev_poi.update(poi_dump)
-        print(f"{prev_poi=}")
+        print(f"{prev_poi=}\n")
         new_poi = POI(**prev_poi)
 
 
         if not hasattr(new_poi, "vector") or new_poi.vector is None or new_poi.vector == []:
             new_poi.generate_embedding(embedding_fn)
+        print("embedding generated!!!\n\n\n")
 
         res = db.upsert(
             collection_name="poi",
