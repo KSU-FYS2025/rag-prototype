@@ -159,6 +159,7 @@ def delete_poi(
             filter=poi_filter
         )
 
-        return res
-    else:
-        return {"error": "No value for id or filter found!"}
+            return res
+
+        else:
+            return {"error": "No value for id or filter found!"}
