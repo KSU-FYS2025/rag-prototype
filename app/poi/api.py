@@ -86,6 +86,9 @@ def insert_poi(
     :param db:
     :return:
     """
+    if len(poi.pos) != 3:
+        raise HTTPException(status_code=400, detail="Pos info in body needs to be a 3 dimensional array of floating point values!!!")
+
     if type(poi) is POI:
         if not hasattr(poi, "vector") or poi.vector is None or poi.vector == []:
             poi.generate_embedding(embedding_fn)
