@@ -1,7 +1,7 @@
 import logging
 
 from pymilvus import MilvusClient
-from fastapi import APIRouter, Body, FastAPI
+from fastapi import APIRouter, Body, FastAPI, HTTPException
 from typing import Annotated, Optional
 from pymilvus import model
 from contextlib import asynccontextmanager
@@ -123,12 +123,17 @@ def update_poi(
             collection_name="poi",
             ids=[poi_id]
         )
+        print(f"{prev_poi=}")
 
         poi_dump = dump_and_trim_none(poi)
+        print(f"{poi_dump=}")
         prev_poi = prev_poi[0].copy()
+        print(f"{prev_poi=}")
 
         prev_poi.update(poi_dump)
+        print(f"{prev_poi=}")
         new_poi = POI(**prev_poi)
+
 
         if not hasattr(new_poi, "vector") or new_poi.vector is None or new_poi.vector == []:
             new_poi.generate_embedding(embedding_fn)
@@ -146,18 +151,20 @@ def delete_poi(
         poi_filter: Annotated[Optional[str], Body()],
         db: NeedsDb
 ):
-    if poi_id is not None and poi_filter is None:
-        res = db.delete(
-            collection_name="poi",
-            ids=[poi_id]
-        )
+    with db as db:
+        if poi_id and not poi_filter:
+            res = db.delete(
+                collection_name="poi",
+                ids=[poi_id]
+            )
 
-        return res
-    elif poi_id is not None and poi_filter is not None:
-        res = db.delete(
-            collection_name="poi",
-            filter=poi_filter
-        )
+            return res
+
+        elif (not poi_id) and poi_filter:
+            res = db.delete(
+                collection_name="poi",
+                filter=poi_filter
+            )
 
             return res
 
