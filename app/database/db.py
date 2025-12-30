@@ -1,7 +1,10 @@
 from contextlib import contextmanager
 from typing import Dict, Optional
 import os
-from pymilvus import MilvusClient, CollectionSchema
+from pymilvus import MilvusClient, CollectionSchema, model
+
+embedding_fn = model.DefaultEmbeddingFunction()
+
 
 #client = MilvusClient(Path(Path.cwd(), "vectorDB.db").__str__())
 
@@ -11,6 +14,7 @@ def get_db_info() -> tuple[str, str] | None:
 
     return os.environ.get("DB_URL"), os.environ.get("DB_TOKEN")
 
+
 def create_db_connection() -> MilvusClient:
     _db_url, _db_token = get_db_info()
 
@@ -18,6 +22,7 @@ def create_db_connection() -> MilvusClient:
         _db_url,
         token=_db_token
     )
+
 
 @contextmanager
 def get_db_gen():
@@ -53,3 +58,21 @@ def create_collection(settings: Dict, schema: Optional[CollectionSchema] = None)
             schema=schema,
             **settings
         )
+
+
+def search_poi(
+       query: str,
+       top_n: int = 5,
+       fields: list[str] = None
+    ) -> list[tuple]:
+    query_vectors = embedding_fn.encode_queries([query])
+
+    with get_db_gen() as db:
+        res = db.search(
+            collection_name="poi",
+            data=query_vectors,
+            limit=top_n,
+            output_fields=fields
+        )
+
+    return [(x[0]["entity"], x[0]["distance"]) for x in res]

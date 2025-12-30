@@ -1,19 +1,17 @@
-import logging
+import os
 
-from pymilvus import MilvusClient
+import ollama
 from fastapi import APIRouter, Body, FastAPI, HTTPException
 from typing import Annotated, Optional
-from pymilvus import model
 from contextlib import asynccontextmanager
-from logging import Logger
+
+from starlette.responses import StreamingResponse
 
 from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params, dump_and_trim_none
 from app.poi.types import OneOrMore
-from app.dependencies import NeedsDb, get_db_gen
-from app.database.db import create_collection
+from app.dependencies import NeedsDb, get_db_gen, NeedsOllama
+from app.database.db import create_collection, embedding_fn, search_poi
 
-# Consider moving this somewhere else
-embedding_fn = model.DefaultEmbeddingFunction()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -171,3 +169,35 @@ def delete_poi(
 
         else:
             return {"error": "No value for id or filter found!"}
+
+@router.get("/poi/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
+async def user_query_step_1(
+        poi_query: str,
+        db: NeedsDb
+) -> StreamingResponse:
+    retrieved_knowledge = search_poi(poi_query, 5, ["label", "tags", "pos", "description"])
+
+    instruction_prompt=f"""You are a helpful chatbot whose role is to assist people in guiding them to the correct spot
+You are to not make up any information about the building or assume anything.
+Using only the prompt and the information given below, answer the user's query as best you can.
+Good luck snake, try to make it out alive. I don't want the paperwork.
+{"\n".join([f" - {chunk}" for chunk, similarity in retrieved_knowledge])}
+"""
+    model = os.environ.get("LANGUAGE_MODEL")
+
+    stream = ollama.chat(
+        model=model,
+        messages=[
+            {"role": "system", "content": instruction_prompt},
+            {"role": "user", "content": poi_query}
+        ],
+        stream=True
+    )
+
+    async def response():
+        for chunk in stream:
+            yield chunk["message"]["content"]
+
+    return StreamingResponse(response())
+
+
