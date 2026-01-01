@@ -32,13 +32,6 @@ def get_poi(
         # fields: Optional[str],
         db: NeedsDb
 ) -> OneOrMore[dict]:
-    """
-
-    :param poi_id:
-    :param fields:
-    :param db:
-    :return:
-    """
     with db as db:
         res = db.get(
             collection_name="poi",
@@ -169,35 +162,3 @@ def delete_poi(
 
         else:
             return {"error": "No value for id or filter found!"}
-
-@router.get("/poi/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
-async def user_query_step_1(
-        poi_query: str,
-        db: NeedsDb
-) -> StreamingResponse:
-    retrieved_knowledge = search_poi(poi_query, 5, ["label", "tags", "pos", "description"])
-
-    instruction_prompt=f"""You are a helpful chatbot whose role is to assist people in guiding them to the correct spot
-You are to not make up any information about the building or assume anything.
-Using only the prompt and the information given below, answer the user's query as best you can.
-Good luck snake, try to make it out alive. I don't want the paperwork.
-{"\n".join([f" - {chunk}" for chunk, similarity in retrieved_knowledge])}
-"""
-    model = os.environ.get("LANGUAGE_MODEL")
-
-    stream = ollama.chat(
-        model=model,
-        messages=[
-            {"role": "system", "content": instruction_prompt},
-            {"role": "user", "content": poi_query}
-        ],
-        stream=True
-    )
-
-    async def response():
-        for chunk in stream:
-            yield chunk["message"]["content"]
-
-    return StreamingResponse(response())
-
-
