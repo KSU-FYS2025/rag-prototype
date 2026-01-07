@@ -1,9 +1,11 @@
+import os
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from pymilvus import MilvusClient
 
 import requests
+import ollama
 
 from app.database.db import get_db_gen
 
@@ -20,6 +22,11 @@ def needs_ollama():
         res = requests.get("http://localhost:11434")
         if res.text != "Ollama is running":
             raise error
+
+        model = os.environ.get("AI_MODEL")
+        if model not in [model.model for model in ollama.list()["models"]]:
+            raise HTTPException(status_code=404, detail="The specified model in the .env file is not installed"
+            "on the ollama server!")
     except:
         raise error
 
