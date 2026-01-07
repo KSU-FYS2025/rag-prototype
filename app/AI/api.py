@@ -11,13 +11,12 @@ router = APIRouter()
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
-        poi_query: str,
-        db: NeedsDb
+        poi_query: str
 ) -> StreamingResponse:
     retrieved_knowledge = search_poi(poi_query, 5, ["label", "tags", "pos", "description"])
 
 
-    model = os.environ.get("LANGUAGE_MODEL")
+    model = os.environ.get("AI_MODEL")
 
     stream = ollama.chat(
         model=model,
