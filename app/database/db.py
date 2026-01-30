@@ -18,7 +18,7 @@ def get_db_info() -> tuple[str, str] | None:
 def create_db_connection() -> MilvusClient:
     _db_url, _db_token = get_db_info()
     try:
-        client =  MilvusClient(
+        client = MilvusClient(
             _db_url,
             token=_db_token
         )
