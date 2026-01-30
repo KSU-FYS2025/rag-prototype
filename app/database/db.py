@@ -17,11 +17,16 @@ def get_db_info() -> tuple[str, str] | None:
 
 def create_db_connection() -> MilvusClient:
     _db_url, _db_token = get_db_info()
+    try:
+        client =  MilvusClient(
+            _db_url,
+            token=_db_token
+        )
 
-    return MilvusClient(
-        _db_url,
-        token=_db_token
-    )
+    except Exception as e:
+        raise Exception(f"{e}\nError while creating database connection! Please ensure that the database server is running\n"
+                        f"and didn't randomly suspend the server for no reason :)")
+    return client
 
 
 @contextmanager
