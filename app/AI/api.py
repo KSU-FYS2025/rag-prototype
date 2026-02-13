@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Annotated
 
@@ -50,5 +51,5 @@ def triage_agent(
         ],
         think=False
     )
-
-    return res
+    content = res["message"]["content"]
+    return json.loads(content)
