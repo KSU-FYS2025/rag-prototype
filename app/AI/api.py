@@ -47,7 +47,8 @@ def triage_agent(
         messages=[
             {"role": "system", "content": triage_agent_prompt()},
             {"role": "user", "content": user_query}
-        ]
+        ],
+        think=False
     )
 
     return res
