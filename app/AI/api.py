@@ -39,7 +39,7 @@ async def user_query_step_1(
 @router.get("/ai/triage_agent", tags=["poi", "ai", "triage_agent"], dependencies=[NeedsOllama])
 def triage_agent(
         user_query: str,
-        user_position: Annotated[(float, int, int), Body()]
+        # user_position: Annotated[tuple[float, float, float], Body()]
 ):
     model = os.environ.get("AI_MODEL")
 
