@@ -3,9 +3,9 @@ import os
 from typing import Annotated
 
 import ollama
-from fastapi import APIRouter
+from fastapi import APIRouter, WebSocket
 from fastapi.params import Body
-from starlette.responses import StreamingResponse
+from starlette.responses import StreamingResponse, JSONResponse
 
 from app.database.db import search_poi
 from app.dependencies import NeedsDb, NeedsOllama
@@ -40,7 +40,7 @@ async def user_query_step_1(
 @router.get("/ai/triage_agent", tags=["poi", "ai", "triage_agent"], dependencies=[NeedsOllama])
 def triage_agent(
         user_query: str
-):
+) -> JSONResponse:
     model = os.environ.get("AI_MODEL")
 
     res = ollama.chat(
@@ -52,4 +52,4 @@ def triage_agent(
         think=False
     )
     content = res["message"]["content"]
-    return json.loads(content)
+    return content
