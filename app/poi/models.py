@@ -10,7 +10,8 @@ from pydantic.v1.schema import schema
 from pymilvus import DataType, MilvusClient
 from pymilvus.model.dense import OnnxEmbeddingFunction
 
-from app.database.db import create_schema
+from app.database.db import create_schema, embedding_fn
+
 
 # https://stackoverflow.com/a/76560886
 def partial_model(model: Type[BaseModel]):
@@ -29,36 +30,26 @@ def partial_model(model: Type[BaseModel]):
         }
     )
 
-
-class Pos(BaseModel):
-    x: float
-    y: float
-    z: float
-
-    def generate_vector(self) -> list[float]:
-        return [self.x, self.y, self.z]
-
-
 class POI(BaseModel):
     """
     Please keep up to date with the implementation of this! This is very subject
     to change once I learn more about how to data is structured. As of right now,
-    this is based off the information in the shared doc from the first meeting.
+    this is based off the information in the Unity project
     """
-    id: Optional[int] = None
-    label: str
-    tags: list[str]
+    id: int
+    vector: list[float]
     pos: list[float]
+    name: str
     description: str
-    vector: Optional[list[float]] = None
+    type: str
 
-    def generate_embedding(self, embedding_fn: OnnxEmbeddingFunction):
-        embedding_str = f"label: {self.label} | "
-        f"tags: {",".join(self.tags)} | "
-        f"description: {self.description} | "
+    def generate_embedding(self):
+        text = f"""{self.pos=}
+{self.name=}
+{self.description=}
+{self.type=}"""
+        self.vector = embedding_fn.encode_documents([text])
 
-        embedding = embedding_fn.encode_documents([embedding_str])
-        self.vector = embedding[0].tolist()
 
 @partial_model
 class POIOptional(POI):
