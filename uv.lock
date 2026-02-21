@@ -1185,6 +1185,7 @@ dependencies = [
     { name = "ollama" },
     { name = "pymilvus", extra = ["milvus-lite"] },
     { name = "pymilvus-model" },
+    { name = "websockets" },
 ]
 
 [package.metadata]
@@ -1195,6 +1196,7 @@ requires-dist = [
     { name = "pymilvus", specifier = ">=2.6.2" },
     { name = "pymilvus", extras = ["milvus-lite"] },
     { name = "pymilvus-model" },
+    { name = "websockets", specifier = ">=15.0.1" },
 ]
 
 [[package]]
