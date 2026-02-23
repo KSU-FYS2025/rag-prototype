@@ -32,22 +32,24 @@ def partial_model(model: Type[BaseModel]):
 
 class POI(BaseModel):
     """
-    Please keep up to date with the implementation of this! This is very subject
-    to change once I learn more about how to data is structured. As of right now,
-    this is based off the information in the Unity project
+    Aligned strictly with Unity POIData from POIExtractor.cs
     """
     id: int
-    vector: list[float]
-    pos: list[float]
-    name: str
-    description: str
-    type: str
+    vector: Optional[list[float]] = None
+    name: str = ""
+    title: str = ""
+    poiName: str = ""
+    description: str = ""
+    type: str = "Room"
+    position: list[float]
+    rotation: list[float] = [0.0, 0.0, 0.0]
+    localPosition: list[float] = [0.0, 0.0, 0.0]
+    localRotation: list[float] = [0.0, 0.0, 0.0]
+    parentName: str = ""
 
     def generate_embedding(self):
-        text = f"""{self.pos=}
-{self.name=}
-{self.description=}
-{self.type=}"""
+        # Embedding based on key textual descriptors
+        text = f"Name: {self.name}\nPOI Name: {self.poiName}\nTitle: {self.title}\nDescription: {self.description}\nType: {self.type}\nParent: {self.parentName}"
         self.vector = embedding_fn.encode_documents([text])
 
 
@@ -56,43 +58,68 @@ class POIOptional(POI):
     pass
 
 
-posSchema = (MilvusClient.create_struct_field_schema()
-             .add_field("x", DataType.FLOAT)
-             .add_field("y", DataType.FLOAT)
-             .add_field("z", DataType.FLOAT))
-
-
 def get_poi_schema():
-    poiSchema = MilvusClient.create_schema()
+    poiSchema = MilvusClient.create_schema(enable_dynamic_field=True)
     poiSchema.add_field(
         field_name="id",
         datatype=DataType.INT64,
         is_primary=True,
-        auto_id=True,
+        auto_id=False,
     )
     poiSchema.add_field(
-        field_name="label",
-        datatype=DataType.ARRAY,
-        element_type=DataType.VARCHAR,
-        max_capacity=10,
-        max_length=25,
+        field_name="name",
+        datatype=DataType.VARCHAR,
+        max_length=200,
     )
-    # poiSchema.add_field(
-    #     field_name="pos",
-    #     datatype=DataType.STRUCT,
-    #     struct_schema=posSchema,
-    # )
-    # I do not like this, but I have to do it this way because milvus only supports
     poiSchema.add_field(
-        field_name="pos",
+        field_name="title",
+        datatype=DataType.VARCHAR,
+        max_length=200,
+    )
+    poiSchema.add_field(
+        field_name="poiName",
+        datatype=DataType.VARCHAR,
+        max_length=200,
+    )
+    poiSchema.add_field(
+        field_name="description",
+        datatype=DataType.VARCHAR,
+        max_length=1000,
+    )
+    poiSchema.add_field(
+        field_name="type",
+        datatype=DataType.VARCHAR,
+        max_length=100,
+    )
+    poiSchema.add_field(
+        field_name="parentName",
+        datatype=DataType.VARCHAR,
+        max_length=200,
+    )
+    # Coordinate arrays
+    poiSchema.add_field(
+        field_name="position",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
         max_capacity=3
     )
     poiSchema.add_field(
-        field_name="description",
-        datatype=DataType.VARCHAR,
-        max_length=300,
+        field_name="rotation",
+        datatype=DataType.ARRAY,
+        element_type=DataType.FLOAT,
+        max_capacity=3
+    )
+    poiSchema.add_field(
+        field_name="localPosition",
+        datatype=DataType.ARRAY,
+        element_type=DataType.FLOAT,
+        max_capacity=3
+    )
+    poiSchema.add_field(
+        field_name="localRotation",
+        datatype=DataType.ARRAY,
+        element_type=DataType.FLOAT,
+        max_capacity=3
     )
     poiSchema.add_field(
         field_name="vector",

@@ -13,18 +13,7 @@ from app.dependencies import NeedsDb, get_db_gen, NeedsOllama
 from app.database.db import create_collection, embedding_fn, search_poi
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    with get_db_gen() as db:
-        if not db.has_collection("poi"):
-
-            create_collection({
-                "collection_name": "poi",
-                "index_params": get_index_params(),
-            }, get_poi_schema())
-    yield
-
-router = APIRouter(lifespan=lifespan)
+router = APIRouter()
 
 @router.get("/poi/", tags=["poi"])
 def get_poi(

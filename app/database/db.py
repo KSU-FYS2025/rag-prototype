@@ -8,9 +8,9 @@ embedding_fn = model.DefaultEmbeddingFunction()
 
 #client = MilvusClient(Path(Path.cwd(), "vectorDB.db").__str__())
 
-def get_db_info() -> tuple[str, str] | None:
-    if not "DB_URL" in os.environ or not "DB_TOKEN" in os.environ:
-        raise Exception("Database url or token not found in the .env file!")
+def get_db_info() -> tuple[str, Optional[str]]:
+    if not "DB_URL" in os.environ:
+        raise Exception("Database url (DB_URL) not found in the .env file!")
 
     return os.environ.get("DB_URL"), os.environ.get("DB_TOKEN")
 
@@ -56,13 +56,32 @@ def create_schema(schema: list[Dict]) -> CollectionSchema:
 
 def create_collection(settings: Dict, schema: Optional[CollectionSchema] = None):
     with get_db_gen() as db:
-        if db.has_collection(settings["collection_name"]):
-            db.drop_collection(settings["collection_name"])
-
+        name = settings["collection_name"]
+        if db.has_collection(name):
+            print(f"Dropping existing collection: {name}")
+            db.drop_collection(name)
+        
+        print(f"Creating collection: {name}")
         db.create_collection(
             schema=schema,
             **settings
         )
+        print(f"Collection {name} created.")
+
+def ensure_collection(settings: Dict, schema: Optional[CollectionSchema] = None, db: Optional[MilvusClient] = None):
+    if db is not None:
+        name = settings["collection_name"]
+        if not db.has_collection(name):
+            print(f"Collection {name} not found. Creating...")
+            db.create_collection(
+                schema=schema,
+                **settings
+            )
+            print(f"Collection {name} created.")
+        return
+
+    with get_db_gen() as db:
+        ensure_collection(settings, schema, db)
 
 
 def search_poi(
