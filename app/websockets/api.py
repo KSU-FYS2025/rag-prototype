@@ -11,7 +11,7 @@ from app.AI.api import triage_agent
 from app.database.db import get_db_gen
 from app.poi.models import POI
 
-
+# TODO: Make sure to handle location data as well.
 class Triage(WebSocketEndpoint):
     encoding = "json"
 
