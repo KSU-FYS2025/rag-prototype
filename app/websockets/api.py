@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from starlette.endpoints import WebSocketEndpoint
-from starlette.routing import Route
+from starlette.routing import Route, WebSocketRoute
 from pydantic import ValidationError
 
 from app.AI.api import triage_agent
@@ -60,8 +60,8 @@ class Sync(WebSocketEndpoint):
         return res
 
 routes = [
-    Route("/ws/AI", Triage),
-    Route("/ws/sync", Sync)
+    WebSocketRoute("/ws/AI", Triage),
+    WebSocketRoute("/ws/sync", Sync)
 ]
 
 router = APIRouter(routes=routes)
