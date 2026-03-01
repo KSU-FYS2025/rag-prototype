@@ -26,7 +26,11 @@ class Sync(WebSocketEndpoint):
     validated: list[dict] = []
 
     async def on_receive(self, websocket: WebSocket, data: Any) -> None:
-        self.received.append(data)
+        if isinstance(data, list):
+            for element in data:
+                self.received.append(element)
+        elif isinstance(data, dict):
+            self.received.append(data)
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
         match close_code:
