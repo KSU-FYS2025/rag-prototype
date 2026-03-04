@@ -18,7 +18,7 @@ class Triage(WebSocketEndpoint):
     async def on_receive(self, websocket: WebSocket, data: Any) -> None:
         await websocket.send_json({"message": "waiting on server..."})
         if "data" in data and "pos" in data:
-            res = triage_agent(data["data"], data["pos"])
+            res = triage_agent(data["data"])
             await websocket.send_json(res)
         else:
             await websocket.close(1002, "Incorrect data format! Must include data and position attributes!")
