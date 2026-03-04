@@ -42,12 +42,39 @@ This is the recommended method for your serverless AWS instance.
 > [!IMPORTANT]
 > For Zilliz Cloud, you **must** use an API Token. Use the "Project" -> "API Keys" section in the Zilliz console to create one.
 
-## 4. Prepare Ollama
+### 3.1: Configurable Search Backend (Optional)
+The backend can operate in 3 modes by setting `SEARCH_MODE` in `.env`:
+* **`milvus`** (Default): Connects to the configured `DB_URL` Zilliz database.
+* **`in_memory`**: Completely bypasses Milvus and reads a raw JSON file. It embeds and compares locally, which is incredibly fast for pure prototypes (<1,000 items).
+* **`gemini_context`**: Abandons semantic search and instead pipes the *entire JSON file contents* into the Gemini prompt window so the LLM has global awareness of all rooms simultaneously.
+
+**To use `in_memory` or `gemini_context` mode, add this to your `.env`:**
+```env
+SEARCH_MODE=in_memory
+# Provide an absolute path to your Unity POIs JSON
+POI_JSON_PATH=../Assets/NavigationFireDynamicMesh_POIs.json
+```
+
+## 4. Prepare the AI Engine
+
+The backend supports both local execution via **Ollama** and cloud execution via **Gemini**.
+
+### Option A: Local Ollama Model
+If you are running the LLM locally on your Mac:
 The AI features require **Ollama** to be running on your Mac.
 1. Download and install Ollama from [ollama.com](https://ollama.com).
 2. Pull the required model:
    ```bash
    ollama pull llama3
+   ```
+
+### Option B: Cloud Gemini API
+If you prefer a faster or smarter cloud model, you can stream queries directly to Google's Gemini endpoint.
+1. Sign up and grab an API key from Google AI Studio. 
+2. Add your key and choose a Gemini model in your `.env`:
+   ```env
+   GEMINI_API_KEY=YOUR_API_KEY_HERE
+   AI_MODEL=gemini-2.5-flash
    ```
 
 ## 5. Run the Server

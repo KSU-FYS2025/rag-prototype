@@ -15,12 +15,30 @@ from app.poi.models import POI
 class Triage(WebSocketEndpoint):
     encoding = "json"
 
+    async def on_connect(self, websocket: WebSocket) -> None:
+        await websocket.accept()
+        self.history = [] # Store last few turns
+
     async def on_receive(self, websocket: WebSocket, data: Any) -> None:
         await websocket.send_json({"message": "waiting on server..."})
         # data is a dict because encoding="json"
-        # triage_agent expects a string user_query
-        query = data.get("query", str(data)) if isinstance(data, dict) else str(data)
-        res = triage_agent(query)
+        query = data.get("query", "")
+        context = data.get("context", None)
+        
+        if not query and isinstance(data, str):
+            query = data
+
+        if data.get("type") == "verification":
+            from app.AI.api import verify_route_agent
+            res = verify_route_agent(query, data, context=context, history=self.history)
+        else:
+            res = triage_agent(query, context=context, history=self.history)
+        
+        # Update history (keep last 5 exchanges)
+        self.history.append({"user": query, "ai": res.get("response", "")})
+        if len(self.history) > 5:
+            self.history.pop(0)
+
         await websocket.send_json(res)
 
 class Sync(WebSocketEndpoint):
@@ -90,7 +108,10 @@ class Sync(WebSocketEndpoint):
         indices_to_embed = []
         for i, poi in enumerate(pois_to_process):
             if not poi.vector:
-                text = f"Name: {poi.name}\nPOI Name: {poi.poiName}\nTitle: {poi.title}\nDescription: {poi.description}\nType: {poi.type}\nParent: {poi.parentName}"
+                # Constructing a more human-like, descriptive paragraph for better semantic embedding
+                text = f"The {poi.type} named '{poi.poiName}' (also known as {poi.name}) is a point of interest titled '{poi.title}'. " \
+                       f"It is situated within the {poi.parentName if poi.parentName else 'main scene'}. " \
+                       f"Description of this area: {poi.description if poi.description else 'No specific details provided.'}"
                 texts_to_embed.append(text)
                 indices_to_embed.append(i)
         
