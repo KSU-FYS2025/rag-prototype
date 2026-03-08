@@ -14,10 +14,10 @@ from app.poi.models import POI
 
 class Triage(WebSocketEndpoint):
     encoding = "json"
-    history = []
 
     async def on_connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
+        self.history = [] # Store last few turns
 
     async def on_receive(self, websocket: WebSocket, data: Any) -> None:
         await websocket.send_json({"message": "waiting on server..."})
