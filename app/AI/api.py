@@ -9,7 +9,7 @@ from starlette.responses import StreamingResponse, JSONResponse
 
 from app.database.db import search_poi
 from app.dependencies import NeedsDb, NeedsOllama
-from app.AI.extras import *
+from app.AI.prompts import *
 
 
 def json_serializable(data):
