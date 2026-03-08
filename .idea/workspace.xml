@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0995fd77-c379-4e98-9e3b-157cfdec90fd" name="Changes" comment="Add check to insure model in .env file is installed to the ollama server">
-      <change beforePath="$PROJECT_DIR$/app/websockets/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/websockets/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/dependencies.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/dependencies.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +33,12 @@
     &quot;assignee&quot;: &quot;RobertHoeh&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/RobertHoeh/rag-prototype.git&quot;,
-    &quot;accountId&quot;: &quot;6fbeb3bd-ef44-420e-bdcf-2ed21c9ff5af&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/KSU-FYS2025/rag-prototype.git",
+    "accountId": "e77afc99-c836-4edb-87aa-5bcb2f69c691"
   }
-}</component>
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
   </component>

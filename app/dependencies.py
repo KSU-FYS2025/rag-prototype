@@ -13,6 +13,7 @@ NeedsDb = Annotated[MilvusClient, Depends(get_db_gen)]
 """
 Declares database dependency as an easy to use type.
 Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session-dependency
+test for github ignore
 """
 
 def needs_ollama():
