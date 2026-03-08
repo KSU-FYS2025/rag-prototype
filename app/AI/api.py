@@ -9,7 +9,7 @@ from starlette.responses import StreamingResponse, JSONResponse
 
 from app.database.db import search_poi
 from app.dependencies import NeedsDb, NeedsOllama
-from app.AI.extras import instruction_prompt, triage_agent_prompt
+from app.AI.extras import *
 
 
 def json_serializable(data):
@@ -126,9 +126,9 @@ def triage_agent(
         rot = context.get("rotation", [0, 0, 0])
         scene = context.get("scene", "Unknown")
         full_prompt += f"[USER CONTEXT] Position: {pos}, Rotation: {rot}, Scene: {scene}\n"
-    
+
     full_prompt += f"[USER QUERY] {user_query}"
-    
+
     # STAGE 1: Triage
     print(f"\n--- [STAGE 1: TRIAGE] ---")
     print(f"Prompt sent to LLM:\n{full_prompt}")
@@ -144,16 +144,16 @@ def triage_agent(
             format="json"
         )
         print(f"LLM Raw Output: {content}")
-        
+
         # Try to parse the JSON output from the LLM
         # LLM might wrap JSON in backticks
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
             content = content.split("```")[1].split("```")[0].strip()
-        
+
         data = json.loads(content)
-        
+
         # Identify mixed intents from the actions array
         intents = set()
         for action in data.get("actions", []):
@@ -161,11 +161,11 @@ def triage_agent(
                 intents.add(action["cmd"])
         if not intents and data.get("type"):
             intents.add(data.get("type"))
-            
+
         print(f"Parsed Intents: {intents}")
-        
+
         all_candidates_for_rag = []
-        
+
         # 1. Handle Navigation: Already searching, but let's ensure it's robust
         # Expected 'targets' structure from LLM for navigation or inquiry types:
         # - targets: An array of objects to search for (for navigation or inquiry types). Each target must have:
@@ -182,32 +182,32 @@ def triage_agent(
                     print(f"\n--- [STAGE 2: SEARCH (NAV)] ---")
                     search_filter = target.get("filter", "")
                     target_type = target.get("target_type", "generic")
-                    
+
                     fetch_count = 5 # Fetch enough candidates for the AI to pick from
-                    
+
                     print(f"Searching for semantics: {semantics}. Type: {target_type}. Filter: {search_filter}")
                     try:
                         raw_results = search_poi(
-                            semantics, 
-                            fetch_count, 
+                            semantics,
+                            fetch_count,
                             ["id", "name", "poiName", "description", "type", "position"],
                             filter_expression=search_filter
                         )
                         if not raw_results and search_filter:
                             print("Filter returned 0 results, retrying without filter.")
                             raw_results = search_poi(
-                                semantics, 
-                                fetch_count, 
+                                semantics,
+                                fetch_count,
                                 ["id", "name", "poiName", "description", "type", "position"]
                             )
                     except Exception as filter_err:
                         print(f"Filter failed, retrying without filter: {filter_err}")
                         raw_results = search_poi(
-                            semantics, 
-                            fetch_count, 
+                            semantics,
+                            fetch_count,
                             ["id", "name", "poiName", "description", "type", "position"]
                         )
-                    
+
                     # --- AI Reranking / Validation ---
                     if raw_results:
                         print("\n--- [STAGE 2.5: AI SELECTION] ---")
@@ -216,7 +216,7 @@ def triage_agent(
                             item = res[0]
                             candidate_strings.append(f"ID: {item.get('id')} | Name: {item.get('name')} | Local Name: {item.get('poiName')} | Type: {item.get('type')}")
                         candidate_text = "\n".join(candidate_strings)
-                        
+
                         sys_prompt = f"""You are a STRICT JSON spatial filter API. The user requested to navigate: "{user_query}"
 The target location they are looking for is: "{semantics}"
 Target Type: {target_type.upper()}
@@ -258,10 +258,10 @@ Example 3: { "selected_ids": [] }"""
                                 val_content = val_content.split("```json")[1].split("```")[0].strip()
                             elif "```" in val_content:
                                 val_content = val_content.split("```")[1].split("```")[0].strip()
-                                
+
                             val_data = json.loads(val_content)
                             print(f"AI Selected IDs: {val_data}")
-                            
+
                             # Robustly extract selected_ids, protecting against hallucinations
                             if isinstance(val_data, dict) and "selected_ids" in val_data:
                                 valid_ids = val_data["selected_ids"]
@@ -291,11 +291,11 @@ Example 3: { "selected_ids": [] }"""
                         except Exception as e:
                             print(f"AI selection failed, returning empty. Error: {e}")
                             raw_results = []
-                            
+
                     # If this target is completely missing, and it's either specific OR there are absolutely no other valid targets remaining, we should tell the user!
                     if not raw_results:
                         print(f"Aborting query: Target '{semantics}' could not be found.")
-                        
+
                         # Only abort immediately if this is specific OR if this was the only target we had.
                         # (If they asked for 'Room 1' and 'food', and 'food' is missing, we still want to route them to Room 1.
                         # But if 'food' was the ONLY target and it's missing, we must apologize and abort).
@@ -311,32 +311,32 @@ Example 3: { "selected_ids": [] }"""
                                 ).strip('\"')
                             except Exception:
                                 error_msg = f"I couldn't find '{semantics}' in the building. Could you please double-check or clarify?"
-    
+
                             return {
                                 "type": data.get("type", "navigation"),
                                 "response": error_msg,
                                 "targets": [],
                                 "actions": []
                             }
-                            
+
                     # Return only 'id' and 'name' to Unity as requested, securely
                     target["poi_results"] = [{"id": res[0].get("id", 0), "name": res[0].get("name", "Unknown")} for res in raw_results]
                     print(f"Found {len(target['poi_results'])} POI results for this target.")
                     all_candidates_for_rag.extend(raw_results)
-        
+
         # 2. Handle Inquiry: Use RAG to provide a grounded response
         if "inquiry" in intents:
             # STAGE 2: Search (Inquiry)
             print(f"\n--- [STAGE 2: SEARCH (INQ)] ---")
-            
+
             # Use expanded semantics from targets if available, otherwise fallback to query
             search_term = user_query
             search_filter = data.get("filter", "")
-            
+
             if "targets" in data and len(data["targets"]) > 0:
                 search_term = data["targets"][0].get("semantics", user_query)
                 search_filter = data["targets"][0].get("filter", search_filter)
-            
+
             if all_candidates_for_rag:
                 print("Reusing candidates from Navigation block for RAG Context.")
                 retrieved_knowledge = all_candidates_for_rag
@@ -344,7 +344,7 @@ Example 3: { "selected_ids": [] }"""
                 print(f"Searching database for grounding context. Search Term: {search_term}. Filter: {search_filter}")
                 try:
                     retrieved_knowledge = search_poi(
-                        search_term, 
+                        search_term,
                         10,  # Raise top_n for inquiry to capture more candidates
                         ["id", "name", "poiName", "description", "type", "position", "parentName"],
                         filter_expression=search_filter
@@ -352,19 +352,19 @@ Example 3: { "selected_ids": [] }"""
                     if not retrieved_knowledge and search_filter:
                         print("Filter returned 0 results, retrying without filter.")
                         retrieved_knowledge = search_poi(
-                            search_term, 
+                            search_term,
                             10,
                             ["id", "name", "poiName", "description", "type", "position", "parentName"]
                         )
                 except Exception as filter_err:
                     print(f"Filter failed, retrying without filter: {filter_err}")
                     retrieved_knowledge = search_poi(
-                        search_term, 
+                        search_term,
                         10,
                         ["id", "name", "poiName", "description", "type", "position", "parentName"]
                     )
                 print(f"Retrieved {len(retrieved_knowledge)} context items.")
-            
+
             # Formulate a context-aware response using the second prompt style
             if retrieved_knowledge:
                 # STAGE 3: Inference (RAG)
@@ -379,9 +379,9 @@ Example 3: { "selected_ids": [] }"""
                         f"Parent Area: {entity.get('parentName')} | "
                         f"Description: {entity.get('description')}"
                     )
-                
+
                 knowledge_text = "\n".join(knowledge_strings)
-                
+
                 system_prompt_content = f"""
 You are a helpful building assistant. Using ONLY the information provided below, describe the requested location(s) or answer the question.
 You may reference the Location (X,Y,Z) to describe where something is in the building (e.g. 'on the east wing').  
@@ -397,12 +397,12 @@ Simply describe all matched locations accurately. Use the conversation history p
                         {"role": "user", "content": user_query}
                     ]
                 )
-                
-                # If this is purely an inquiry, we do not want Unity to construct NavMesh routes. 
+
+                # If this is purely an inquiry, we do not want Unity to construct NavMesh routes.
                 # We clear the targets so it skips STAGE 5 entirely and immediately displays this RAG response.
                 if "targets" in data and "navigation" not in intents:
                     data["targets"] = []
-                    
+
                 # Return only 'id' and 'name' for the context used
                 data["context_used"] = [{"id": res[0]["id"], "name": res[0]["name"]} for res in retrieved_knowledge]
                 print(f"Generated RAG Response: {data['response']}")
@@ -425,11 +425,11 @@ Simply describe all matched locations accurately. Use the conversation history p
         # STAGE 4: Return
         final_data = json_serializable(data)
         print(f"\n--- [STAGE 4: SERIALIZED RETURN] ---")
-        
+
         # Pretty-print the response to the python terminal for debugging
         json_output = json.dumps(final_data, indent=2)
         print(f"Payload ready for Unity ({len(json_output)} chars):\n{json_output}")
-        
+
         return final_data
     except Exception as e:
         import logging
@@ -458,22 +458,7 @@ def verify_route_agent(
     import json
     prompt += json.dumps(distances_payload.get("targets", []), indent=2)
     
-    system_prompt_content = f"""You are a multi-stage location verification assistant. 
-The user's original intent was: '{original_type}'.
-Unity has calculated the exact walking distance (in meters) to several possible POI candidates across multiple user targets.
-
-Your job is to weigh the semantic match (how well the name matches what they asked for) against the physical distance.
-
-CRITICAL: The user may have requested multiple destinations! Look at the names of the candidates in each target block. 
-If a requested SPECIFIC location is NOT present in the candidates, you MUST reject it!
-Do NOT route the user to a completely different specific location just because it's in the list.
-If ANY target (specific or generic) is missing, incorrect, or has no valid candidates, politely acknowledge that you couldn't find it in your conversational response, and ONLY route them to the targets that DO exist!
-
-Return a minified JSON object with the following:
-- "selected_ids": A JSON array. For each target block provided in the payload, you must select EXACTLY ONE best integer ID (the one that matches best and/or is physically closest). If you are given more than one candidates, pick ONLY the single closest one. NEVER return multiple IDs for the same target! If a specific target is completely missing from the candidates, DO NOT include any ID for it.
-- "reasoning": A brief explanation of why you picked those exact ID(s).
-- "response": A conversational confirmation or apology. You MUST provide a response! If ANY target was missing, explicitly mention that you couldn't find it. (e.g., "I couldn't find Room 2000, but taking you to the nearest Vending Machine instead..."). If all targets failed, just say "I'm sorry, I couldn't find any matching locations for that."
-"""
+    system_prompt_content = verify_route_agent_prompt(original_type)
 
     try:
         content = generate_chat_response(

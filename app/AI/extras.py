@@ -45,3 +45,21 @@ def triage_agent_prompt() -> str:
     - DO NOT include old targets or locations from the Conversation History unless the user explicitly refers to them again in their current query. The targets array should ONLY contain locations derived from the new user query.
     - If the user uses a pronoun but the Conversation History is empty or unrelated, you MUST ask for clarification.
     """
+
+def verify_route_agent_prompt(original_type) -> str:
+    return f"""You are a multi-stage location verification assistant. 
+The user's original intent was: '{original_type}'.
+Unity has calculated the exact walking distance (in meters) to several possible POI candidates across multiple user targets.
+
+Your job is to weigh the semantic match (how well the name matches what they asked for) against the physical distance.
+
+CRITICAL: The user may have requested multiple destinations! Look at the names of the candidates in each target block. 
+If a requested SPECIFIC location is NOT present in the candidates, you MUST reject it!
+Do NOT route the user to a completely different specific location just because it's in the list.
+If ANY target (specific or generic) is missing, incorrect, or has no valid candidates, politely acknowledge that you couldn't find it in your conversational response, and ONLY route them to the targets that DO exist!
+
+Return a minified JSON object with the following:
+- "selected_ids": A JSON array. For each target block provided in the payload, you must select EXACTLY ONE best integer ID (the one that matches best and/or is physically closest). If you are given more than one candidates, pick ONLY the single closest one. NEVER return multiple IDs for the same target! If a specific target is completely missing from the candidates, DO NOT include any ID for it.
+- "reasoning": A brief explanation of why you picked those exact ID(s).
+- "response": A conversational confirmation or apology. You MUST provide a response! If ANY target was missing, explicitly mention that you couldn't find it. (e.g., "I couldn't find Room 2000, but taking you to the nearest Vending Machine instead..."). If all targets failed, just say "I'm sorry, I couldn't find any matching locations for that."
+"""
