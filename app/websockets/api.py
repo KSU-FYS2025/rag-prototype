@@ -2,14 +2,14 @@ import logging
 from typing import Any
 
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket
 from starlette.endpoints import WebSocketEndpoint
-from starlette.routing import Route, WebSocketRoute
-from pydantic import ValidationError
+from starlette.routing import WebSocketRoute
 
 from app.AI.api import triage_agent
 from app.database.db import get_db_gen
-from app.poi.models import POI
+from app.poi.models import POI, get_poi_schema, get_index_params
+from app.database.db import embedding_fn, ensure_collection
 
 
 class Triage(WebSocketEndpoint):
@@ -67,16 +67,12 @@ class Sync(WebSocketEndpoint):
         logging.info(f"Sync client disconnected with code {close_code}")
 
     def validate(self):
-        from app.poi.models import POI
         for data in self.received:
             # We trust the data enough to skip per-item Pydantic re-validation if needed,
             # but we ensured the model is flexible. 
             self.validated.append(data)
 
     def send_to_db(self) -> dict:
-        from app.poi.models import POI
-        from app.database.db import embedding_fn
-        
         pois_to_process = []
         for item in self.validated:
             # Full mapping from Unity POIData
@@ -131,8 +127,7 @@ class Sync(WebSocketEndpoint):
         if not data_to_insert:
             return {"message": "No data to insert"}
 
-        from app.poi.models import get_poi_schema, get_index_params
-        from app.database.db import ensure_collection
+
 
         with get_db_gen() as db:
             # Lazy initialize if dropped during runtime
