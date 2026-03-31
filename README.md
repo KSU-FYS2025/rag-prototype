@@ -4,6 +4,24 @@
 If running on MacOS, you can just skip to Setting up UV. Unfortunately, the project does not support
 linux, so it cannot run on that platform. If on Linux, follow the instructions in the following section:
 
+#### Environment file
+Before running the backend, first create a .env file in the root of the project, and add the following
+variables to it.
+
+```dotenv
+AI_MODEL=deepseek-r1:8b
+POI_JSON_PATH=NavigationFireDynamicMesh_POIs.json
+DB_URL=database.db
+```
+
+You may put whatever AI model you'd like for the `AI_MODEL` field, however please ensure you have this installed
+within ollama
+
+#### POI JSON Information
+Before continuing, make sure you export the POIs as json. To do this, go to the NavigationFireDynamicMesh scene
+using the instructions in the repository for the Unity project, then open the project, click on POITools and
+click export. In the file picker, navigate to the root of the project, then click save.
+
 #### Running on Docker:
 In order to setup the docker, ensure you have downloaded and installed [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 and followed their setup directions. Once setup, go to the project in pycharm (you may need to clone
