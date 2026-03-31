@@ -3,6 +3,7 @@
 .env
 .idea/workspace.xml
 *.db
+*.db.lock
 *.pyc
 /.venv
 /.idea
