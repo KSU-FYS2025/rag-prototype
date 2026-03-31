@@ -52,6 +52,10 @@ class POI(BaseModel):
         text = f"Name: {self.name}\nPOI Name: {self.poiName}\nTitle: {self.title}\nDescription: {self.description}\nType: {self.type}\nParent: {self.parentName}"
         self.vector = embedding_fn.encode_documents([text])
 
+    @classmethod
+    def generate_embedding_json(cls, data: dict):
+        return embedding_fn.encode_documents([f"Name: {data["name"]}\nPOI Name: {data["poiName"]}\nTitle: {data["title"]}\nDescription: {data["description"]}\nType: {data["type"]}\nParent: {data["parentName"]}"])
+
 
 @partial_model
 class POIOptional(POI):

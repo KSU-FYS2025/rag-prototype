@@ -5,6 +5,7 @@ from pymilvus import MilvusClient, CollectionSchema, model
 import json
 import re
 import numpy as np
+from pymilvus.milvus_client import milvus_client
 
 embedding_fn = model.DefaultEmbeddingFunction()
 
@@ -92,10 +93,15 @@ def get_db_info() -> tuple[str, Optional[str]]:
 def create_db_connection() -> MilvusClient:
     _db_url, _db_token = get_db_info()
     try:
-        client = MilvusClient(
-            _db_url,
-            token=_db_token
-        )
+        if _db_token:
+            client = MilvusClient(
+                _db_url,
+                token=_db_token
+            )
+        else:
+            client = MilvusClient(
+                _db_url
+            )
 
     except Exception as e:
         raise Exception(f"{e}\nError while creating database connection! Please ensure that the database server is running\n"
@@ -128,19 +134,18 @@ def create_schema(schema: list[Dict]) -> CollectionSchema:
     return _schema
 
 
-def create_collection(settings: Dict, schema: Optional[CollectionSchema] = None):
-    with get_db_gen() as db:
-        name = settings["collection_name"]
-        if db.has_collection(name):
-            print(f"Dropping existing collection: {name}")
-            db.drop_collection(name)
-        
-        print(f"Creating collection: {name}")
-        db.create_collection(
-            schema=schema,
-            **settings
-        )
-        print(f"Collection {name} created.")
+def create_collection(settings: Dict, db: MilvusClient,  schema: Optional[CollectionSchema] = None):
+    name = settings["collection_name"]
+    if db.has_collection(name):
+        print(f"Dropping existing collection: {name}")
+        db.drop_collection(name)
+
+    print(f"Creating collection: {name}")
+    db.create_collection(
+        schema=schema,
+        **settings
+    )
+    print(f"Collection {name} created.")
 
 def ensure_collection(settings: Dict, schema: Optional[CollectionSchema] = None, db: Optional[MilvusClient] = None):
     if db is not None:
