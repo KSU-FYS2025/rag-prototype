@@ -20,7 +20,7 @@ within ollama
 #### POI JSON Information
 Before continuing, make sure you export the POIs as json. To do this, go to the NavigationFireDynamicMesh scene
 using the instructions in the repository for the Unity project, then open the project, click on POITools and
-click export. In the file picker, navigate to the root of the project, then click save.
+click export. In the file picker, navigate to the root of the backend project, then click save.
 
 #### Running on Docker:
 In order to setup the docker, ensure you have downloaded and installed [Docker Desktop](https://www.docker.com/products/docker-desktop/)
