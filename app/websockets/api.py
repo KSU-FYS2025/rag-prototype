@@ -11,16 +11,17 @@ from app.database.db import get_db_gen
 from app.poi.models import POI, get_poi_schema, get_index_params
 from app.database.db import embedding_fn, ensure_collection
 
-
 class Triage(WebSocketEndpoint):
     encoding = "json"
 
     async def on_connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
         self.history = [] # Store last few turns
+        logging.info("Connected to Unity Project!")
 
     async def on_receive(self, websocket: WebSocket, data: Any) -> None:
         await websocket.send_json({"message": "waiting on server..."})
+        logging.info("Processing request from Unity...")
         # data is a dict because encoding="json"
         query = data.get("query", "")
         context = data.get("context", None)

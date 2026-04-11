@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
                     poi["localRotation"]["y"],
                     poi["localRotation"]["z"]
                 ]
-                poi["id"] = id_counter
+                poi["id"] = poi["identification"]
                 id_counter += 1
                 embedding = POI.generate_embedding_json(poi)
                 poi["vector"] = embedding[0]
