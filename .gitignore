@@ -2,5 +2,9 @@
 
 .env
 .idea/workspace.xml
-/.venv
+*.db
+*.db.lock
 *.pyc
+/.venv
+/.idea
+*.json

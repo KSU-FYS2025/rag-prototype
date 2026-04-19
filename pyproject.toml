@@ -5,8 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi>=0.121.1",
-    "ollama>=0.6.0",
-    "pymilvus>=2.6.3",
-    "pymilvus-model>=0.3.2",
+    "fastapi[standard]",
+    "ollama",
+    "pymilvus>=2.6.2",
+    "pymilvus-model",
+    "pymilvus[milvus_lite]",
+    "Flax",
+    "websockets>=15.0.1",
+    "google-generativeai>=0.8.6",
+    "google-genai>=1.64.0",
 ]
