@@ -93,3 +93,12 @@ to skip the pipx install, however I haven't tested this, so I'm not certain if i
 Once uv is installed, you may need to restart your terminal or pycharm (or both!) before being able to run it.
 Once you have, run `uv sync` within the project to make sure that you have the correct packages installed.
 Then, you're done! You can then run the project by running the command `uv run fastapi run`.
+
+## Setup
+### Running the Backend and Unity Scene on the same computer
+If you are running both on the same computer, there are no additional setup steps. Simply ensure that the docker image
+is running before you use it.
+### Running the Backend and Unity Scene on different computers
+Once you have the system running, you have to get the IP address of your computer on your local network. This can be
+done through a variety of means and varies from OS to OS. You can replace the `localhost` portion in the RealTimeQuery
+object with your computer's local IP
