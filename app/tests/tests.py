@@ -35,6 +35,7 @@ async def main_mcp_client():
     async with Client(transport=mcp) as mcp_client:
         yield mcp_client
 
+@pytest.mark.asyncio
 async def test_ping(main_mcp_client: Client[FastMCPTransport]):
     res = await main_mcp_client.call_tool("ping")
 
