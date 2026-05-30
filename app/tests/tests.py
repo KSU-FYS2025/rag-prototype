@@ -39,4 +39,4 @@ async def main_mcp_client():
 async def test_ping(main_mcp_client: Client[FastMCPTransport]):
     res = await main_mcp_client.call_tool("ping")
 
-    assert res.content == "pong!"
+    assert res.data == "pong!"
