@@ -19,3 +19,7 @@ dependencies = [
     "pytest>=9.0.3",
     "httpx>=0.28.1",
 ]
+
+# Suggested by fastmcp docs
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
