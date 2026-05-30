@@ -18,6 +18,7 @@ dependencies = [
     "adk>=0.0.5",
     "pytest>=9.0.3",
     "httpx>=0.28.1",
+    "pytest-asyncio>=1.4.0",
 ]
 
 # Suggested by fastmcp docs
