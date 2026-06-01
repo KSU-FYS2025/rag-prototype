@@ -4,7 +4,7 @@ on:
       - dev
 # Template using https://docs.astral.sh/uv/guides/integration/github/#installation
 jobs:
-  setup_python:
+  test_backend:
     name: Setup Python
     runs-on: ubuntu-latest
     environment: actions-environment
@@ -12,11 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-#      - name: Setup environment file
-#        run: |
-#          echo "AI_MODEL=${{ vars.AI_MODEL }}" >> .env
-#          echo "DB_URL=${{ vars.DB_URL }}" >> .env
-#          echo "POI_JSON_PATH=${{ vars.POI_JSON_PATH }}" >> .env
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Run Ollama
+        run: |
+          ollama serve &
+          ollama pull ${{ vars.AI_MODEL }}
 
       - name: Setup Python
         uses: actions/setup-python@v6
