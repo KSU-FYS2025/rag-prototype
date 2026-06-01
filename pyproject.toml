@@ -15,10 +15,10 @@ dependencies = [
     "google-generativeai>=0.8.6",
     "google-genai>=1.64.0",
     "fastmcp>=3.3.1",
-    "adk>=0.0.5",
     "pytest>=9.0.3",
     "httpx>=0.28.1",
     "pytest-asyncio>=1.4.0",
+    "google-adk>=1.23.0",
 ]
 
 # Suggested by fastmcp docs
