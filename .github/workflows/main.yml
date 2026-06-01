@@ -29,4 +29,8 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Run tests
+        env:
+          AI_MODEL: ${{ vars.AI_MODEL }}
+          DB_URL: ${{ vars.DB_URL }}
+          POI_JSON_PATH: ${{ vars.POI_JSON_PATH }}
         run: uv run pytest ./app/tests/tests.py
