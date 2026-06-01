@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import json
 import os
+from dotenv import load_dotenv
 
 from app.poi import api as poiapi
 from app.AI import api as aiapi
@@ -11,6 +12,8 @@ import logging
 from contextlib import asynccontextmanager
 from app.poi.models import get_poi_schema, get_index_params, POI
 from app.database.db import create_collection, get_db_gen
+
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
