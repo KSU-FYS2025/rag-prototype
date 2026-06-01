@@ -84,10 +84,11 @@ def simple_filter(poi, filter_expr):
 #client = MilvusClient(Path(Path.cwd(), "vectorDB.db").__str__())
 
 def get_db_info() -> tuple[str, Optional[str]]:
-    if not "DB_URL" in os.environ:
+    db_url = os.environ.get("DB_URL")
+    if not db_url:
         raise Exception("Database url (DB_URL) not found in the .env file!")
 
-    return os.environ.get("DB_URL"), os.environ.get("DB_TOKEN")
+    return db_url, os.environ.get("DB_TOKEN")
 
 
 def create_db_connection() -> MilvusClient:
