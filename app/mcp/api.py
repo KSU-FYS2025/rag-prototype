@@ -26,7 +26,8 @@ def search_poi(
     :param query: String to search for within the database
     :param top_n: Optional, Specifies how many of the top results to return
     :param fields: Optional, Specifies which fields of the result to output
-    :param filter_expression: Optional, specifies a filter to use within the results
+    :param filter_expression: Optional, specifies a filter to use within the results. Format specified here:
+    https://milvus.io/docs/boolean.md
     :return: List of tuples of the result and the distance from the query
     """
     return search_poi(query, top_n, fields, filter_expression)
