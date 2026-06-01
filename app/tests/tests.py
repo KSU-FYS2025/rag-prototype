@@ -32,7 +32,7 @@ def test_ollama():
 
     assert not failed
 
-def test_milvus():
+def test_milvus(client: TestClient):
     response = client.get("/poi/all")
     print(response)
     assert response.json() != {}
