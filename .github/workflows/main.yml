@@ -7,6 +7,7 @@ jobs:
   setup_python:
     name: Setup Python
     runs-on: ubuntu-latest
+    environment: actions-environment
 
     steps:
       - uses: actions/checkout@v6
