@@ -11,11 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup environment file
-        run: |
-          echo "AI_MODEL=${{ vars.AI_MODEL }}" >> .env
-          echo "DB_URL=${{ vars.DB_URL }}" >> .env
-          echo "POI_JSON_PATH=${{ vars.POI_JSON_PATH }}" >> .env
+#      - name: Setup environment file
+#        run: |
+#          echo "AI_MODEL=${{ vars.AI_MODEL }}" >> .env
+#          echo "DB_URL=${{ vars.DB_URL }}" >> .env
+#          echo "POI_JSON_PATH=${{ vars.POI_JSON_PATH }}" >> .env
 
       - name: Setup Python
         uses: actions/setup-python@v6
