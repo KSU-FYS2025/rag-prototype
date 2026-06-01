@@ -9,10 +9,17 @@ from ..dependencies import needs_ollama
 from ..mcp.api import mcp
 from fastapi.testclient import TestClient
 
+@pytest.fixture(scope="session")
+def client():
+    with TestClient(app) as fastapi_client:  # lifespan fires here
+        yield fastapi_client
 
-client = TestClient(app)
+@pytest.fixture
+async def main_mcp_client():
+    async with Client(transport=mcp) as mcp_client:
+        yield mcp_client
 
-def test_fastapi_server():
+def test_fastapi_server(client):
     response = client.get("/ping")
     assert response.json() == {"message": "pong!"}
 
@@ -29,11 +36,6 @@ def test_milvus():
     response = client.get("/poi/all")
     print(response)
     assert response.json() != {}
-
-@pytest.fixture
-async def main_mcp_client():
-    async with Client(transport=mcp) as mcp_client:
-        yield mcp_client
 
 @pytest.mark.asyncio
 async def test_ping(main_mcp_client: Client[FastMCPTransport]):
