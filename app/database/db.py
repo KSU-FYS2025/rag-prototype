@@ -165,54 +165,71 @@ def ensure_collection(settings: Dict, schema: Optional[CollectionSchema] = None,
 
 
 def search_poi(
-       query: str,
-       top_n: int = 5,
-       fields: list[str] = None,
-       filter_expression: str = ""
-    ) -> list[tuple]:
-    search_mode = os.environ.get("SEARCH_MODE", "milvus").lower()
-    
-    if search_mode == "milvus":
-        query_vectors = embedding_fn.encode_queries([query])
-        with get_db_gen() as db:
-            res = db.search(
-                collection_name="poi",
-                data=query_vectors,
-                limit=top_n,
-                output_fields=fields,
-                filter=filter_expression
-            )
-        return [(hit["entity"], hit["distance"]) for x in res for hit in x if hit]
-        
-    elif search_mode == "in_memory":
-        pois = _load_in_memory_db()
-        query_vectors = embedding_fn.encode_queries([query])
-        # Flatten the outer query array down to 1D
-        query_vector = np.array(query_vectors[0]) 
-        
-        results = []
-        for poi in pois:
-            if not simple_filter(poi, filter_expression):
-                continue
-                
-            poi_vec = np.array(poi["_vector"])
-            dist = float(np.dot(query_vector, poi_vec) / (np.linalg.norm(query_vector) * np.linalg.norm(poi_vec)))
-            
-            entity = {k: v for k, v in poi.items() if (not fields or k in fields)}
-            results.append((entity, dist))
-            
-        results.sort(key=lambda x: x[1], reverse=True)
-        return results[:top_n]
-        
-    elif search_mode == "gemini_context":
-        pois = _load_in_memory_db()
-        results = []
-        for poi in pois:
-            if not simple_filter(poi, filter_expression):
-                continue
-            entity = {k: v for k, v in poi.items() if (not fields or k in fields)}
-            results.append((entity, 1.0)) # Dummy distance
-        return results
-        
-    else:
-        raise ValueError(f"Unknown SEARCH_MODE: {search_mode}")
+        query: str,
+        top_n: int = 5,
+        fields: list[str] = None,
+        filter_expression: str = ""
+) -> list[tuple]:
+    query_vectors = embedding_fn.encode_queries([query])
+    with get_db_gen() as db:
+        res = db.search(
+            collection_name="poi",
+            data=query_vectors,
+            limit=top_n,
+            output_fields=fields,
+            filter=filter_expression
+        )
+    return [(hit["entity"], hit["distance"]) for x in res for hit in x if hit]
+
+# def search_poi(
+#        query: str,
+#        top_n: int = 5,
+#        fields: list[str] = None,
+#        filter_expression: str = ""
+#     ) -> list[tuple]:
+#     search_mode = os.environ.get("SEARCH_MODE", "milvus").lower()
+#
+#     if search_mode == "milvus":
+#         query_vectors = embedding_fn.encode_queries([query])
+#         with get_db_gen() as db:
+#             res = db.search(
+#                 collection_name="poi",
+#                 data=query_vectors,
+#                 limit=top_n,
+#                 output_fields=fields,
+#                 filter=filter_expression
+#             )
+#         return [(hit["entity"], hit["distance"]) for x in res for hit in x if hit]
+#
+#     elif search_mode == "in_memory":
+#         pois = _load_in_memory_db()
+#         query_vectors = embedding_fn.encode_queries([query])
+#         # Flatten the outer query array down to 1D
+#         query_vector = np.array(query_vectors[0])
+#
+#         results = []
+#         for poi in pois:
+#             if not simple_filter(poi, filter_expression):
+#                 continue
+#
+#             poi_vec = np.array(poi["_vector"])
+#             dist = float(np.dot(query_vector, poi_vec) / (np.linalg.norm(query_vector) * np.linalg.norm(poi_vec)))
+#
+#             entity = {k: v for k, v in poi.items() if (not fields or k in fields)}
+#             results.append((entity, dist))
+#
+#         results.sort(key=lambda x: x[1], reverse=True)
+#         return results[:top_n]
+#
+#     elif search_mode == "gemini_context":
+#         pois = _load_in_memory_db()
+#         results = []
+#         for poi in pois:
+#             if not simple_filter(poi, filter_expression):
+#                 continue
+#             entity = {k: v for k, v in poi.items() if (not fields or k in fields)}
+#             results.append((entity, 1.0)) # Dummy distance
+#         return results
+#
+#     else:
+#         raise ValueError(f"Unknown SEARCH_MODE: {search_mode}")
