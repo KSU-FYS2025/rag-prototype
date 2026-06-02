@@ -32,7 +32,7 @@ class ValidationAgent(BaseAgent):
             parsed_dict = raw
         else:
             raise ValueError(
-                f"[{self.name}] state['{self.state_key}'] is not valid JSON: {e}\nRaw value: {raw!r}"
+                f"[{self.name}] state['{self.state_key}'] is not valid JSON\nRaw value: {raw!r}"
             )
 
         try:
