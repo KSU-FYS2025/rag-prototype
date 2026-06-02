@@ -167,7 +167,7 @@ def ensure_collection(settings: Dict, schema: Optional[CollectionSchema] = None,
 def search_poi(
         query: str,
         top_n: int = 5,
-        fields: list[str] = None,
+        fields: Optional[list[str]] = None,
         filter_expression: str = ""
 ) -> list[tuple]:
     query_vectors = embedding_fn.encode_queries([query])
