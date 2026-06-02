@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, ValidationError
 from google.adk.agents import BaseAgent
 from google.adk.agents.invocation_context import InvocationContext
@@ -48,20 +50,9 @@ class ValidationAgent(BaseAgent):
             actions=EventActions()
         )
 
-
 class NavigationIntent(str, Enum):
     NAV_QUERY = "navigation_query"
     NAV_GUIDE = "navigation_guidance"
     CONVERSATIONAL = "conversational"
 
-class RootOutput(BaseModel):
-    intent: NavigationIntent = Field(description="What the user's query is classified as.\n"
-                                                 "NAV_GUIDE or navigation_guidance is when the user asks, either"
-                                                 "implicitly or explicitly to be guided to some place(s).\n"
-                                                 "NAV_QUERY or navigation_query is when the user asks about a place(s)"
-                                                 "but does not explicitly wish to be guided to that place."
-                                                 "CONVERSATIONAL or conversational is when the user's query is"
-                                                 "just conversational and does not require additional information.")
-    confidence: float = Field(ge=0.0, le=1.0,
-                              description="How confident the AI model is in it's choice of navigation intent")
-
+type TargetType = Literal["implicit", "general"]
