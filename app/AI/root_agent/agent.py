@@ -16,10 +16,3 @@ root_agent = Agent(
                 }''',
     output_schema=RootOutput
 )
-
-root_validation_agent = ValidationAgent(
-    name="RootValidator",
-    description="Validates the json output of root_agent",
-    state_key="output_intent",
-    schema=RootOutput
-)
