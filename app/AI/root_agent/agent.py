@@ -14,7 +14,7 @@ root_agent = Agent(
                     "intent": <str>, MUST BE ONE OF THE FOLLOWING ["navigation_query", "navigation_guidance", "conversational"]
                     "confidence": <number>, How confident you are in the user intent from 0 to 1 (floating point number)
                 }''',
-    output_key='output_intent'
+    output_schema=RootOutput
 )
 
 root_validation_agent = ValidationAgent(
