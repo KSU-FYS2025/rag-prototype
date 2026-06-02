@@ -19,7 +19,6 @@ triage_agent = Agent(
                 "target_type": <str>, MUST BE ONE OF THE FOLLOWING ["implicit", "explicit"]. If user directly mentions
                     place, assign to explicit, otherwise should be implicit
                 "semantics": <str>, brief information describing the place to be used for vector search
-                "filter": <str>, filter for the vector search output
                 "source": <str>, should always be "llm"
             },
             ...

@@ -8,7 +8,6 @@ class QueryClassifier(BaseModel):
     intent: NavigationIntent
     target_type: TargetType
     semantics: str
-    filter: str
     source: str
 
 class TriageAgentOutput(BaseModel):
