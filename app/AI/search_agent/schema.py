@@ -6,5 +6,5 @@ class Validation(BaseModel):
     selected_ids: List[int]
     method: str
 
-class TriageOutput(BaseModel):
+class SearchOutput(BaseModel):
     validations: List[Validation]
