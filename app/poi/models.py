@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Optional, Any, Literal, Callable, Type, Tuple, TypeVar
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, create_model, Field
 from pydantic.fields import FieldInfo
 from pymilvus import DataType, MilvusClient
 
@@ -29,18 +29,18 @@ class POI(BaseModel):
     """
     Aligned strictly with Unity POIData from POIExtractor.cs
     """
-    id: int
-    vector: Optional[list[float]] = None
-    name: str = ""
-    title: str = ""
-    poiName: str = ""
-    description: str = ""
-    type: str = "Room"
-    position: list[float]
-    rotation: list[float] = [0.0, 0.0, 0.0]
-    localPosition: list[float] = [0.0, 0.0, 0.0]
-    localRotation: list[float] = [0.0, 0.0, 0.0]
-    parentName: str = ""
+    id: int = Field(description="Unique identifier of the POI")
+    name: str = Field(description="Name of the POI")
+    vector: Optional[list[float]] = Field(default=None, description="Vector embedding representation of the POI")
+    title: str = Field(default="", description="Title of the POI. Brief information about what the POI is.")
+    poiName: str = Field(description="Name of the POI. Will be the same as title a majority of the time.")
+    description: str = Field(default="", description="Brief description of the POI")
+    type: str = Field(default="Room", description="Type of the POI. What it represents at a high level")
+    position: list[float] = Field(description="Position of the POI")
+    rotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Rotation of the POI")
+    localPosition: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local position of the POI")
+    localRotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local rotation of the POI")
+    parentName: str = Field(default="", description="What collection the POI belongs to.")
 
     def generate_embedding(self):
         # Embedding based on key textual descriptors
