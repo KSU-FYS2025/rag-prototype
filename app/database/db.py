@@ -169,7 +169,7 @@ def search_poi(
         top_n: int = 5,
         fields: Optional[list[str]] = None,
         filter_expression: str = ""
-) -> list[tuple]:
+) -> list[tuple[dict, float]]:
     query_vectors = embedding_fn.encode_queries([query])
     with get_db_gen() as db:
         res = db.search(
