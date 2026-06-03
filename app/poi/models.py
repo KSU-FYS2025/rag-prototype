@@ -5,7 +5,7 @@ from pydantic import BaseModel, create_model
 from pydantic.fields import FieldInfo
 from pymilvus import DataType, MilvusClient
 
-from app.database.db import create_schema, embedding_fn
+from app.database.db import embedding_fn
 
 
 # https://stackoverflow.com/a/76560886
