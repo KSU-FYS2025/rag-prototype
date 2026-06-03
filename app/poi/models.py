@@ -1,14 +1,9 @@
 from copy import deepcopy
 from typing import Optional, Any, Literal, Callable, Type, Tuple, TypeVar
 
-import pydantic.v1.main
 from pydantic import BaseModel, create_model
 from pydantic.fields import FieldInfo
-from pydantic.main import IncEx
-from pydantic.v1.main import ModelMetaclass
-from pydantic.v1.schema import schema
 from pymilvus import DataType, MilvusClient
-from pymilvus.model.dense import OnnxEmbeddingFunction
 
 from app.database.db import create_schema, embedding_fn
 
