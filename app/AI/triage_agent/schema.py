@@ -4,7 +4,7 @@ from app.AI.schema import TargetType, NavigationIntent
 from typing import List
 
 class QueryClassifier(BaseModel):
-    order: int = Field(ge=1)
+    order: int = Field(ge=1, description="The index of this item in the targets list")
     intent: NavigationIntent
     target_type: TargetType
     filter: str = Field(description="A SQL-Like filter that is used to further refine the output of a vector search "
