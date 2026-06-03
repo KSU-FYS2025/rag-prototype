@@ -1,6 +1,5 @@
 from google.adk.agents.llm_agent import Agent
 
-from app.AI.schema import ValidationAgent
 from app.AI.triage_agent.schema import TriageAgentOutput
 
 triage_agent = Agent(

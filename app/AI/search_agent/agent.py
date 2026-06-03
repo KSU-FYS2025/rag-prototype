@@ -1,4 +1,3 @@
-import asyncio
 from math import sqrt
 
 from google.adk import Workflow, Context, Event, Agent
