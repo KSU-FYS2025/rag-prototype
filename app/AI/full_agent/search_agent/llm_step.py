@@ -1,7 +1,7 @@
 from google.adk.agents.llm_agent import Agent
 
-from app.AI.search_agent.schema import SearchOutput
-from app.AI.triage_agent.schema import QueryClassifier
+from app.AI.full_agent.search_agent.schema import SearchOutput
+from app.AI.full_agent.triage_agent.schema import QueryClassifier
 
 llm_step = Agent(
     model='gemini-2.5-flash',

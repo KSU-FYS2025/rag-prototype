@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 
-from app.AI.triage_agent.schema import TriageAgentOutput
+from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 
 triage_agent = Agent(
     model='gemini-2.5-flash',

@@ -3,8 +3,8 @@ from math import sqrt
 from google.adk import Workflow, Context, Event, Agent
 from google.adk.workflow import node, JoinNode
 
-from app.AI.search_agent.schema import DistanceAndVector, DistanceBetweenPOIs, Vector, DistanceOutput, SearchOutput
-from app.AI.triage_agent.schema import TriageAgentOutput, QueryClassifier
+from app.AI.full_agent.search_agent.schema import DistanceAndVector, DistanceBetweenPOIs, Vector, DistanceOutput, SearchOutput
+from app.AI.full_agent.triage_agent.schema import TriageAgentOutput, QueryClassifier
 from app.database.db import search_poi
 from app.poi.models import POI
 
