@@ -84,7 +84,7 @@ async def distance_calculator(
 
 synthesis_agent = Agent(
     model='gemini-2.5-flash',
-    name='synthesis agent',
+    name='synthesis_agent',
     description='Agent that takes in all the vector search information and creates a path',
     instruction='Take in the data provided to you and create a path between the Points of Interest that most closely'
                 'match the user\'s request. Only use the information presented to you within the POI\'s data fields to'

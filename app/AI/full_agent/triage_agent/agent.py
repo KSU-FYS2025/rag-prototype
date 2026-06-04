@@ -4,7 +4,7 @@ from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 
 triage_agent = Agent(
     model='gemini-2.5-flash',
-    name='root_agent',
+    name='triage_agent',
     description='An agent that separates and classifies queries within a full user query',
     instruction='''You are the second agent within a chain meant to provide navigation support. Your role is to take the
     user's query and separate it into separate queries if applicable, and provide meaningful information related to the
