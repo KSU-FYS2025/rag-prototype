@@ -1,15 +1,18 @@
 import json
 import os
-from typing import Annotated
 
 import ollama
 from fastapi import APIRouter, WebSocket
-from fastapi.params import Body
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
+from google.adk.sessions import Session
 from starlette.responses import StreamingResponse, JSONResponse
+from google.adk import Workflow, Runner
 
 from app.database.db import search_poi
-from app.dependencies import NeedsDb, NeedsOllama
+from app.dependencies import NeedsOllama
 from app.AI.prompts import *
+from app.AI.full_agent.agent import full_workflow
 
 
 def json_serializable(data):
@@ -66,6 +69,35 @@ def generate_chat_response(model_name: str, messages: list, format: str = None) 
         return res["message"]["content"]
 
 router = APIRouter()
+
+app = App(
+    name="RagPrototypeADKWorkflow",
+    root_agent=full_workflow
+)
+
+@router.get("ai/graph-workflow", dependencies=[NeedsOllama])
+async def graph_workflow(
+        user_query: str,
+) -> str:
+
+    runner = InMemoryRunner()
+
+    response = await runner.run_debug(
+        user_query,
+    )
+
+    output = ""
+
+    for event in response:
+        if event.is_final_response():
+            final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
+
+            final_output = event.output
+
+            output = final_text or str(final_output)
+            break
+
+    return output
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
