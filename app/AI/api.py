@@ -9,10 +9,14 @@ from google.adk.sessions import Session
 from starlette.responses import StreamingResponse, JSONResponse
 from google.adk import Workflow, Runner
 
+from app.AI.full_agent import search_agent
+from app.AI.full_agent.root_agent.agent import root_agent
 from app.database.db import search_poi
 from app.dependencies import NeedsOllama
 from app.AI.prompts import *
 from app.AI.full_agent.agent import full_workflow
+from app.AI.full_agent.triage_agent.agent import triage_agent as triage_agent_adk
+from app.AI.full_agent.search_agent.agent import search_workflow
 
 
 def json_serializable(data):
@@ -70,17 +74,14 @@ def generate_chat_response(model_name: str, messages: list, format: str = None) 
 
 router = APIRouter()
 
-app = App(
-    name="RagPrototypeADKWorkflow",
-    root_agent=full_workflow
-)
-
-@router.get("ai/graph-workflow", dependencies=[NeedsOllama])
-async def graph_workflow(
+async def run_adk_workflow(
         user_query: str,
+        workflow: Workflow
 ) -> str:
-
-    runner = InMemoryRunner()
+    runner = InMemoryRunner(
+        app_name=f"RagPrototypeADK{workflow.name}",
+        node=workflow
+    )
 
     response = await runner.run_debug(
         user_query,
@@ -98,6 +99,30 @@ async def graph_workflow(
             break
 
     return output
+
+@router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
+async def graph_workflow(
+        user_query: str,
+) -> str:
+    return await run_adk_workflow(user_query, full_workflow)
+
+@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
+async def graph_workflow(
+        user_query: str,
+) -> str:
+    return await run_adk_workflow(user_query, root_agent)
+
+@router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
+async def graph_workflow(
+        user_query: str,
+) -> str:
+    return await run_adk_workflow(user_query, triage_agent_adk)
+
+@router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama])
+async def graph_workflow(
+        user_query: str,
+) -> str:
+    return await run_adk_workflow(user_query, search_workflow)
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
