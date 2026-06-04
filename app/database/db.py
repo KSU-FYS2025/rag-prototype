@@ -7,7 +7,13 @@ import re
 import numpy as np
 from pymilvus.milvus_client import milvus_client
 
-embedding_fn = model.DefaultEmbeddingFunction()
+_embedding_fn = None
+
+def get_embedding_fn(*args, **kwargs):
+    global _embedding_fn
+    if _embedding_fn is None:
+        _embedding_fn = model.DefaultEmbeddingFunction()
+    return _embedding_fn(*args, **kwargs)
 
 # --- In-Memory JSON Fallbacks ---
 _in_memory_cache = None
