@@ -7,9 +7,9 @@ from pymilvus import MilvusClient
 import requests
 import ollama
 
-from app.database.db import get_db_gen
+from app.database.db import get_db_dep
 
-NeedsDb = Annotated[MilvusClient, Depends(get_db_gen)]
+NeedsDb = Annotated[MilvusClient, Depends(get_db_dep)]
 """
 Declares database dependency as an easy to use type.
 Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session-dependency

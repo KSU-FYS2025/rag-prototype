@@ -122,6 +122,10 @@ def get_db_gen():
     finally:
         client.close()
 
+def get_db_dep():
+    with get_db_gen() as db:
+        yield db
+
 
 def create_schema(schema: list[Dict]) -> CollectionSchema:
     """
