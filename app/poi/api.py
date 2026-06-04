@@ -9,7 +9,7 @@ from starlette.responses import StreamingResponse
 
 from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params, dump_and_trim_none
 from app.poi.types import OneOrMore
-from app.dependencies import NeedsDb, get_db_gen, NeedsOllama
+from app.dependencies import NeedsDb, NeedsOllama
 from app.database.db import create_collection, embedding_fn, search_poi
 
 
@@ -21,13 +21,12 @@ def get_poi(
         # fields: Optional[str],
         db: NeedsDb
 ) -> OneOrMore[dict]:
-    with db as db:
-        res = db.get(
-            collection_name="poi",
-            ids=poi_id,
-            # output_fields=fields
-            # TODO: Change this field when you have more information about schema
-        )
+    res = db.get(
+        collection_name="poi",
+        ids=poi_id,
+        # output_fields=fields
+        # TODO: Change this field when you have more information about schema
+    )
 
     if type(poi_id) is str:
         return res[0]
@@ -43,13 +42,12 @@ def get_all_poi(
     :param db:
     :return:
     """
-    with db as db:
-        res = db.query(
-            collection_name="poi",
-            filter="id >= 0",
-            # output_fields=fields
-            # TODO: Change this field when you have more information about schema
-        )
+    res = db.query(
+        collection_name="poi",
+        filter="id >= 0",
+        # output_fields=fields
+        # TODO: Change this field when you have more information about schema
+    )
     return str(res)
 
 @router.post("/poi/", tags=["poi"])
@@ -83,11 +81,10 @@ def insert_poi(
             delattr(poi, "id")
             data.append(_poi.model_dump(mode="json"))
 
-    with db as db:
-        res = db.insert(
-            collection_name="poi",
-            data=data
-        )
+    res = db.insert(
+        collection_name="poi",
+        data=data
+    )
 
     return str(res)
 
@@ -98,31 +95,30 @@ def update_poi(
         poi: Annotated[POIOptional, Body()],
         db: NeedsDb
 ):
-    with db as db:
-        prev_poi = db.get(
-            collection_name="poi",
-            ids=poi_id
-        )
-        print(f"{prev_poi=}\n")
+    prev_poi = db.get(
+        collection_name="poi",
+        ids=poi_id
+    )
+    print(f"{prev_poi=}\n")
 
-        poi_dump = dump_and_trim_none(poi)
-        print(f"{poi_dump=}\n")
-        prev_poi = prev_poi[0].copy()
-        print(f"{prev_poi=}\n")
+    poi_dump = dump_and_trim_none(poi)
+    print(f"{poi_dump=}\n")
+    prev_poi = prev_poi[0].copy()
+    print(f"{prev_poi=}\n")
 
-        prev_poi.update(poi_dump)
-        print(f"{prev_poi=}\n")
-        new_poi = POI(**prev_poi)
+    prev_poi.update(poi_dump)
+    print(f"{prev_poi=}\n")
+    new_poi = POI(**prev_poi)
 
 
-        if not hasattr(new_poi, "vector") or new_poi.vector is None or new_poi.vector == []:
-            new_poi.generate_embedding(embedding_fn)
-        print("embedding generated!!!\n\n\n")
+    if not hasattr(new_poi, "vector") or new_poi.vector is None or new_poi.vector == []:
+        new_poi.generate_embedding()
+    print("embedding generated!!!\n\n\n")
 
-        res = db.upsert(
-            collection_name="poi",
-            data=new_poi.model_dump()
-        )
+    res = db.upsert(
+        collection_name="poi",
+        data=new_poi.model_dump()
+    )
 
     return res
 
@@ -132,22 +128,21 @@ def delete_poi(
         poi_filter: Annotated[Optional[str], Body()],
         db: NeedsDb
 ):
-    with db as db:
-        if poi_id and not poi_filter:
-            res = db.delete(
-                collection_name="poi",
-                ids=[poi_id]
-            )
+    if poi_id and not poi_filter:
+        res = db.delete(
+            collection_name="poi",
+            ids=[poi_id]
+        )
 
-            return res
+        return res
 
-        elif (not poi_id) and poi_filter:
-            res = db.delete(
-                collection_name="poi",
-                filter=poi_filter
-            )
+    elif (not poi_id) and poi_filter:
+        res = db.delete(
+            collection_name="poi",
+            filter=poi_filter
+        )
 
-            return res
+        return res
 
-        else:
-            return {"error": "No value for id or filter found!"}
+    else:
+        return {"error": "No value for id or filter found!"}
