@@ -110,7 +110,7 @@ def create_db_connection() -> MilvusClient:
     return client
 
 
-# @contextmanager
+@contextmanager
 def get_db_gen():
     """
     Base function from
