@@ -21,6 +21,7 @@ dependencies = [
     "pytest-asyncio>=1.4.0",
     "google-adk>=2.0.0",
     "pydantic>=2.12.4",
+    "requests>=2.32.5",
 ]
 
 # Suggested by fastmcp docs

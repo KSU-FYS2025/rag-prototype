@@ -1996,6 +1996,7 @@ dependencies = [
     { name = "pymilvus-model" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "requests" },
     { name = "websockets" },
 ]
 
@@ -2016,6 +2017,7 @@ requires-dist = [
     { name = "pymilvus-model" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
+    { name = "requests", specifier = ">=2.32.5" },
     { name = "websockets", specifier = ">=15.0.1" },
 ]
 
