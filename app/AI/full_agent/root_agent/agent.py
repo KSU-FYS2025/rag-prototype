@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 
-from schema import RootOutput
+from app.AI.full_agent.root_agent.schema import RootOutput
 
 root_agent = Agent(
     model='gemini-2.5-flash',
