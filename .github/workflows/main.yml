@@ -5,7 +5,7 @@ on:
 # Template using https://docs.astral.sh/uv/guides/integration/github/#installation
 jobs:
   test_backend:
-    name: Setup Python
+    name: Test Backend
     runs-on: ubuntu-latest
     environment: actions-environment
 
@@ -15,10 +15,17 @@ jobs:
       - name: Install Ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
 
-      - name: Run Ollama
+      - name: Start Ollama
+        run: ollama serve
+
+      - name: Wait for Ollama to be Ready
         run: |
-          ollama serve &
-          ollama pull ${{ vars.AI_MODEL }}
+          until curl -s http://127.0.0.1:11434 > /deb/null; do
+            sleep 1
+          done
+
+      - name: Pull configured model
+        run: ollama pull ${{ vars.AI_MODEL }}
 
       - name: Setup Python
         uses: actions/setup-python@v6
