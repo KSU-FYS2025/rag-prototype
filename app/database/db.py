@@ -9,7 +9,7 @@ from pymilvus.milvus_client import milvus_client
 
 _embedding_fn = None
 
-def get_embedding_fn(*args, **kwargs):
+def embedding_fn(*args, **kwargs):
     global _embedding_fn
     if _embedding_fn is None:
         _embedding_fn = model.DefaultEmbeddingFunction()
