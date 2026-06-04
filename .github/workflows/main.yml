@@ -20,7 +20,7 @@ jobs:
 
       - name: Wait for Ollama to be Ready
         run: |
-          until curl -s http://127.0.0.1:11434 > /deb/null; do
+          until curl -s http://127.0.0.1:11434 > /dev/null; do
             sleep 1
           done
 
