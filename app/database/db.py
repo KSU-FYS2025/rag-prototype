@@ -198,35 +198,25 @@ def get_db_info() -> tuple[str, Optional[str]]:
 #     return client
 
 def create_db_connection() -> MilvusClient:
-    """Initializes and returns a robust database connection client with retries."""
+    """Initializes and returns a database connection client using the local file path."""
     _db_url, _db_token = get_db_info()
-    max_retries = 5
-    backoff_factor = 2.0
+    try:
+        # Use try/except to catch immediate initialization failure related to file paths or permissions.
+        if _db_token:
+            client = MilvusClient(_db_url, token=_db_token)
+        else:
+            client = MilvusClient(_db_url)
 
-    for attempt in range(max_retries):
-        try:
-            if _db_token:
-                client = MilvusClient(_db_url, token=_db_token)
-            else:
-                client = MilvusClient(_db_url)
+        # Minimal check: Attempt a basic command that requires connectivity (like listing collections).
+        # We still attempt this, as it's the best way to confirm local readiness.
+        list_collections_result = client.list_collections()
+        print("Connection test successful: Successfully connected and listed collections.")
+        return client
 
-            # Attempt a basic connectivity check by listing collections.
-            list_collections_result = client.list_collections()
-            print("Connection test successful: Could list collections.")
-            return client
-
-        except Exception as e:
-            is_connection_error = "Connection" in str(e) or "Cannot connect to milvus" in str(e)
-            if attempt < max_retries - 1 and is_connection_error:
-                wait_time = backoff_factor ** attempt
-                print(
-                    f"Warning: Connection failed (Attempt {attempt + 1}/{max_retries}). Retrying in {wait_time:.1f}s... Error: {e}")
-                time.sleep(wait_time)
-            else:
-                # Re-raise as a fatal error if retries exhausted or not a connection issue
-                raise Exception(f"Fatal error connecting to Milvus database after {max_retries} attempts. "
-                                f"Ensure the Milvus service is running and accessible at {_db_url}. Original Error: {e}")
-    raise Exception("Connection test failed")
+    except Exception as e:
+        # Catching any exception ensures we report configuration or file system errors correctly.
+        raise Exception(f"Failed to initialize MilvusClient connection with {_db_url}. "
+                        f"Check if the local database directory exists, permissions are correct, and pymilvus is configured for local files. Error: {e}")
 
 
 @contextmanager
