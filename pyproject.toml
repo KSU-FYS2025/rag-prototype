@@ -16,6 +16,8 @@ dependencies = [
     "pytest>=9.0.3",
     "pydantic",
     "torch",
+    "transformers",
+    "sentence-transformers",
     "httpx>=0.28.1",
     "pytest-asyncio>=1.4.0",
     "google-adk>=2.0.0",
