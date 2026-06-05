@@ -12,6 +12,47 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      # Cache HuggingFace models BEFORE installing project dependencies
+      # This ensures models are cached early and reused across workflow runs
+      - name: Cache HuggingFace models
+        id: hf-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/huggingface
+          key: huggingface-${{ runner.os }}-paraphrase-albert-small-v2-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            huggingface-${{ runner.os }}-paraphrase-albert-small-v2-
+
+      - name: Install Project
+        run: uv sync --locked --all-extras --dev
+        env:
+          UV_PYTHON: ${{ env.pythonLocation }}
+
+      # Pre-download embedding model to populate cache before tests run
+      # This prevents repeated downloads on every test run in CI/CD
+      - name: Pre-initialize embedding model
+        run: |
+          python -c "
+          import os
+          os.environ['HF_HOME'] = os.path.expanduser('~/.cache/huggingface')
+          os.environ['POI_JSON_PATH'] = '${{ vars.POI_JSON_PATH }}'
+          from app.database.db import embedding_fn
+          print('Pre-initializing embedding model...')
+          embedding_fn.initialize(max_retries=3)
+          if embedding_fn._embedding_fn:
+            print('✓ Embedding model successfully cached')
+          else:
+            print('⚠ Embedding model initialization failed, tests will attempt retry')
+          "
+
       - name: Install Ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
 
@@ -33,28 +74,9 @@ jobs:
       - name: Pull configured model
         run: ollama pull ${{ vars.AI_MODEL }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version-file: "pyproject.toml"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
-
-      - name: Install Project
-        run: uv sync --locked --all-extras --dev
-        env:
-          UV_PYTHON: ${{ env.pythonLocation }}
-
-      - name: Cache HuggingFace models
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/huggingface
-          key: huggingface-${{ runner.os }}-paraphrase-albert-small-v2
-
       - name: Run tests
         env:
           AI_MODEL: ${{ vars.AI_MODEL }}
           DB_URL: ${{ vars.DB_URL }}
           POI_JSON_PATH: ${{ vars.POI_JSON_PATH }}
-        run: uv run pytest ./app/tests/tests.py
+        run: uv run pytest ./app/tests/tests.py -v
