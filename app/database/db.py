@@ -96,6 +96,9 @@ class EmbeddingFn:
         return self._embedding_fn.encode_documents(documents)
 
 embedding_fn = EmbeddingFn()
+# Initialize the embedding function globally upon module load to ensure all functions (like search_poi) can use it.
+if embedding_fn._embedding_fn is None:
+    embedding_fn.initialize()
 
 # --- In-Memory JSON Fallbacks ---
 _in_memory_cache = None
