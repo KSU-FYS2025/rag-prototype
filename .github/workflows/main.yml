@@ -40,7 +40,7 @@ jobs:
       # This prevents repeated downloads on every test run in CI/CD
       - name: Pre-initialize embedding model
         run: |
-          python -c "
+          uv run python -c "
           import os
           os.environ['HF_HOME'] = os.path.expanduser('~/.cache/huggingface')
           os.environ['POI_JSON_PATH'] = '${{ vars.POI_JSON_PATH }}'
