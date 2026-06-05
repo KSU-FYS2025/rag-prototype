@@ -42,6 +42,7 @@ def get_all_poi(
     :param db:
     :return:
     """
+    db.load_collection("poi")
     res = db.query(
         collection_name="poi",
         filter="id >= 0",
