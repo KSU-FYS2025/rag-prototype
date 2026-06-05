@@ -179,23 +179,54 @@ def get_db_info() -> tuple[str, Optional[str]]:
     return db_url, os.environ.get("DB_TOKEN")
 
 
-def create_db_connection() -> MilvusClient:
-    _db_url, _db_token = get_db_info()
-    try:
-        if _db_token:
-            client = MilvusClient(
-                _db_url,
-                token=_db_token
-            )
-        else:
-            client = MilvusClient(
-                _db_url
-            )
+# def create_db_connection() -> MilvusClient:
+#     _db_url, _db_token = get_db_info()
+#     try:
+#         if _db_token:
+#             client = MilvusClient(
+#                 _db_url,
+#                 token=_db_token
+#             )
+#         else:
+#             client = MilvusClient(
+#                 _db_url
+#             )
+#
+#     except Exception as e:
+#         raise Exception(f"{e}\nError while creating database connection! Please ensure that the database server is running\n"
+#                         f"and didn't randomly suspend the server for no reason :)")
+#     return client
 
-    except Exception as e:
-        raise Exception(f"{e}\nError while creating database connection! Please ensure that the database server is running\n"
-                        f"and didn't randomly suspend the server for no reason :)")
-    return client
+def create_db_connection() -> MilvusClient:
+    """Initializes and returns a robust database connection client with retries."""
+    _db_url, _db_token = get_db_info()
+    max_retries = 5
+    backoff_factor = 2.0
+
+    for attempt in range(max_retries):
+        try:
+            if _db_token:
+                client = MilvusClient(_db_url, token=_db_token)
+            else:
+                client = MilvusClient(_db_url)
+
+            # Attempt a basic connectivity check by listing collections.
+            list_collections_result = client.list_collections()
+            print("Connection test successful: Could list collections.")
+            return client
+
+        except Exception as e:
+            is_connection_error = "Connection" in str(e) or "Cannot connect to milvus" in str(e)
+            if attempt < max_retries - 1 and is_connection_error:
+                wait_time = backoff_factor ** attempt
+                print(
+                    f"Warning: Connection failed (Attempt {attempt + 1}/{max_retries}). Retrying in {wait_time:.1f}s... Error: {e}")
+                time.sleep(wait_time)
+            else:
+                # Re-raise as a fatal error if retries exhausted or not a connection issue
+                raise Exception(f"Fatal error connecting to Milvus database after {max_retries} attempts. "
+                                f"Ensure the Milvus service is running and accessible at {_db_url}. Original Error: {e}")
+    raise Exception("Connection test failed")
 
 
 @contextmanager
