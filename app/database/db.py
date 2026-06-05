@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import os
 from pymilvus import MilvusClient, CollectionSchema, model
 import json
@@ -9,11 +9,21 @@ from pymilvus.milvus_client import milvus_client
 
 _embedding_fn = None
 
-def embedding_fn(*args, **kwargs):
-    global _embedding_fn
-    if _embedding_fn is None:
-        _embedding_fn = model.DefaultEmbeddingFunction()
-    return _embedding_fn(*args, **kwargs)
+class EmbeddingFn:
+    def __init__(self):
+        self._embedding_fn = None
+
+    def encode_queries(self, queries: List[str]):
+        if self._embedding_fn is None:
+            self._embedding_fn = model.DefaultEmbeddingFunction()
+        return self._embedding_fn.encode_queries(queries)
+
+    def encode_documents(self, documents: List[str]):
+        if self._embedding_fn is None:
+            self._embedding_fn = model.DefaultEmbeddingFunction()
+        return self._embedding_fn.encode_documents(documents)
+
+embedding_fn = EmbeddingFn()
 
 # --- In-Memory JSON Fallbacks ---
 _in_memory_cache = None
