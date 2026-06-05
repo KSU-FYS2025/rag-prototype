@@ -76,7 +76,7 @@ jobs:
 
       - name: Run tests
         env:
-          AI_MODEL: ${{ vars.AI_MODEL }}
-          DB_URL: ${{ vars.DB_URL }}
-          POI_JSON_PATH: ${{ vars.POI_JSON_PATH }}
+          AI_MODEL: ${{ vars.AI_MODEL || 'deepseek-r1:8b' }}
+          DB_URL: ${{ vars.DB_URL || 'database.db' }}
+          POI_JSON_PATH: ${{ vars.POI_JSON_PATH || 'NavigationFireDynamicMesh_POIs.json' }}
         run: uv run pytest ./app/tests/tests.py -v
