@@ -4,23 +4,95 @@ import os
 from pymilvus import MilvusClient, CollectionSchema, model
 import json
 import re
-import numpy as np
-from pymilvus.milvus_client import milvus_client
+import logging
+import time
 
-_embedding_fn = None
+logger = logging.getLogger(__name__)
+
+# Configure HuggingFace and transformers model caching
+def _configure_model_caching():
+    """Configure environment variables for model caching before any model loading."""
+    # Set HuggingFace hub cache directory
+    if not os.environ.get("HF_HOME"):
+        cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface")
+        os.environ["HF_HOME"] = cache_dir
+        logger.info(f"Set HF_HOME to {cache_dir}")
+
+    # Set transformers cache directory
+    if not os.environ.get("TRANSFORMERS_CACHE"):
+        cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "transformers")
+        os.environ["TRANSFORMERS_CACHE"] = cache_dir
+        logger.info(f"Set TRANSFORMERS_CACHE to {cache_dir}")
+
+    # Prevent offline mode issues
+    os.environ.setdefault("HF_DATASETS_OFFLINE", "0")
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "0")
+
+_configure_model_caching()
 
 class EmbeddingFn:
     def __init__(self):
         self._embedding_fn = None
+        self._initialization_lock = False
+
+    def initialize(self, max_retries: int = 3, backoff_factor: float = 2.0):
+        """Initialize embedding function once at startup with retry logic."""
+        if self._embedding_fn is not None:
+            logger.info("Embedding function already initialized.")
+            return self._embedding_fn
+
+        if self._initialization_lock:
+            logger.warning("Embedding function initialization already in progress.")
+            return None
+
+        self._initialization_lock = True
+
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Initializing embedding function (attempt {attempt + 1}/{max_retries})...")
+                self._embedding_fn = model.DefaultEmbeddingFunction()
+                logger.info("Embedding function initialized successfully and cached for reuse.")
+                return self._embedding_fn
+            except Exception as e:
+                if "429" in str(e) or "Too Many Requests" in str(e):
+                    # Rate limit error - calculate backoff
+                    wait_time = backoff_factor ** attempt
+                    logger.warning(
+                        f"HuggingFace rate limit hit (HTTP 429). "
+                        f"Retrying in {wait_time:.1f}s... (Attempt {attempt + 1}/{max_retries})"
+                    )
+                    if attempt < max_retries - 1:
+                        time.sleep(wait_time)
+                    else:
+                        logger.error(
+                            f"Failed to initialize embedding function after {max_retries} attempts due to rate limiting. "
+                            "Tests will continue but vector search may not work."
+                        )
+                else:
+                    logger.error(f"Error initializing embedding function (attempt {attempt + 1}/{max_retries}): {e}")
+                    if attempt < max_retries - 1:
+                        wait_time = backoff_factor ** attempt
+                        logger.info(f"Retrying in {wait_time:.1f}s...")
+                        time.sleep(wait_time)
+
+        logger.error("Failed to initialize embedding function after all retry attempts.")
+        self._initialization_lock = False
+        return None
 
     def encode_queries(self, queries: List[str]):
         if self._embedding_fn is None:
-            self._embedding_fn = model.DefaultEmbeddingFunction()
+            raise RuntimeError(
+                "Embedding function not initialized. "
+                "Call initialize() at startup or check server logs for initialization errors."
+            )
         return self._embedding_fn.encode_queries(queries)
 
     def encode_documents(self, documents: List[str]):
         if self._embedding_fn is None:
-            self._embedding_fn = model.DefaultEmbeddingFunction()
+            raise RuntimeError(
+                "Embedding function not initialized. "
+                "Call initialize() at startup or check server logs for initialization errors."
+            )
         return self._embedding_fn.encode_documents(documents)
 
 embedding_fn = EmbeddingFn()

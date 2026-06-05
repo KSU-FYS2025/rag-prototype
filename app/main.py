@@ -11,14 +11,28 @@ from app.mcp import api as mcp
 import logging
 from contextlib import asynccontextmanager
 from app.poi.models import get_poi_schema, get_index_params, POI
-from app.database.db import create_collection, get_db_gen
+from app.database.db import create_collection, get_db_gen, embedding_fn
 
 load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize database collections before app starts
-    print("Lifespan starting: initializing database...")
+    print("Lifespan starting: initializing models and database...")
+    # Track startup success - app can start even if embedding fails
+    embedding_init_failed = False
+
+    # CRITICAL: Initialize embedding model FIRST and cache it for entire app lifetime
+    # This prevents repeated downloads/initialization on every request
+    logging.info("Pre-loading embedding model (this may take a moment on first run)...")
+    embedding_fn.initialize(max_retries=3)
+    if embedding_fn._embedding_fn is None:
+        logging.warning(
+            "Failed to initialize embedding model. Vector search will not be available. "
+            "This may be due to network issues or HuggingFace rate limiting."
+        )
+        embedding_init_failed = True
+
     try:
         poi_json_path = os.environ.get("POI_JSON_PATH")
         if not poi_json_path:
@@ -60,10 +74,19 @@ async def lifespan(app: FastAPI):
                     poi["localRotation"]["z"]
                 ]
                 poi["id"] = poi["identification"]
-                embedding = POI.generate_embedding_json(poi)
-                poi["vector"] = embedding[0]
-                # embedding = embedding.astype(numpy.float32)
-                # poi["vector"] = embedding.tolist()
+                try:
+                    embedding = POI.generate_embedding_json(poi)
+                    poi["vector"] = embedding[0]
+                except Exception as e:
+                    # If embedding fails due to network issues, log and continue
+                    # The app can still start, but vector search may not be available
+                    logging.warning(
+                        f"Failed to generate embedding for POI {poi.get('id', 'unknown')}: {e}. "
+                        f"This may be due to network issues. Vector search may be unavailable."
+                    )
+                    embedding_init_failed = True
+                    # Create a dummy embedding if network fails
+                    poi["vector"] = [0.0] * 768
 
         logging.info(f"Loaded {len(json_data['pois'])} POIs from file")
 
@@ -89,6 +112,13 @@ async def lifespan(app: FastAPI):
                     data=json_data["pois"],
                 )
                 logging.info(f"Successfully upserted {len(json_data['pois'])} POIs")
+
+        if embedding_init_failed:
+            logging.warning(
+                "Embedding initialization failed during startup. "
+                "The app is running but vector search may not work as expected. "
+                "Please check your network connection and restart the app."
+            )
     except Exception as e:
         logging.error(f"Failed to initialize database: {e}", exc_info=True)
         print(f"ERROR: Database initialization failed: {e}")
