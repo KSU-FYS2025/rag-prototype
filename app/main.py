@@ -18,10 +18,23 @@ load_dotenv()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize database collections before app starts
-    logging.info("Lifespan starting: initializing database...")
+    print("Lifespan starting: initializing database...")
     try:
+        poi_json_path = os.environ.get("POI_JSON_PATH")
+        if not poi_json_path:
+            raise RuntimeError(
+                "POI_JSON_PATH environment variable not set. "
+                "Please set it to point to your POI JSON file."
+            )
+
+        if not os.path.exists(poi_json_path):
+            raise FileNotFoundError(
+                f"POI JSON file not found at: {poi_json_path}"
+            )
+
+        logging.info(f"Loading POI data from: {poi_json_path}")
         json_data = None
-        with open(os.environ.get("POI_JSON_PATH"), "r") as db_file:
+        with open(poi_json_path, "r") as db_file:
             json_data = json.load(db_file)
             id_counter = 0
             for poi in json_data["pois"]:
@@ -51,6 +64,9 @@ async def lifespan(app: FastAPI):
                 poi["vector"] = embedding[0]
                 # embedding = embedding.astype(numpy.float32)
                 # poi["vector"] = embedding.tolist()
+
+        logging.info(f"Loaded {len(json_data['pois'])} POIs from file")
+
         with get_db_gen() as db:
             if not db.has_collection("poi"):
                 logging.info("Collection 'poi' not found. Creating...")
@@ -59,11 +75,12 @@ async def lifespan(app: FastAPI):
                     "index_params": get_index_params(),
                 }, db, get_poi_schema())
                 logging.info("Collection 'poi' created successfully.")
-                logging.info("Creating POIs form file...")
+                logging.info("Inserting POIs from file...")
                 db.insert(
                     collection_name="poi",
                     data=json_data["pois"],
                 )
+                logging.info(f"Successfully inserted {len(json_data['pois'])} POIs")
             else:
                 logging.info("Collection 'poi' already exists.")
                 logging.info("Updating POIs from file...")
@@ -71,8 +88,11 @@ async def lifespan(app: FastAPI):
                     collection_name="poi",
                     data=json_data["pois"],
                 )
+                logging.info(f"Successfully upserted {len(json_data['pois'])} POIs")
     except Exception as e:
-        logging.error(f"Failed to initialize database: {e}")
+        logging.error(f"Failed to initialize database: {e}", exc_info=True)
+        print(f"ERROR: Database initialization failed: {e}")
+        raise
     yield
 
 app = FastAPI(lifespan=lifespan)

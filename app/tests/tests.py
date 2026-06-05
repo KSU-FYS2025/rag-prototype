@@ -4,15 +4,9 @@ import pytest
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
 
-from ..main import app
 from ..dependencies import needs_ollama
 from ..mcp.api import mcp
 from fastapi.testclient import TestClient
-
-@pytest.fixture(scope="session")
-def client():
-    with TestClient(app) as fastapi_client:  # lifespan fires here
-        yield fastapi_client
 
 @pytest.fixture
 async def main_mcp_client():
