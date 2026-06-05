@@ -9,6 +9,7 @@ dependencies = [
     "ollama",
     "pymilvus>=2.6.2",
     "pymilvus[milvus_lite]",
+    "pymilvus[model]",
     "Flax",
     "websockets>=15.0.1",
     "google-generativeai>=0.8.6",
