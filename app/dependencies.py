@@ -35,7 +35,7 @@ async def timing_dependency(request: Request, response: Response):
     response.headers["X-Route-Name"] = route_name
     response.headers["X-Duration"] = f"{duration:.4f}s"
 
-TimingDep = Annotated[None, Depends(timing_dependency)]
+TimingDep = Depends(timing_dependency)
 
 def needs_ollama():
     ollama_host = os.environ.get("OLLAMA_HOST", "127.0.0.1:11434")

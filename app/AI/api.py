@@ -110,7 +110,7 @@ async def graph_workflow_full(
 ):
     return await run_adk_workflow(user_query, full_workflow)
 
-@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama, Depends(timing_dependency)])
+@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama, TimingDep])
 async def graph_workflow_root(
         user_query: str,
         response: Response,
