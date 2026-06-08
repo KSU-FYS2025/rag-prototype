@@ -8,6 +8,7 @@ from fastapi.params import Depends
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.sessions import Session
+from pydantic import BaseModel
 from starlette.responses import StreamingResponse, JSONResponse
 from google.adk import Workflow, Runner
 
@@ -79,7 +80,7 @@ router = APIRouter()
 async def run_adk_workflow(
         user_query: str,
         workflow: Workflow
-) -> str:
+) -> dict:
     runner = InMemoryRunner(
         app_name=f"RagPrototypeADK{workflow.name}",
         node=workflow
@@ -89,7 +90,7 @@ async def run_adk_workflow(
         user_query,
     )
 
-    output = ""
+    output = {}
 
     for event in response:
         if event.is_final_response():
@@ -97,7 +98,7 @@ async def run_adk_workflow(
 
             final_output = event.output
 
-            output = final_text or str(final_output)
+            output = final_output or {"response": final_text}
             break
 
     return output
