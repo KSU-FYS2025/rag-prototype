@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Optional
 
 import ollama
 from fastapi import APIRouter, WebSocket
@@ -12,7 +13,7 @@ from google.adk import Workflow, Runner
 from app.AI.full_agent import search_agent
 from app.AI.full_agent.root_agent.agent import root_agent
 from app.database.db import search_poi
-from app.dependencies import NeedsOllama
+from app.dependencies import NeedsOllama, TimingDep
 from app.AI.prompts import *
 from app.AI.full_agent.agent import full_workflow
 from app.AI.full_agent.triage_agent.agent import triage_agent as triage_agent_adk
@@ -31,7 +32,7 @@ def json_serializable(data):
         return data.tolist()
     return data
 
-def generate_chat_response(model_name: str, messages: list, format: str = None) -> str:
+def generate_chat_response(model_name: str, messages: list, format: Optional[str]) -> str:
     if model_name.lower().startswith("gemini"):
         from google import genai
         from google.genai import types
@@ -100,25 +101,25 @@ async def run_adk_workflow(
 
     return output
 
-@router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
+@router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama, TimingDep])
 async def graph_workflow(
         user_query: str,
 ) -> str:
     return await run_adk_workflow(user_query, full_workflow)
 
-@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
+@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama, TimingDep])
 async def graph_workflow(
         user_query: str,
 ) -> str:
     return await run_adk_workflow(user_query, root_agent)
 
-@router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
+@router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama, TimingDep])
 async def graph_workflow(
         user_query: str,
 ) -> str:
     return await run_adk_workflow(user_query, triage_agent_adk)
 
-@router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama])
+@router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama, TimingDep])
 async def graph_workflow(
         user_query: str,
 ) -> str:

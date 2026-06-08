@@ -1,7 +1,8 @@
 import os
 from typing import Annotated
+import time
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request, Response
 from pymilvus import MilvusClient
 
 import requests
@@ -15,6 +16,22 @@ NeedsDb = Annotated[MilvusClient, Depends(get_db_dep)]
 Declares database dependency as an easy to use type.
 Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session-dependency
 """
+
+def timing_dependency(request: Request, response: Response):
+    route = request.scope.get("route")
+    route_name = route.name if route else "unknown"
+
+    start = time.time()
+
+    yield
+
+    end = time.time()
+
+    duration = end - start
+    response.headers["X-Route-Name"] = route_name
+    response.headers["X-Duration"] = f"{duration:.4f}s"
+
+TimingDep = Annotated[None, Depends(timing_dependency)]
 
 def needs_ollama():
     ollama_host = os.environ.get("OLLAMA_HOST", "127.0.0.1:11434")
