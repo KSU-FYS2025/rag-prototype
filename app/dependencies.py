@@ -17,7 +17,7 @@ Declares database dependency as an easy to use type.
 Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session-dependency
 """
 
-def timing_dependency(request: Request, response: Response):
+async def timing_dependency(request: Request, response: Response):
     route = request.scope.get("route")
     route_name = route.name if route else "unknown"
 
