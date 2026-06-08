@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     # This prevents repeated downloads/initialization on every request
     logging.info("Pre-loading embedding model (this may take a moment on first run)...")
     embedding_fn.initialize(max_retries=3)
-    if embedding_fn._embedding_fn is None:
+    if not embedding_fn.is_initialized():
         logging.warning(
             "Failed to initialize embedding model. Vector search will not be available. "
             "This may be due to network issues or HuggingFace rate limiting."

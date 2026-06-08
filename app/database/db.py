@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from typing import Dict, Optional, List
 import os
 from pymilvus import MilvusClient, CollectionSchema, model
+from sentence_transformers import SentenceTransformer, util
 import json
 import re
 import logging
@@ -50,8 +51,10 @@ class EmbeddingFn:
         for attempt in range(max_retries):
             try:
                 logger.info(f"Initializing embedding function (attempt {attempt + 1}/{max_retries})...")
-                self._embedding_fn = model.DefaultEmbeddingFunction()
-                logger.info("Embedding function initialized successfully and cached for reuse.")
+
+                # Loading the embedding model explicitly using a modern wrapper
+                logger.info("Loading Sentencetransformer for embeddings...")
+                self._embedding_fn = SentenceTransformer('all-MiniLM-L6-v2') # A standard, reliable all-purpose model
                 return self._embedding_fn
             except Exception as e:
                 if "429" in str(e) or "Too Many Requests" in str(e):
@@ -79,13 +82,17 @@ class EmbeddingFn:
         self._initialization_lock = False
         return None
 
+    def is_initialized(self):
+        return self._embedding_fn is not None
+
     def encode_queries(self, queries: List[str]):
         if self._embedding_fn is None:
             raise RuntimeError(
                 "Embedding function not initialized. "
                 "Call initialize() at startup or check server logs for initialization errors."
             )
-        return self._embedding_fn.encode_queries(queries)
+        # Use the underlying sentence transformer method
+        return self._embedding_fn.encode(queries, convert_to_tensor=True)
 
     def encode_documents(self, documents: List[str]):
         if self._embedding_fn is None:
@@ -93,7 +100,8 @@ class EmbeddingFn:
                 "Embedding function not initialized. "
                 "Call initialize() at startup or check server logs for initialization errors."
             )
-        return self._embedding_fn.encode_documents(documents)
+        # Use the underlying sentence transformer method
+        return self._embedding_fn.encode(documents, convert_to_tensor=True)
 
 embedding_fn = EmbeddingFn()
 # Initialize the embedding function globally upon module load to ensure all functions (like search_poi) can use it.
