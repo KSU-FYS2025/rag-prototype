@@ -116,6 +116,7 @@ async def graph_workflow_root(
         response: Response,
         _=Depends(timing_dependency)
 ):
+    print(f"Route response id: {id(response)}")
     response.headers["X-Route-Name"] = "testseestsestst"
     return await run_adk_workflow(user_query, root_agent)
 
