@@ -28,6 +28,7 @@ async def timing_dependency(request: Request, response: Response):
     end = time.time()
 
     duration = end - start
+    print(f"Setting headers for {route_name}: {duration:.4f}s")
     response.headers["X-Route-Name"] = route_name
     response.headers["X-Duration"] = f"{duration:.4f}s"
 
