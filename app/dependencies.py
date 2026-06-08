@@ -8,6 +8,7 @@ import requests
 import ollama
 
 from app.database.db import get_db_dep
+import logging
 
 NeedsDb = Annotated[MilvusClient, Depends(get_db_dep)]
 """
@@ -28,7 +29,8 @@ def needs_ollama():
         if model not in [model.model for model in ollama.list()["models"]]:
             raise HTTPException(status_code=404, detail="The specified model in the .env file is not installed"
             "on the ollama server!")
-    except:
+    except Exception as e:
+        logging.error(e)
         raise error
 
 NeedsOllama = Depends(needs_ollama)
