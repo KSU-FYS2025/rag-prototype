@@ -9,7 +9,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.sessions import Session
 from pydantic import BaseModel
-from starlette.responses import StreamingResponse, JSONResponse
+from starlette.responses import StreamingResponse, JSONResponse, Response
 from google.adk import Workflow, Runner
 
 from app.AI.full_agent import search_agent
@@ -113,8 +113,10 @@ async def graph_workflow_full(
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow_root(
         user_query: str,
+        response: Response,
         _=Depends(timing_dependency)
 ):
+    response.headers["X-Route-Name"] = "testseestsestst"
     return await run_adk_workflow(user_query, root_agent)
 
 @router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
