@@ -27,7 +27,7 @@ def needs_ollama():
 
         model = os.environ.get("AI_MODEL")
         if model not in [model.model for model in ollama.list()["models"]]:
-            raise HTTPException(status_code=404, detail="The specified model in the .env file is not installed"
+            raise HTTPException(status_code=404, detail="The specified model in the .env file is not installed "
             "on the ollama server!")
     except Exception as e:
         raise e
