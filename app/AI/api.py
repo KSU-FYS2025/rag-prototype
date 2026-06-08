@@ -106,28 +106,28 @@ async def run_adk_workflow(
 async def graph_workflow(
         user_query: str,
         _=Depends(timing_dependency)
-) -> str:
+):
     return await run_adk_workflow(user_query, full_workflow)
 
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
         _=Depends(timing_dependency)
-) -> str:
+):
     return await run_adk_workflow(user_query, root_agent)
 
 @router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
         _=Depends(timing_dependency)
-) -> str:
+):
     return await run_adk_workflow(user_query, triage_agent_adk)
 
 @router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
         _=Depends(timing_dependency)
-) -> str:
+):
     return await run_adk_workflow(user_query, search_workflow)
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
