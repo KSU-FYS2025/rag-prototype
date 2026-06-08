@@ -30,7 +30,6 @@ def needs_ollama():
             raise HTTPException(status_code=404, detail="The specified model in the .env file is not installed"
             "on the ollama server!")
     except Exception as e:
-        logging.error(e)
-        raise error
+        raise e
 
 NeedsOllama = Depends(needs_ollama)
