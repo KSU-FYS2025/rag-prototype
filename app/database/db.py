@@ -54,7 +54,7 @@ class EmbeddingFn:
 
                 # Loading the embedding model explicitly using a modern wrapper
                 logger.info("Loading Sentencetransformer for embeddings...")
-                self._embedding_fn = SentenceTransformer('all-MiniLM-L6-v2') # A standard, reliable all-purpose model
+                self._embedding_fn = SentenceTransformer('all-mpnet-base-v2') # A standard, reliable all-purpose model
                 return self._embedding_fn
             except Exception as e:
                 if "429" in str(e) or "Too Many Requests" in str(e):
