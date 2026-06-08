@@ -19,7 +19,8 @@ def needs_ollama():
     error = HTTPException(status_code=404, detail="""Ollama is not running!
             ensure ollama is running on the server before querying this route!""")
     try:
-        res = requests.get("http://localhost:11434")
+        ollama_port = os.environ.get("OLLAMA_PORT", "11434")
+        res = requests.get(f"http://localhost:{ollama_port}")
         if res.text != "Ollama is running":
             raise error
 
