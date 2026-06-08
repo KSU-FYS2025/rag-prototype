@@ -103,28 +103,28 @@ async def run_adk_workflow(
     return output
 
 @router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
-async def graph_workflow(
+async def graph_workflow_full(
         user_query: str,
         _=Depends(timing_dependency)
 ):
     return await run_adk_workflow(user_query, full_workflow)
 
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
-async def graph_workflow(
+async def graph_workflow_root(
         user_query: str,
         _=Depends(timing_dependency)
 ):
     return await run_adk_workflow(user_query, root_agent)
 
 @router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
-async def graph_workflow(
+async def graph_workflow_triage(
         user_query: str,
         _=Depends(timing_dependency)
 ):
     return await run_adk_workflow(user_query, triage_agent_adk)
 
 @router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama])
-async def graph_workflow(
+async def graph_workflow_search(
         user_query: str,
         _=Depends(timing_dependency)
 ):
