@@ -4,6 +4,7 @@ from typing import Optional
 
 import ollama
 from fastapi import APIRouter, WebSocket
+from fastapi.params import Depends
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.sessions import Session
@@ -13,7 +14,7 @@ from google.adk import Workflow, Runner
 from app.AI.full_agent import search_agent
 from app.AI.full_agent.root_agent.agent import root_agent
 from app.database.db import search_poi
-from app.dependencies import NeedsOllama, TimingDep
+from app.dependencies import NeedsOllama, TimingDep, timing_dependency
 from app.AI.prompts import *
 from app.AI.full_agent.agent import full_workflow
 from app.AI.full_agent.triage_agent.agent import triage_agent as triage_agent_adk
@@ -101,27 +102,31 @@ async def run_adk_workflow(
 
     return output
 
-@router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama, TimingDep])
+@router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
+        _=Depends(timing_dependency)
 ) -> str:
     return await run_adk_workflow(user_query, full_workflow)
 
-@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama, TimingDep])
+@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
+        _=Depends(timing_dependency)
 ) -> str:
     return await run_adk_workflow(user_query, root_agent)
 
-@router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama, TimingDep])
+@router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
+        _=Depends(timing_dependency)
 ) -> str:
     return await run_adk_workflow(user_query, triage_agent_adk)
 
-@router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama, TimingDep])
+@router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama])
 async def graph_workflow(
         user_query: str,
+        _=Depends(timing_dependency)
 ) -> str:
     return await run_adk_workflow(user_query, search_workflow)
 
