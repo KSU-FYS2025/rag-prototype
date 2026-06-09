@@ -170,9 +170,7 @@ async def graph_workflow_triage(
 async def graph_workflow_search(
         triage_output: TriageAgentOutput
 ):
-    output = await run_adk_workflow(triage_output, search_workflow)
-    logging.info(output)
-    return {"response": "this still has to return something"}
+    return await run_adk_workflow(triage_output, search_workflow)
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
