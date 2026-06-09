@@ -52,7 +52,7 @@ async def parallel_router(
         ]
     )
 
-    return Event(output=await ctx.run_node(workflow, node_input))
+    return Event(output=await ctx.run_node(workflow, node_input.targets))
 
 @node(name="distance_calculator", rerun_on_resume=True)
 async def distance_calculator(
