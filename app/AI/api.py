@@ -8,7 +8,7 @@ from fastapi import APIRouter, WebSocket
 from fastapi.params import Depends
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
-from google.adk.sessions import Session
+from google.adk.sessions import Session, InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse, JSONResponse, Response
@@ -84,10 +84,14 @@ async def run_adk_workflow(
         user_query: str | BaseModel,
         workflow: Workflow
 ) -> dict | str | None:
-    runner = InMemoryRunner(
+    session_service = InMemorySessionService()
+    runner = Runner(
         app_name=f"RagPrototypeADK{workflow.name}",
-        node=workflow
+        node=workflow,
+        session_service=session_service,
     )
+
+    await session_service.create_session(app_name=f"RagPrototypeADK{workflow.name}", user_id="example_user", session_id="example_session")
 
     user_content: types.Content
 
