@@ -107,27 +107,29 @@ async def run_adk_workflow(
     )
 
     output = {}
+    try:
+        async for event in response:
+            if event.is_final_response():
+                # final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
 
-    async for event in response:
-        if event.is_final_response():
-            # final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
-
-            try:
-                output: dict | None = event.output
-                logging.info(f"ADK Workflow Output: {output}")
-            except AssertionError:
-                content = event.content
-                assert content is not None
-                parts = content.parts
-                assert parts is not None
-                assert parts[0] is not None
-                output = parts[0].text
-                assert output is not None
                 try:
-                    output = json.loads(output)
+                    output: dict | None = event.output
+                    logging.info(f"ADK Workflow Output: {output}")
                 except AssertionError:
-                    pass
-            break
+                    content = event.content
+                    assert content is not None
+                    parts = content.parts
+                    assert parts is not None
+                    assert parts[0] is not None
+                    output = parts[0].text
+                    assert output is not None
+                    try:
+                        output = json.loads(output)
+                    except AssertionError:
+                        pass
+                break
+    finally:
+        await response.aclose()
 
     return output or {"response": "Response was null for some reason"}
 
