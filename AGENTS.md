@@ -7,43 +7,59 @@ This is a **Retrieval Augmented Generation (RAG) backend** for a 3D AR navigatio
 
 **Query Pipeline** (from Unity to response):
 ```
-WebSocket /ws/AI → Triage Agent (classify intent) → Search Agent (vector search on POI DB) 
-→ Context Reranking (validate candidates) → RAG Response → Verification Agent (physical distance) 
-→ Return {type, response, targets[], actions[]} to Unity
+WebSocket /ws/AI → Root Agent (classify intent) → Triage Agent (extract targets) 
+→ Search Workflow (parallel: vector search + distance + path planning) 
+→ Response sent to Unity
+Optional: POST for distance verification → verify_route_agent (final weighting)
 ```
 
 **Key Components:**
-- `app/AI/full_agent/`: Multi-agent orchestration using Google ADK workflows
-  - `root_agent`: Entry point (Gemini 2.5-flash)
-  - `triage_agent`: Intent classification (navigation/inquiry/greeting/clarification)
-  - `search_agent`: Vector search + distance calculation between POIs
-  - `synthesis_agent`: Path planning from search results
+- `app/AI/full_agent/`: Multi-agent orchestration using Google ADK Workflows
+  - `root_agent` (`full_agent/root_agent/agent.py`): Entry point classifier (Gemini 2.5-flash) — determines intent (navigation_guidance/navigation_query/conversational)
+  - `triage_agent` (`full_agent/triage_agent/agent.py`): LLM agent extracting `targets[]` with semantics + filters
+  - `search_agent` (`full_agent/search_agent/agent.py`): Workflow with parallel target processing:
+    - `parallel_router`: Routes each target through parallel search pipelines using JoinNode
+    - `search_poi_node`: Vector DB search per target
+    - `validate_pois`: Converts results to POI objects
+    - `distance_calculator`: Inter-POI distances and semantic rankings
+    - `synthesis_agent`: LLM agent for multi-POI path planning
+  - `full_workflow`: Linear orchestration (START → root_agent → triage_agent → search_workflow)
+- `app/AI/api.py`: Flask-style route `triage_agent()` wrapping the workflow for WebSocket
 - `app/database/db.py`: Milvus vector DB client + embedding function
-- `app/websockets/api.py`: WebSocket endpoints for Unity communication
+- `app/websockets/api.py`: WebSocket `/ws/AI` (Triage handler) + `/ws/sync` (POI sync) + optional `verify_route_agent` post-verification
 - `app/poi/models.py`: POI schema (aligned with Unity POIData structure)
 
-## Critical Workflow Pattern: 3+1 Stage Processing
+## Critical Workflow Pattern: Multi-Agent ADK Workflow
 
-**STAGE 1 (Triage):** LLM classifies user query intent and extracts search terms
-- Input: User query + conversation history + user context (position/rotation)
-- Output: Structured JSON with `targets[]` array (multiple if multi-destination)
-  - Each target has: `target_type` (specific/generic), `semantics` (search terms), `filter` (Milvus SQL filter)
+**Full Workflow (Google ADK Workflow)** with 5 processing stages:
+
+**STAGE 0 (Root Classification):** Root agent classifies user intent
+- Input: User query + conversation history
+- Output: Intent classification (navigation_guidance/navigation_query/conversational)
+- Only continues to triage if intent requires search
+
+**STAGE 1 (Triage):** Triage agent extracts and structures search targets
+- Input: User query + optional intent context
+- Output: `TriageAgentOutput` with `targets[]` array (multiple targets if multi-destination query)
+  - Each target: `order` (position), `intent`, `target_type` (specific/generic), `semantics` (search terms), `filter` (Milvus SQL filter)
 - **Key rule:** Specific targets must match EXACTLY (e.g., "Room 2000" != "Room 2010"). Generic targets are flexible.
 
-**STAGE 2 (Search & Reranking):** Vector search → AI validation of candidates
-- Calls `search_poi()` which embeds query and finds k-nearest POIs
-- **Fallback strategy:** If filter returns 0 results, retry without filter
-- STAGE 2.5: AI reranker validates if candidates semantically match semantic target
-  - For specific targets: Returns empty [] if exact match not found (critical for navigation!)
-  - For generic targets: Returns all matching semantic candidates for distance calculation
+**STAGE 2 (Parallel Search & Validation):** Search workflow processes targets in parallel via JoinNode
+- Each target runs through its own pipeline:
+  1. `search_poi_node`: Vector search with filter fallback (retries without filter if 0 results)
+  2. `validate_pois`: Converts raw search results to POI objects
+  3. Distance calculations between POIs
+- Joins all target results using `JoinNode` before moving to synthesis
 
-**STAGE 3 (Inference):** Generate natural language response using RAG context
-- Formats retrieved POI data into knowledge text
-- LLM synthesizes response using system prompt + knowledge + conversation history
+**STAGE 3 (Synthesis):** synthesis_agent generates multi-POI path plan
+- Input: All POI candidates with inter-POI distances
+- Output: `SearchOutput` with `validations[]` (one per target) containing selected POI candidates
+- **Critical for specific targets:** Returns empty `selected_ids[]` if exact match not found (stops navigation)
 
-**STAGE 4 (Verification):** If navigation query, Unity calculates distances → backend selects best POI
-- Weights semantic match vs physical distance
-- Returns final action: `{"cmd": "navigation", "id": poi_id}`
+**Optional STAGE 4 (Route Verification):** Post-flight distance verification via WebSocket
+- Only triggered when Unity sends `{"type": "verification", ...}` payload with calculated distances
+- `verify_route_agent()` in `app/AI/api.py` weights semantic match vs physical distances
+- Returns final selected POI for navigation action
 
 ## Essential Data Structures
 
@@ -68,19 +84,20 @@ vector: list[float]      # 768-dim embedding
 - Uses pymilvus `DefaultEmbeddingFunction` (768-dim model)
 - Generated at: (1) JSON import in FastAPI lifespan, (2) WebSocket sync endpoint
 
-### Response Structure (from /ws/AI or triage_agent)
+### Response Structure (from /ws/AI endpoint or triage_agent function)
 ```python
 {
-    "type": "navigation|inquiry|greeting|clarification|error",
-    "response": "Natural language response",
-    "targets": [{                          # Only populated for nav/inquiry
+    "type": "navigation_guidance|navigation_query|conversational|error",  # From root_agent classification
+    "response": "Natural language response",                             # From synthesis_agent or LLM
+    "targets": [{                                                        # Only populated for nav intents
+        "order": int,                                                    # Position in multi-target queries
         "target_type": "specific|generic",
         "semantics": "search terms",
         "filter": "Milvus SQL filter",
-        "poi_results": [{"id": int, "name": str}]  # Results after Stage 2
+        "poi_results": [{"id": int, "name": str, "distance": float}]   # After Stage 2 search
     }],
-    "actions": [{"cmd": "navigation|inquiry", "id": poi_id}],
-    "context_used": [{"id": int, "name": str}]    # For RAG transparency
+    "actions": [{"cmd": "navigation", "id": poi_id}],                   # When specific match found
+    "context_used": [{"id": int, "name": str}]                          # For RAG transparency
 }
 ```
 
@@ -139,18 +156,34 @@ pytest  # Uses TestClient + async fixtures
 # Key tests: test_fastapi_server, test_ollama, test_milvus (vector search)
 ```
 
+### Google ADK Workflow Execution
+- Workflows are defined using `google.adk` and use Agents (LLM-backed) and Nodes (computation/I/O)
+- Each Agent specifies `output_schema` (Pydantic model) for structured outputs
+- Workflow edges defined as: `("START", agent1, agent2, ..., agent_n)` or `(node1, node2)` for workflows
+- JoinNode used in `search_agent` to parallelize per-target search pipelines
+- Context passed through Events between nodes/agents: `Event(output=...)`
+- **Important:** Agents use Gemini 2.5-flash by default; local Ollama models require custom adapter (not implemented)
+
 ### Debugging Tips
 - Check `/ping` endpoint to verify server is running
-- WebSocket `/ws/AI` logs all stages: [STAGE 1: TRIAGE], [STAGE 2: SEARCH], [STAGE 3: INFERENCE], [STAGE 4: SERIALIZED_RETURN]
-- Print full LLM input/output in logs (already done in triage_agent function)
-- Verify POI JSON is loading: Check lifespan logs on startup
-- Test vector search: GET `/poi/all` or MCP tool `search_poi(query, top_n=5)`
+- WebSocket `/ws/AI` receives queries and calls `triage_agent()` function which orchestrates the full workflow
+  - Logs include agent outputs at each stage (check console for Agent execution details)
+  - Connection stores conversation history (last 5 turns)
+- Optional distance verification: POST to same `/ws/AI` endpoint with `{"type": "verification", "targets": [...], ...}` to trigger `verify_route_agent()`
+- Print full LLM input/output in logs (LLMs: Ollama for local models, Gemini API for cloud)
+- Verify POI JSON is loading: Check startup logs for embedding function initialization
+- Test vector search directly: Call `search_poi()` from MCP tools or access `/poi/all` endpoint
+- Parallel search processing: Check that all targets are being routed through the JoinNode correctly by inspecting WorkflowContext logs
 
 ### Adding New Agents or Routes
-1. **New AI route:** Add to `app/AI/api.py`, decorate with `@router.get()`, use `generate_chat_response()` helper
-2. **New WebSocket endpoint:** Extend `app/websockets/api.py`, follow `Triage` class pattern (on_connect, on_receive, on_disconnect)
-3. **New ADK workflow:** Create agent in `full_agent/<agent_name>/agent.py`, wire into workflow edges
-4. **Database queries:** Always use `get_db_gen()` context manager, never globals (thread-safety)
+1. **New AI HTTP route:** Add function to `app/AI/api.py`, decorate with `@router.get()`, use `generate_chat_response()` helper
+2. **New WebSocket endpoint:** Extend `app/websockets/api.py`, subclass `WebSocketEndpoint` following `Triage` class pattern (on_connect, on_receive, on_disconnect)
+3. **New ADK agent:** 
+   - Create `full_agent/<new_agent_name>/agent.py` with `Agent()` from `google.adk.agents.llm_agent`
+   - Define corresponding schema in `full_agent/<new_agent_name>/schema.py`
+   - Wire into `full_workflow.edges` in `full_agent/agent.py` or create sub-workflow
+4. **New workflow nodes:** Use `@node` decorator from `google.adk.workflow` with `async def`, return `Event(output=...)` 
+5. **Database queries:** Always use `get_db_gen()` context manager, never globals (thread-safety)
 
 ## Common Pitfalls & Solutions
 
@@ -165,10 +198,15 @@ pytest  # Uses TestClient + async fixtures
 
 ## Key Files to Know
 
-- **Entry point:** `app/main.py` (FastAPI lifespan, POI DB initialization)
-- **Primary API logic:** `app/AI/api.py` (triage_agent function is 500+ lines but well-structured)
-- **Prompts:** `app/AI/prompts.py` (system instructions that guide LLM behavior—edit for tuning)
-- **Vector DB client:** `app/database/db.py` (search_poi, embedding_fn, context managers)
-- **POI schema:** `app/poi/models.py` (defines all Milvus fields and validation)
-- **Configuration:** `pyproject.toml` (dependencies), `Dockerfile` (containerization), `docker-compose.yml` (services)
-
+- **Workflow orchestration:** 
+  - `app/AI/full_agent/agent.py` (full_workflow definition with root → triage → search edges)
+  - `app/AI/full_agent/root_agent/agent.py` (entry classifier Agent)
+  - `app/AI/full_agent/triage_agent/agent.py` (target extraction Agent)
+  - `app/AI/full_agent/search_agent/agent.py` (parallel search Workflow + synthesis Agent)
+- **WebSocket entry point:** `app/websockets/api.py` (Triage handler routes to `triage_agent()`)
+- **HTTP wrapper:** `app/AI/api.py` (triage_agent function + verify_route_agent, wraps workflows)
+- **Prompts & LLM behavior:** `app/AI/prompts.py` (system instructions—edit to tune agent behavior)
+- **FastAPI setup:** `app/main.py` (lifespan hooks for POI DB initialization)
+- **Vector DB client:** `app/database/db.py` (search_poi, EmbeddingFn, context managers)
+- **POI data model:** `app/poi/models.py` (Milvus schema + Unity alignment)
+- **Configuration:** `pyproject.toml` (dependencies), `Dockerfile`, `docker-compose.yml`
