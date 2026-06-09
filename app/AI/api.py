@@ -127,7 +127,6 @@ async def run_adk_workflow(
                         output = json.loads(output)
                     except AssertionError:
                         pass
-                break
     finally:
         await response.aclose()
 
