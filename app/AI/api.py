@@ -134,6 +134,30 @@ async def graph_workflow_triage(
 ):
     return await run_adk_workflow(user_query, triage_agent_adk)
 
+"""
+{
+  "targets": [
+    {
+      "order": 1,
+      "intent": "navigation_guidance",
+      "target_type": "explicit",
+      "filter": "name LIKE '%3436%'",
+      "semantics": "room 3436",
+      "source": "LLM"
+    },
+    {
+      "order": 2,
+      "intent": "navigation_guidance",
+      "target_type": "implicit",
+      "filter": "type == 'Vending Machine'",
+      "semantics": "vending machine",
+      "source": "LLM"
+    }
+  ],
+  "extraction_method": "LLM"
+}
+"""
+
 @router.post("/ai/graph-workflow/search", dependencies=[NeedsOllama])
 async def graph_workflow_search(
         triage_output: TriageAgentOutput
