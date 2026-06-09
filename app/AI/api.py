@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from typing import Optional
 
@@ -105,6 +106,7 @@ async def run_adk_workflow(
 
             try:
                 output: dict | None = event.output
+                logging.info(f"ADK Workflow Output: {output}")
             except AssertionError:
                 content = event.content
                 assert content is not None
