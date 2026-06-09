@@ -298,7 +298,7 @@ def search_poi(
 ) -> list[tuple[dict, float]]:
     query_vectors = embedding_fn.encode_queries([query])
     if isinstance(query_vectors, Tensor):
-        query_vectors = query_vectors.float().tolist()
+        query_vectors = query_vectors.tolist()[0]
     with get_db_gen() as db:
         db.load_collection("poi")
         res = db.search(
