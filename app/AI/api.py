@@ -94,7 +94,7 @@ async def run_adk_workflow(
     if isinstance(user_query, str):
         user_content = types.Content(role="user", parts=[types.Part(text=user_query)])
     else:
-        user_content = types.Content(role="user", parts=[types.Part(user_query.model_dump())])
+        user_content = types.Content(role="user", parts=[types.Part(text=user_query.model_dump())])
 
     response = runner.run_async(
         user_id="example_user",
