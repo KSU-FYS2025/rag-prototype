@@ -34,7 +34,7 @@ def json_serializable(data):
         return data.tolist()
     return data
 
-def generate_chat_response(model_name: str, messages: list, format: Optional[str]) -> str:
+def generate_chat_response(model_name: str, messages: list, format_str: Optional[str]) -> str:
     if model_name.lower().startswith("gemini"):
         from google import genai
         from google.genai import types
@@ -54,7 +54,7 @@ def generate_chat_response(model_name: str, messages: list, format: Optional[str
         config_args = {}
         if system_instruction:
             config_args["system_instruction"] = system_instruction
-        if format == "json":
+        if format_str == "json":
             config_args["response_mime_type"] = "application/json"
             
         response = client.models.generate_content(
@@ -70,8 +70,8 @@ def generate_chat_response(model_name: str, messages: list, format: Optional[str
             "model": model_name,
             "messages": messages
         }
-        if format:
-            kwargs["format"] = format
+        if format_str:
+            kwargs["format"] = format_str
         res = ollama.chat(**kwargs)
         return res["message"]["content"]
 
@@ -109,7 +109,7 @@ async def graph_workflow_full(
 ):
     return await run_adk_workflow(user_query, full_workflow)
 
-@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama, TimingDep])
+@router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow_root(
         user_query: str
 ):
@@ -201,7 +201,7 @@ def triage_agent(
                 {"role": "system", "content": triage_agent_prompt()},
                 {"role": "user", "content": full_prompt}
             ],
-            format="json"
+            format_str="json"
         )
         print(f"LLM Raw Output: {content}")
 
@@ -311,7 +311,7 @@ Example 3: { "selected_ids": [] }"""
                                     {"role": "system", "content": sys_prompt},
                                     {"role": "user", "content": "Analyze the candidates and return the selected_ids JSON."}
                                 ],
-                                format="json"
+                                format_str="json"
                             )
                             # Fallback if backticks apply
                             if "```json" in val_content:
@@ -527,7 +527,7 @@ def verify_route_agent(
                 {"role": "system", "content": system_prompt_content},
                 {"role": "user", "content": prompt}
             ],
-            format="json"
+            format_str="json"
         )
         
         print(f"LLM Verification Raw Output: {content}")
