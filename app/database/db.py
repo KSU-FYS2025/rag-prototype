@@ -300,6 +300,7 @@ def search_poi(
     if isinstance(query_vectors, Tensor):
         query_vectors = query_vectors.float().tolist()
     with get_db_gen() as db:
+        db.load_collection("poi")
         res = db.search(
             collection_name="poi",
             data=query_vectors,
