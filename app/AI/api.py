@@ -108,7 +108,10 @@ async def run_adk_workflow(
                 output: dict = output_model.model_dump()
             except:
                 output: str | None = event.content.parts[0].text
-
+                try:
+                    output = json.loads(output)
+                except:
+                    pass
             break
 
     return output
