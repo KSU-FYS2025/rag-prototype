@@ -104,13 +104,18 @@ async def run_adk_workflow(
             # final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
 
             try:
-                output_model: BaseModel = event.output
-                output: dict = output_model.model_dump()
-            except:
-                output: str | None = event.content.parts[0].text
+                output: dict | None = event.output
+            except AssertionError:
+                content = event.content
+                assert content is not None
+                parts = content.parts
+                assert parts is not None
+                assert parts[0] is not None
+                output = parts[0].text
+                assert output is not None
                 try:
                     output = json.loads(output)
-                except:
+                except AssertionError:
                     pass
             break
 
