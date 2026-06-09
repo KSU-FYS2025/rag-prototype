@@ -29,12 +29,13 @@ async def validate_pois(
 
     return Event(output=collect)
 
-baseWorkflow = Workflow(
-    name="BaseWorkflow",
-    edges=[
-        ("START", search_poi_node, validate_pois),
-    ]
-)
+def make_base_workflow(i: int) -> Workflow:
+    return Workflow(
+        name=f"BaseWorkflow_{i}",
+        edges=[
+            ("START", search_poi_node, validate_pois),
+        ]
+    )
 
 @node(name="router", rerun_on_resume=True)
 async def parallel_router(
@@ -46,7 +47,7 @@ async def parallel_router(
     workflow = Workflow(
         name="Router",
         edges=[
-            *[("START", baseWorkflow, join) for _ in node_input.targets],
+            *[("START", make_base_workflow(i), join) for i, _ in enumerate(node_input.targets)],
             (join,)
         ]
     )
