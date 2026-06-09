@@ -8,12 +8,14 @@ from fastapi.params import Depends
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.sessions import Session
+from google.genai import types
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse, JSONResponse, Response
 from google.adk import Workflow, Runner
 
 from app.AI.full_agent import search_agent
 from app.AI.full_agent.root_agent.agent import root_agent
+from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 from app.database.db import search_poi
 from app.dependencies import NeedsOllama
 from app.AI.prompts import *
@@ -78,17 +80,22 @@ def generate_chat_response(model_name: str, messages: list, format_str: Optional
 router = APIRouter()
 
 async def run_adk_workflow(
-        user_query: str,
+        user_query: str | BaseModel,
         workflow: Workflow
 ) -> dict:
     runner = InMemoryRunner(
         app_name=f"RagPrototypeADK{workflow.name}",
         node=workflow
     )
-
-    response = await runner.run_debug(
-        user_query,
-    )
+    if isinstance(user_query, str):
+        response = await runner.run_debug(
+            user_query,
+        )
+    else:
+        structured_dict = user_query.model_dump(mode="json")
+        response = await runner.run_debug(
+            json.dumps(structured_dict),
+        )
 
     output = {}
 
@@ -121,11 +128,11 @@ async def graph_workflow_triage(
 ):
     return await run_adk_workflow(user_query, triage_agent_adk)
 
-@router.get("/ai/graph-workflow/search", dependencies=[NeedsOllama])
+@router.post("/ai/graph-workflow/search", dependencies=[NeedsOllama])
 async def graph_workflow_search(
-        user_query: str
+        triage_output: TriageAgentOutput
 ):
-    return await run_adk_workflow(user_query, search_workflow)
+    return await run_adk_workflow(triage_output, search_workflow)
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
