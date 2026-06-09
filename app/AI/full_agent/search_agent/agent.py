@@ -1,3 +1,4 @@
+import asyncio
 from math import sqrt
 
 from google.adk import Workflow, Context, Event, Agent
@@ -42,17 +43,24 @@ async def parallel_router(
         ctx: Context,
         node_input: TriageAgentOutput
 ):
-    join = JoinNode(name="JoinRouter")
+    # join = JoinNode(name="JoinRouter")
+    #
+    # workflow = Workflow(
+    #     name="Router",
+    #     edges=[
+    #         *[("START", make_base_workflow(i), join) for i, _ in enumerate(node_input.targets)],
+    #         (join,)
+    #     ]
+    # )
 
-    workflow = Workflow(
-        name="Router",
-        edges=[
-            *[("START", make_base_workflow(i), join) for i, _ in enumerate(node_input.targets)],
-            (join,)
-        ]
-    )
+    tasks = []
 
-    return Event(output=await ctx.run_node(workflow, node_input.targets))
+    for item in node_input.targets:
+        tasks.append(ctx.run_node(make_base_workflow(item.order), item))
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    return Event(output=results)
 
 @node(name="distance_calculator", rerun_on_resume=True)
 async def distance_calculator(
