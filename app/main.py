@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import json
 import os
 from dotenv import load_dotenv
+import time
 
 from app.poi import api as poiapi
 from app.AI import api as aiapi
@@ -126,6 +127,14 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+@app.middleware("http")
+async def add_process_time(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
 app.include_router(poiapi.router)
 app.include_router(aiapi.router)

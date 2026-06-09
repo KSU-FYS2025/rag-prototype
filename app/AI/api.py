@@ -115,11 +115,7 @@ async def graph_workflow_root(
         user_query: str,
         response: Response,
 ):
-    print(f"Route response id: {id(response)}")
-    result = await run_adk_workflow(user_query, root_agent)
-    response.headers["X-Route-Name"] = "testseestsestst"
-    print(f"Headers before return: {dict(response.headers)}")
-    return result
+    return await run_adk_workflow(user_query, root_agent)
 
 @router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
 async def graph_workflow_triage(
