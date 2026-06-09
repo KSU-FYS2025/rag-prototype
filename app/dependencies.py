@@ -17,26 +17,6 @@ Declares database dependency as an easy to use type.
 Reference: https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-session-dependency
 """
 
-async def timing_dependency(request: Request, response: Response):
-    route = request.scope.get("route")
-    route_name = route.name if route else "unknown"
-
-    start = time.time()
-
-    yield
-
-    end = time.time()
-
-    duration = end - start
-    print(f"Setting headers for {route_name}: {duration:.4f}s")
-    print(f"Dependency response id: {id(response)}")
-    request.state.x_duration = f"{duration:.4f}s"
-    request.state.x_route_name = route_name
-    response.headers["X-Route-Name"] = route_name
-    response.headers["X-Duration"] = f"{duration:.4f}s"
-
-TimingDep = Depends(timing_dependency)
-
 def needs_ollama():
     ollama_host = os.environ.get("OLLAMA_HOST", "127.0.0.1:11434")
     error = HTTPException(status_code=404, detail=f"""Ollama is not running!
