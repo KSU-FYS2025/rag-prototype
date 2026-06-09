@@ -83,7 +83,7 @@ router = APIRouter()
 async def run_adk_workflow(
         user_query: str | BaseModel,
         workflow: Workflow
-) -> dict | str | None:
+) -> dict | str:
     session_service = InMemorySessionService()
     runner = Runner(
         app_name=f"RagPrototypeADK{workflow.name}",
@@ -129,7 +129,7 @@ async def run_adk_workflow(
                     pass
             break
 
-    return output
+    return output or {"response": "Response was null for some reason"}
 
 @router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
 async def graph_workflow_full(
