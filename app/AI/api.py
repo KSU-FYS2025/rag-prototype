@@ -88,19 +88,23 @@ async def run_adk_workflow(
         app_name=f"RagPrototypeADK{workflow.name}",
         node=workflow
     )
+
+    user_content: types.Content
+
     if isinstance(user_query, str):
-        response = await runner.run_debug(
-            user_query,
-        )
+        user_content = types.Content(role="user", parts=[types.Part(text=user_query)])
     else:
-        structured_dict = user_query.model_dump(mode="json")
-        response = await runner.run_debug(
-            json.dumps(structured_dict),
-        )
+        user_content = types.Content(role="user", parts=[types.Part(value=user_query)])
+
+    response = runner.run_async(
+        user_id="example_user",
+        session_id="example_session",
+        new_message=user_content
+    )
 
     output = {}
 
-    for event in response:
+    async for event in response:
         if event.is_final_response():
             # final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
 
