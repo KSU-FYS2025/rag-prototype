@@ -8,6 +8,8 @@ import re
 import logging
 import time
 
+from torch import Tensor
+
 logger = logging.getLogger(__name__)
 
 # Configure HuggingFace and transformers model caching
@@ -295,6 +297,8 @@ def search_poi(
         filter_expression: str = ""
 ) -> list[tuple[dict, float]]:
     query_vectors = embedding_fn.encode_queries([query])
+    if isinstance(query_vectors, Tensor):
+        query_vectors = query_vectors.float().tolist()
     with get_db_gen() as db:
         res = db.search(
             collection_name="poi",
