@@ -82,7 +82,7 @@ router = APIRouter()
 async def run_adk_workflow(
         user_query: str | BaseModel,
         workflow: Workflow
-) -> dict:
+) -> dict | str | None:
     runner = InMemoryRunner(
         app_name=f"RagPrototypeADK{workflow.name}",
         node=workflow
@@ -101,11 +101,14 @@ async def run_adk_workflow(
 
     for event in response:
         if event.is_final_response():
-            final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
+            # final_text = None if event.content is None or event.content.parts is None else event.content.parts[0].text
 
-            final_output = event.output
+            try:
+                output_model: BaseModel = event.output
+                output: dict = output_model.model_dump()
+            except:
+                output: str | None = event.content.parts[0].text
 
-            output = final_output or {"response": final_text}
             break
 
     return output
