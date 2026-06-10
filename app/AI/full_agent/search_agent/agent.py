@@ -5,7 +5,8 @@ from math import sqrt
 from google.adk import Workflow, Context, Event, Agent, workflow
 from google.adk.workflow import node, JoinNode
 
-from app.AI.full_agent.search_agent.schema import DistanceAndVector, DistanceBetweenPOIs, Vector, DistanceOutput, SearchOutput
+from app.AI.full_agent.search_agent.schema import DistanceAndVector, DistanceBetweenPOIs, Vector, DistanceOutput, \
+    SearchOutput, POIAndSemanticDistance
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput, QueryClassifier
 from app.database.db import search_poi
 from app.poi.models import POI
@@ -65,7 +66,7 @@ async def parallel_router(
 
 @node(name="distance_calculator", rerun_on_resume=True)
 async def distance_calculator(
-        node_input: list[list[tuple[POI, float]]]
+        node_input: list[list[POIAndSemanticDistance]]
 ) -> Event:
     distances: list[DistanceBetweenPOIs] = []
     for query1, query2 in zip(node_input, node_input[1:]):
