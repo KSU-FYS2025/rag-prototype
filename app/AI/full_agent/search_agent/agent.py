@@ -68,7 +68,7 @@ async def parallel_router(
         ctx.run_node(wf, item) for wf, item in zip(workflows, node_input.targets)
     ]
 
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    results = await asyncio.gather(*tasks, return_exceptions=False)
 
     failures = [r for r in results if isinstance(r, Exception)]
     if failures:
