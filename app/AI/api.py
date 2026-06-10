@@ -109,7 +109,11 @@ async def run_adk_workflow(
     output = {}
     try:
         async for event in response:
+            logging.info(
+                f"Event author: {event.author} | is_final: {event.is_final_response()} | output: {event.output} | content: {event.content}"
+            )
             if event.is_final_response() and event.author == workflow.name:
+                logging.info(f"Matched root event: {event}")
                 if event.output is not None:
                     output = event.output
                 elif event.content is not None and event.content.parts is not None:
@@ -121,7 +125,8 @@ async def run_adk_workflow(
                             output = text
     finally:
         await response.aclose()
-
+    
+    logging.info(f"Final output: {output}")
     return output
 
 @router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
