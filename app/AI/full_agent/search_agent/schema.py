@@ -4,9 +4,9 @@ from typing import List
 from app.poi.models import POI
 
 class Validation(BaseModel):
-    order: int
-    selected_pois: List[POI]
-    method: str
+    order: int = Field(description="The order of the POIs returned by the input. This MUST match your input.")
+    selected_pois: List[POI] = Field(description="List of POIs chosen by the LLM.")
+    method: str = Field(default="LLM",description="MUST always be LLM")
 
 class SearchOutput(BaseModel):
     validations: List[Validation]
