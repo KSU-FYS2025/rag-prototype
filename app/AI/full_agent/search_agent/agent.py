@@ -74,7 +74,9 @@ async def distance_calculator(
     logging.info(f"distance_calculator called with {node_input}")
     distances: list[DistanceBetweenPOIs] = []
     for query1, query2 in zip(node_input, node_input[1:]):
-        for (poi1, _), (poi2, _) in zip(query1, query2):
+        for poi_semantic1, poi_semantic2 in zip(query1, query2):
+            poi1 = poi_semantic1.poi
+            poi2 = poi_semantic2.poi
             distance_vector = Vector(
                 dx=poi2.localPosition[0] - poi1.localRotation[0],
                 dy=poi2.localPosition[1] - poi1.localRotation[1],
