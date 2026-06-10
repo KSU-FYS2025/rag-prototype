@@ -11,12 +11,12 @@ from app.AI.full_agent.triage_agent.schema import TriageAgentOutput, QueryClassi
 from app.database.db import search_poi
 from app.poi.models import POI
 
-logging.basicConfig(level=logging.INFO)
-
-logging.getLogger("google_adk").setLevel(logging.DEBUG)
-logging.getLogger("google.adk").setLevel(logging.DEBUG)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("opentelemetry").setLevel(logging.WARNING)
+# logging.basicConfig(level=logging.INFO)
+#
+# logging.getLogger("google_adk").setLevel(logging.DEBUG)
+# logging.getLogger("google.adk").setLevel(logging.DEBUG)
+# logging.getLogger("httpx").setLevel(logging.WARNING)
+# logging.getLogger("opentelemetry").setLevel(logging.WARNING)
 
 @node(name="search_poi", rerun_on_resume=True)
 async def search_poi_node(
