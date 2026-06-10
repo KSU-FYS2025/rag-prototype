@@ -11,9 +11,11 @@ class QueryClassifier(BaseModel):
                                     "inside pymilvus.")
     semantics: str = Field(description="Semantic information about the query that can be used to run a vector search. "
                                        "Include things like what the Point of Interest is, and any helpful explicit "
-                                       "information.\n"
-                                       "EX1: ROOM 2131\n"
-                                       "EX2: bathroom, third floor")
+                                       "information.\n",
+                           examples=[
+                               "EX1: ROOM 2131\n",
+                               "EX2: bathroom, third floor"
+                           ])
     source: str = Field(description="MUST always be LLM")
 
 class TriageAgentOutput(BaseModel):
