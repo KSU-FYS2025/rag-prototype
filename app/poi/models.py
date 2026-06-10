@@ -40,7 +40,7 @@ class POI(BaseModel):
     rotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Rotation of the POI")
     localPosition: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local position of the POI")
     localRotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local rotation of the POI")
-    parentName: str = Field(default="", description="What collection the POI belongs to.")
+    parentName: str = Field(default="", description="What collection of POIs the POI belongs to.")
 
     def generate_embedding(self):
         # Embedding based on key textual descriptors
