@@ -22,6 +22,7 @@ logging.getLogger("opentelemetry").setLevel(logging.WARNING)
 async def search_poi_node(
         node_input: QueryClassifier
 ) -> Event:
+    logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = node_input.semantics, 5, None, node_input.filter
     return Event(output=search_poi(query, top_n, fields, filter_expression))
 
@@ -30,6 +31,7 @@ async def search_poi_node(
 async def validate_pois(
         node_input: list[tuple[dict, float]]
 ) -> Event:
+    logging.info(f"validate_pois called with {node_input}")
     collect: list[tuple[POI, float]] = []
     for item, distance in node_input:
         try:
@@ -52,6 +54,7 @@ async def parallel_router(
         ctx: Context,
         node_input: TriageAgentOutput
 ):
+    logging.info(f"parallel_router called with {node_input}")
     workflows = [
         make_base_workflow(item.order) for item in node_input.targets
     ]
@@ -68,6 +71,7 @@ async def parallel_router(
 async def distance_calculator(
         node_input: list[list[POIAndSemanticDistance]]
 ) -> Event:
+    logging.info(f"distance_calculator called with {node_input}")
     distances: list[DistanceBetweenPOIs] = []
     for query1, query2 in zip(node_input, node_input[1:]):
         for (poi1, _), (poi2, _) in zip(query1, query2):
@@ -90,6 +94,8 @@ async def distance_calculator(
         POIs=node_input,
         distances=distances
     )
+
+    logging.info(f"synthesis_agent called with {distance_output}")
 
     return Event(output=distance_output)
 
