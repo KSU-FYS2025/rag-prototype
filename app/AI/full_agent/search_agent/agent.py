@@ -64,6 +64,9 @@ async def parallel_router(
     ]
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    if not isinstance(results[0], list):
+        results = [results]
 
     return Event(output=results)
 
