@@ -1,9 +1,11 @@
 import asyncio
 import logging
 from math import sqrt
+import re
 
 from google.adk import Workflow, Context, Event, Agent, workflow
 from google.adk.workflow import node, JoinNode
+from pymilvus import MilvusException
 
 from app.AI.full_agent.search_agent.schema import DistanceAndVector, DistanceBetweenPOIs, Vector, DistanceOutput, \
     SearchOutput, POIAndSemanticDistance
@@ -18,13 +20,24 @@ logging.basicConfig(level=logging.INFO)
 # logging.getLogger("httpx").setLevel(logging.WARNING)
 # logging.getLogger("opentelemetry").setLevel(logging.WARNING)
 
+def sanitize_filter(filter_expr: str) -> str:
+    # Replace single-quoted strings with double-quoted equivalents
+    def swap_quotes(match):
+        inner = match.group(1).replace("''", "'")  # unescape doubled single quotes
+        return f'"{inner}"'
+    return re.sub(r"'((?:[^']|'')*)'", swap_quotes, filter_expr)
+
 @node(name="search_poi", rerun_on_resume=True)
 async def search_poi_node(
         node_input: QueryClassifier
 ) -> Event:
     logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = node_input.semantics, 5, None, node_input.filter
-    results = search_poi(query, top_n, fields, filter_expression)
+    try:
+        results = search_poi(query, top_n, fields, filter_expression)
+    except MilvusException:
+        logging.info(f"Filter failed: {filter_expression}\nTrying again with sanitized filter")
+        results = search_poi(query, top_n, fields, sanitize_filter(filter_expression))
     if not results:
         logging.info(f"search_poi failed with filter: {node_input.filter}\nTrying again without filter")
         results = search_poi(query, top_n, fields)
