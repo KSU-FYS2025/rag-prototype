@@ -119,6 +119,7 @@ async def run_adk_workflow(
                             output = json.loads(text)
                         except json.JSONDecodeError:
                             output = text
+                break
     finally:
         await response.aclose()
 
