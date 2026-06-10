@@ -136,7 +136,7 @@ async def run_adk_workflow(
 async def graph_workflow_full(
         user_query: str
 ):
-    return await run_adk_workflow(user_query, full_workflow)
+    return await run_adk_workflow(user_query, full_workflow, "synthesis_agent")
 
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow_root(
