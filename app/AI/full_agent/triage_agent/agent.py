@@ -1,5 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 
+from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 
 triage_agent = Agent(
@@ -30,10 +31,7 @@ triage_agent = Agent(
             }
         ],
         "extraction_method": "llm"
-    }
-    
-    The user's query is:
-    {user_content}''',
-    output_key="output_triage",
+    }''',
+    input_schema=RootOutput,
     output_schema=TriageAgentOutput,
 )

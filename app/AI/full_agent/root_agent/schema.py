@@ -4,6 +4,7 @@ from app.AI.schema import NavigationIntent
 
 
 class RootOutput(BaseModel):
+    user_query: str = Field(description="The original user's query. MUST match the original user's query exactly.")
     intent: NavigationIntent = Field(description="What the user's query is classified as.\n"
                                                  "NAV_GUIDE or navigation_guidance is when the user asks, either"
                                                  "implicitly or explicitly to be guided to some place(s).\n"
