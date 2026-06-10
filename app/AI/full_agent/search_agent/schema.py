@@ -25,9 +25,15 @@ class DistanceBetweenPOIs(BaseModel):
     poi2: int = Field(description="id of second POI")
     distance: DistanceAndVector
 
+class POIAndSemanticDistance(BaseModel):
+    poi1: POI = Field(description="The POI object that this object is associated with")
+    semantic_distance: float = Field(description="The semantic distance between this POI and the semantic for this "
+                                                 "query.")
+
 class DistanceOutput(BaseModel):
-    POIs: list[list[tuple[POI, float]]] = Field(description="List of POIs returned by the vector search as well as their"
-                                                "semantic distance")
+    POIs: list[list[POIAndSemanticDistance]] = Field(description="List of POIs returned by the vector search as well as "
+                                                                 "their semantic distance from the semantic for this "
+                                                                 "query.")
     distances: list[DistanceBetweenPOIs] = Field(description="Distances between POIs. Only includes distances that are "
                                                        "relevant to the problem.")
 
