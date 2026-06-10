@@ -24,7 +24,11 @@ async def search_poi_node(
 ) -> Event:
     logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = node_input.semantics, 5, None, node_input.filter
-    return Event(output=search_poi(query, top_n, fields, filter_expression))
+    results = search_poi(query, top_n, fields, filter_expression)
+    if not results:
+        logging.info(f"search_poi failed with filter: {node_input.filter}\nTrying again without filter")
+        results = search_poi(query, top_n, fields)
+    return Event(output=results)
 
 
 @node(name="validate_pois", rerun_on_resume=True)
