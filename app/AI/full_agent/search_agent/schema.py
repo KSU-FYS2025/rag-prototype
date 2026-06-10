@@ -26,7 +26,7 @@ class DistanceBetweenPOIs(BaseModel):
     distance: DistanceAndVector
 
 class POIAndSemanticDistance(BaseModel):
-    poi1: POI = Field(description="The POI object that this object is associated with")
+    poi: POI = Field(description="The POI object that this object is associated with")
     semantic_distance: float = Field(description="The semantic distance between this POI and the semantic for this "
                                                  "query.")
 

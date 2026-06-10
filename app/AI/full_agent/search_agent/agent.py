@@ -32,10 +32,10 @@ async def validate_pois(
         node_input: list[tuple[dict, float]]
 ) -> Event:
     logging.info(f"validate_pois called with {node_input}")
-    collect: list[tuple[POI, float]] = []
+    collect: list[POIAndSemanticDistance] = []
     for item, distance in node_input:
         try:
-            collect.append((POI(**item), distance))
+            collect.append(POIAndSemanticDistance(poi=POI(**item), semantic_distance=distance))
         except TypeError as e:
             raise TypeError(f"Unable to validate POI: {item}!\n{e}")
 
