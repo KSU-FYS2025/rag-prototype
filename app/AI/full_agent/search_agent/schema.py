@@ -5,7 +5,7 @@ from app.poi.models import POI
 
 class Validation(BaseModel):
     order: int
-    selected_ids: List[POI]
+    selected_pois: List[POI]
     method: str
 
 class SearchOutput(BaseModel):
