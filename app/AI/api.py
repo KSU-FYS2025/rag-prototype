@@ -82,7 +82,8 @@ router = APIRouter()
 
 async def run_adk_workflow(
         user_query: str | BaseModel,
-        workflow: Workflow
+        workflow: Workflow,
+        target_author: str | None = None,
 ) -> dict | str | None:
     session_service = InMemorySessionService()
     runner = Runner(
@@ -106,13 +107,15 @@ async def run_adk_workflow(
         new_message=user_content
     )
 
+    author_filter = target_author or workflow.name
+
     output = {}
     try:
         async for event in response:
             logging.info(
                 f"Event author: {event.author} | is_final: {event.is_final_response()} | output: {event.output} | content: {event.content}"
             )
-            if event.is_final_response() and event.author == workflow.name:
+            if event.is_final_response() and event.author == author_filter:
                 logging.info(f"Matched root event: {event}")
                 if event.output is not None:
                     output = event.output
@@ -125,7 +128,7 @@ async def run_adk_workflow(
                             output = text
     finally:
         await response.aclose()
-    
+
     logging.info(f"Final output: {output}")
     return output
 
@@ -175,7 +178,7 @@ async def graph_workflow_triage(
 async def graph_workflow_search(
         triage_output: TriageAgentOutput
 ):
-    return await run_adk_workflow(triage_output, search_workflow)
+    return await run_adk_workflow(triage_output, search_workflow, "synthesis_agent")
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
