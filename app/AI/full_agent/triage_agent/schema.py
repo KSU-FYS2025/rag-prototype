@@ -14,8 +14,8 @@ class QueryClassifier(BaseModel):
                                        "information.\n"
                                        "EX1: ROOM 2131\n"
                                        "EX2: bathroom, third floor")
-    source: str = Field(description="Should always be LLM")
+    source: str = Field(description="MUST always be LLM")
 
 class TriageAgentOutput(BaseModel):
     targets: List[QueryClassifier] = Field(description="A list of query classifiers that can be used to run a vector search ")
-    extraction_method: str = Field(description="Should always be LLM")
+    extraction_method: str = Field(description="MUST always be LLM")

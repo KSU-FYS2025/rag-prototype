@@ -113,7 +113,7 @@ synthesis_agent = Agent(
                 'POIs for each query the user has made, as well as distances between them (only the relevant distances '
                 'are included). You must plan a path for the user taking into account their wishes. Inside each entry '
                 'inside each nested list is both the POI as well as the semantic similarity to information extracted '
-                'from the user\'s query',
+                'from the user\'s query. Be sure to keep the order of the objects the same as was provided to you.',
     input_schema=DistanceOutput,
     output_schema=SearchOutput
 )
