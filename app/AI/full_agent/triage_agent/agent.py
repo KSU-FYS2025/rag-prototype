@@ -9,7 +9,7 @@ triage_agent = Agent(
     description='An agent that separates and classifies queries within a full user query',
     instruction='''You are the second agent within a chain meant to provide navigation support. Your role is to take the
     user's query and separate it into separate queries if applicable, and provide meaningful information related to the
-    query.
+    query. As of right now, do NOT include type in your filter. It is error prone and will be fixed later.
     example data:
     {
         "targets": [
