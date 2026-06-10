@@ -150,19 +150,19 @@ async def graph_workflow_triage(
       "intent": "navigation_guidance",
       "target_type": "explicit",
       "filter": "name LIKE '%3436%'",
-      "semantics": "room 3436",
+      "semantics": "Room 3436",
       "source": "LLM"
     },
     {
       "order": 2,
       "intent": "navigation_guidance",
       "target_type": "implicit",
-      "filter": "type == 'Vending Machine'",
-      "semantics": "vending machine",
+      "filter": "type == 'Elevator'",
+      "semantics": "closest elevator",
       "source": "LLM"
     }
   ],
-  "extraction_method": "LLM"
+  "extraction_method": "llm"
 }
 """
 
