@@ -70,6 +70,10 @@ async def parallel_router(
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
+    failures = [r for r in results if isinstance(r, Exception)]
+    if failures:
+        raise RuntimeError(f"One or more sub-workflows failed: {failures}")
+
     if not isinstance(results[0], list):
         results = [results]
 
