@@ -31,7 +31,39 @@ triage_agent = Agent(
             }
         ],
         "extraction_method": "llm"
-    }''',
+    }
+    An example POI has this format:
+        {
+            "name": "Room 3416",
+            "title": "Room 3416",
+            "identification": 154,
+            "poiName": "Room 3416",
+            "description": "",
+            "type": "Room",
+            "position": {
+                "x": 4.190999984741211,
+                "y": 0.2370000034570694,
+                "z": -23.670000076293947
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 280.4602355957031,
+                "z": 0.0
+            },
+            "localPosition": {
+                "x": 2.2799999713897707,
+                "y": 0.2370000034570694,
+                "z": -23.670000076293947
+            },
+            "localRotation": {
+                "x": 0.0,
+                "y": 280.4602355957031,
+                "z": 0.0
+            },
+            "parentName": "3rd Floor"
+        }
+    You may reference this format when constructing your filter
+    ''',
     input_schema=RootOutput,
     output_schema=TriageAgentOutput,
 )
