@@ -30,7 +30,10 @@ triage_agent = Agent(
             }
         ],
         "extraction_method": "llm"
-    }''',
+    }
+    
+    The user's query is:
+    {user_content}''',
     output_key="output_triage",
     output_schema=TriageAgentOutput,
 )
