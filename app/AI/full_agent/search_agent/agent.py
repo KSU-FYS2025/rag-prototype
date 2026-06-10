@@ -35,6 +35,7 @@ async def validate_pois(
     collect: list[POIAndSemanticDistance] = []
     for item, distance in node_input:
         try:
+            logging.info(f"validating poi: {item}")
             collect.append(POIAndSemanticDistance(poi=POI(**item), semantic_distance=distance))
         except TypeError as e:
             raise TypeError(f"Unable to validate POI: {item}!\n{e}")
@@ -64,7 +65,7 @@ async def parallel_router(
     ]
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    
+
     if not isinstance(results[0], list):
         results = [results]
 
