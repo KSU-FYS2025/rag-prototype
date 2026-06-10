@@ -96,14 +96,14 @@ synthesis_agent = Agent(
     model='gemini-2.5-flash',
     name='synthesis_agent',
     description='Agent that takes in all the vector search information and creates a path',
-    instruction='Take in the data provided to you and create a path between the Points of Interest that most closely'
-                'match the user\'s request. Only use the information presented to you within the POI\'s data fields to'
-                'reach a conclusion, do not rely on any outside knowledge in your decision making process other than'
-                'common sense. If the POI has a room number as its name, the first digit is always the floor of the room'
-                'and the second digit is which end of the building it is on. Included in your information is a list of'
-                'POIs for each query the user has made, as well as distances between them (only the relevant distances'
-                'are included). You must plan a path for the user taking into account their wishes. Inside each entry'
-                'inside each nested list is both the POI as well as the semantic similarity to information extracted'
+    instruction='Take in the data provided to you and create a path between the Points of Interest that most closely '
+                'match the user\'s request. Only use the information presented to you within the POI\'s data fields to '
+                'reach a conclusion, do not rely on any outside knowledge in your decision making process other than '
+                'common sense. If the POI has a room number as its name, the first digit is always the floor of the room '
+                'and the second digit is which end of the building it is on. Included in your information is a list of '
+                'POIs for each query the user has made, as well as distances between them (only the relevant distances '
+                'are included). You must plan a path for the user taking into account their wishes. Inside each entry '
+                'inside each nested list is both the POI as well as the semantic similarity to information extracted '
                 'from the user\'s query',
     input_schema=DistanceOutput,
     output_schema=SearchOutput
