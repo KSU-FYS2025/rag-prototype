@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 
+from app.AI.schema import BaseResponse
 from app.poi.models import POI
 
 class Validation(BaseModel):
@@ -8,7 +9,7 @@ class Validation(BaseModel):
     selected_pois: List[POI] = Field(description="List of POIs chosen by the LLM.")
     method: str = Field(default="LLM",description="MUST always be LLM")
 
-class SearchOutput(BaseModel):
+class SearchOutput(BaseResponse):
     validations: List[Validation]
 
 # class Vector(BaseModel):
@@ -30,7 +31,7 @@ class POIAndSemanticDistance(BaseModel):
     semantic_distance: float = Field(description="The semantic distance between this POI and the semantic for this "
                                                  "query.")
 
-class ParallelOutput(BaseModel):
+class ParallelOutput(BaseResponse):
     POIs: list[list[POIAndSemanticDistance]] = Field(description="List of POIs returned by the vector search as well as "
                                                                  "their semantic distance from the semantic for this "
                                                                  "query.")

@@ -89,6 +89,11 @@ async def parallel_router(
     if not isinstance(results[0], list):
         results = [results]
 
+    results_obj = ParallelOutput(
+        user_query=node_input.user_query,
+        POIs=results,
+    )
+
     return Event(output=results)
 
 # @node(name="distance_calculator", rerun_on_resume=True)

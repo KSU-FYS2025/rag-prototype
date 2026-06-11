@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.AI.schema import TargetType, NavigationIntent
+from app.AI.schema import TargetType, NavigationIntent, BaseResponse
 from typing import List
 
 class QueryClassifier(BaseModel):
@@ -20,6 +20,6 @@ class QueryClassifier(BaseModel):
                            )
     source: str = Field(default="LLM", description="MUST always be LLM")
 
-class TriageAgentOutput(BaseModel):
+class TriageAgentOutput(BaseResponse):
     targets: List[QueryClassifier] = Field(description="A list of query classifiers that can be used to run a vector search ")
     extraction_method: str = Field(default="LLM", description="MUST always be LLM")
