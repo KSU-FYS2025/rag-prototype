@@ -7,8 +7,7 @@ from google.adk import Workflow, Context, Event, Agent, workflow
 from google.adk.workflow import node, JoinNode
 from pymilvus import MilvusException
 
-from app.AI.full_agent.search_agent.schema import DistanceAndVector, DistanceBetweenPOIs, Vector, DistanceOutput, \
-    SearchOutput, POIAndSemanticDistance
+from app.AI.full_agent.search_agent.schema import SearchOutput, POIAndSemanticDistance, ParallelOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput, QueryClassifier
 from app.database.db import search_poi
 from app.poi.models import POI
@@ -92,39 +91,39 @@ async def parallel_router(
 
     return Event(output=results)
 
-@node(name="distance_calculator", rerun_on_resume=True)
-async def distance_calculator(
-        node_input: list[list[POIAndSemanticDistance]]
-) -> Event:
-    logging.info(f"distance_calculator called with {node_input}")
-    distances: list[DistanceBetweenPOIs] = []
-    for query1, query2 in zip(node_input, node_input[1:]):
-        for poi_semantic1, poi_semantic2 in zip(query1, query2):
-            poi1 = poi_semantic1.poi
-            poi2 = poi_semantic2.poi
-            distance_vector = Vector(
-                dx=poi2.localPosition[0] - poi1.localRotation[0],
-                dy=poi2.localPosition[1] - poi1.localRotation[1],
-                dz=poi2.localPosition[2] - poi1.localRotation[2]
-            )
-            distance_scalar = sqrt(distance_vector.dx**2 + distance_vector.dy**2 + distance_vector.dz**2)
-
-            distance_obj = DistanceAndVector(distance=distance_scalar, vector=distance_vector)
-
-            distances.append(DistanceBetweenPOIs(
-                poi1=poi1.id,
-                poi2=poi2.id,
-                distance=distance_obj
-            ))
-
-    distance_output = DistanceOutput(
-        POIs=node_input,
-        distances=distances
-    )
-
-    logging.info(f"synthesis_agent called with {distance_output}")
-
-    return Event(output=distance_output)
+# @node(name="distance_calculator", rerun_on_resume=True)
+# async def distance_calculator(
+#         node_input: list[list[POIAndSemanticDistance]]
+# ) -> Event:
+#     logging.info(f"distance_calculator called with {node_input}")
+#     distances: list[DistanceBetweenPOIs] = []
+#     for query1, query2 in zip(node_input, node_input[1:]):
+#         for poi_semantic1, poi_semantic2 in zip(query1, query2):
+#             poi1 = poi_semantic1.poi
+#             poi2 = poi_semantic2.poi
+#             distance_vector = Vector(
+#                 dx=poi2.localPosition[0] - poi1.localRotation[0],
+#                 dy=poi2.localPosition[1] - poi1.localRotation[1],
+#                 dz=poi2.localPosition[2] - poi1.localRotation[2]
+#             )
+#             distance_scalar = sqrt(distance_vector.dx**2 + distance_vector.dy**2 + distance_vector.dz**2)
+#
+#             distance_obj = DistanceAndVector(distance=distance_scalar, vector=distance_vector)
+#
+#             distances.append(DistanceBetweenPOIs(
+#                 poi1=poi1.id,
+#                 poi2=poi2.id,
+#                 distance=distance_obj
+#             ))
+#
+#     distance_output = DistanceOutput(
+#         POIs=node_input,
+#         distances=distances
+#     )
+#
+#     logging.info(f"synthesis_agent called with {distance_output}")
+#
+#     return Event(output=distance_output)
 
 synthesis_agent = Agent(
     model='gemini-2.5-flash',
@@ -139,13 +138,13 @@ synthesis_agent = Agent(
                 'are included). You must plan a path for the user taking into account their wishes. Inside each entry '
                 'inside each nested list is both the POI as well as the semantic similarity to information extracted '
                 'from the user\'s query. Be sure to keep the order of the objects the same as was provided to you.',
-    input_schema=DistanceOutput,
+    input_schema=ParallelOutput,
     output_schema=SearchOutput
 )
 
 search_workflow = Workflow(
     name="SearchWorkflow",
     edges=[
-        ("START", parallel_router, distance_calculator, synthesis_agent),
+        ("START", parallel_router, synthesis_agent),
     ]
 )
