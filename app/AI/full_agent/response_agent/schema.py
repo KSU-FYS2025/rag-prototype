@@ -51,15 +51,17 @@ class ClarifyAction(Action):
     prompt: str = Field(description="The prompt that will be shown to the user. Must include all the suggestions in "
                                     "suggestions.")
 
-Command = Annotated[
-    Union[
-        Annotated[NavigationAction, Tag("navigation")],
-        Annotated[ResolveNearestAction, Tag("resolve_nearest")],
-        Annotated[AnswerAction, Tag("answer")],
-        Annotated[ClarifyAction, Tag("clarify")]
-    ],
-    Discriminator("cmd")
-]
+# Command = Annotated[
+#     Union[
+#         Annotated[NavigationAction, Tag("navigation")],
+#         Annotated[ResolveNearestAction, Tag("resolve_nearest")],
+#         Annotated[AnswerAction, Tag("answer")],
+#         Annotated[ClarifyAction, Tag("clarify")]
+#     ],
+#     Discriminator("cmd")
+# ]
+
+Command = Union[NavigationAction, ResolveNearestAction, AnswerAction, ClarifyAction]
 
 class ResponseAgentOutput(BaseModel):
     response: str = Field(description="The final response from the Unity runner that will be spoken to the user.")
