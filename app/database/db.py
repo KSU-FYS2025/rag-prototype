@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, cast, Any
 import os
 from pymilvus import MilvusClient, CollectionSchema, model
 from sentence_transformers import SentenceTransformer, util
@@ -290,6 +290,13 @@ def ensure_collection(settings: Dict, schema: Optional[CollectionSchema] = None,
         ensure_collection(settings, schema, db)
 
 
+def _to_native(obj: Any) -> Any:
+    if hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, dict)):
+        return [_to_native(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: _to_native(v) for k, v in obj.items()}
+    return obj
+
 def search_poi(
         query: str,
         top_n: int = 5,
@@ -308,7 +315,10 @@ def search_poi(
             output_fields=fields,
             filter=filter_expression
         )
-    return [(hit["entity"], hit["distance"]) for x in res for hit in x if hit]
+    return [
+        (cast(dict, _to_native(hit["entity"])), float(hit["distance"]))
+        for x in res for hit in x if hit
+    ]
 
 # def search_poi(
 #        query: str,
