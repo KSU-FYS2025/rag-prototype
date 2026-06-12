@@ -3,20 +3,34 @@ from typing import List, Literal, Annotated, Union
 from pydantic import BaseModel, Field, Discriminator, Tag
 from enum import Enum
 
-class Action(BaseModel):
+from app.AI.schema import BaseResponse
+
+class Action(BaseResponse):
     order: int = Field(ge=0, description="The order of the Action")
 
 class NavigationAction(Action):
+    """
+    This action should be taken if there is exactly one poi inside the selected_pois tag.
+    """
     cmd: Literal["navigation"] = "navigation"
     id: int = Field(description="The id of the POI the user will be guided to")
     target_label: str = Field(description="The semantic information of the query the user will be guided to")
 
 class ResolveNearestAction(Action):
+    """
+    This action should be taken if there is multiple pois inside the selected_pois tag and the result of the navigation
+    is not impacted by user preferences
+    EX: Things like gender, where/ what classes they are taking are, etc.
+    """
     cmd: Literal["resolve_nearest"] = "resolve_nearest"
     candidate_ids: List[int] = Field(description="The ids the Unity client will decide between.")
     target_label: str = Field(description="The semantic information of the query the user will be guided to")
 
 class AnswerAction(Action):
+    """
+    This action should be taken if the user asked a question and did not request guidance somewhere. Answer their
+    question using the information provided to you in the selected_pois tag.
+    """
     cmd: Literal["answer"] = "answer"
     text: str = Field(description="The text of the Answer")
     source_ids: List[int] = Field(description="The poi ids the user was questioning about")
@@ -26,6 +40,10 @@ class ClarificationSuggestion(BaseModel):
     name: str = Field(description="The name of the POI you are suggesting")
 
 class ClarifyAction(Action):
+    """
+    This action should be taken if there is either no POIs inside the selected_pois tag or there are multiple and the
+    outcome could be impacted by user preferences. In this case, the agent should ask the user for clarification.
+    """
     cmd: Literal["clarify"] = "clarify"
     unresolved_target: str = Field(description="The semantic information of the poi the user queried")
     reason: str = Field(description="The reason the agent was not able to resolve this query.")
