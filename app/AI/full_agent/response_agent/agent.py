@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 
-from app.AI.full_agent.response_agent.schema import FinalResponse
+from app.AI.full_agent.response_agent.schema import ResponseAgentOutput
 from app.AI.full_agent.search_agent.schema import SearchOutput
 
 response_agent = Agent(
@@ -9,5 +9,5 @@ response_agent = Agent(
     description='Agent that generates the final response',
     instruction='Answer user questions to the best of your knowledge',
     input_schema=SearchOutput,
-    output_schema=FinalResponse,
+    output_schema=ResponseAgentOutput,
 )
