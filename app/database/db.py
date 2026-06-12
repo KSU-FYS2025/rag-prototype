@@ -315,6 +315,12 @@ def search_poi(
             output_fields=fields,
             filter=filter_expression
         )
+    for x in res:
+        for hit in x:
+            if hit:
+                logging.info(f"entity type: {type(hit['entity'])}")
+                for k, v in dict(hit["entity"]).items():
+                    logging.info(f"  {k}: {type(v)}")
     return [
         (cast(dict, _to_native(hit["entity"])), float(hit["distance"]))
         for x in res for hit in x if hit
