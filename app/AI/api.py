@@ -80,10 +80,16 @@ def generate_chat_response(model_name: str, messages: list, format_str: Optional
 
 router = APIRouter()
 
+def check_author(event_author: str, target_author: list[str] | str):
+    if isinstance(target_author, str):
+        return event_author == target_author
+    else:
+        return event_author in target_author
+
 async def run_adk_workflow(
         user_query: str | BaseModel,
         workflow: Workflow,
-        target_author: str | None = None,
+        target_author: list[str] | str | None = None,
 ) -> dict | str | None:
     session_service = InMemorySessionService()
     runner = Runner(
@@ -115,7 +121,7 @@ async def run_adk_workflow(
             logging.info(
                 f"Event author: {event.author} | is_final: {event.is_final_response()} | output: {event.output} | content: {event.content}"
             )
-            if event.is_final_response() and event.author == author_filter:
+            if event.is_final_response() and check_author(event.author, author_filter):
                 logging.info(f"Matched root event: {event}")
                 if event.output is not None:
                     output = event.output
@@ -136,7 +142,7 @@ async def run_adk_workflow(
 async def graph_workflow_full(
         user_query: str
 ):
-    return await run_adk_workflow(user_query, full_workflow, "synthesis_agent")
+    return await run_adk_workflow(user_query, full_workflow, ["synthesis_agent", "conversation_agent"])
 
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow_root(
