@@ -15,6 +15,8 @@ from starlette.responses import StreamingResponse, JSONResponse, Response
 from google.adk import Workflow, Runner
 
 from app.AI.full_agent import search_agent
+from app.AI.full_agent.response_agent.agent import response_agent
+from app.AI.full_agent.response_agent.schema import ResponseAgentOutput
 from app.AI.full_agent.root_agent.agent import root_agent
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 from app.database.db import search_poi
@@ -185,6 +187,12 @@ async def graph_workflow_search(
         triage_output: TriageAgentOutput
 ):
     return await run_adk_workflow(triage_output, search_workflow, "synthesis_agent")
+
+@router.post("/ai/graph-workflow/response", dependencies=[NeedsOllama])
+async def graph_workflow_response(
+        triage_output: ResponseAgentOutput
+):
+    return await run_adk_workflow(triage_output, response_agent, "response_agent")
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(
