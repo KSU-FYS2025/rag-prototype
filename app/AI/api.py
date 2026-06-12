@@ -18,6 +18,7 @@ from app.AI.full_agent import search_agent
 from app.AI.full_agent.response_agent.agent import response_agent
 from app.AI.full_agent.response_agent.schema import ResponseAgentOutput
 from app.AI.full_agent.root_agent.agent import root_agent
+from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 from app.database.db import search_poi
 from app.dependencies import NeedsOllama
@@ -331,7 +332,7 @@ async def graph_workflow_search(
 
 @router.post("/ai/graph-workflow/response", dependencies=[NeedsOllama])
 async def graph_workflow_response(
-        triage_output: ResponseAgentOutput
+        triage_output: SearchOutput
 ):
     return await run_adk_workflow(triage_output, response_agent, "response_agent")
 
