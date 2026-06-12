@@ -189,6 +189,146 @@ async def graph_workflow_search(
 ):
     return await run_adk_workflow(triage_output, search_workflow, "synthesis_agent")
 
+"""
+{
+  "user_query": "Take me to room 3436 then to the closest elevator.",
+  "validations": [
+    {
+      "order": 0,
+      "selected_pois": [
+        {
+          "id": 151,
+          "name": "Room 3436",
+          "vector": null,
+          "title": "Room 3436",
+          "poiName": "Room 3436",
+          "description": "",
+          "type": "Room",
+          "position": [
+            -1.063999891281128,
+            0.2370000034570694,
+            -48.78099822998047
+          ],
+          "rotation": [
+            0,
+            280.4602355957031,
+            0
+          ],
+          "localPosition": [
+            -2.9749999046325684,
+            0.2370000034570694,
+            -48.78099822998047
+          ],
+          "localRotation": [
+            0,
+            280.4602355957031,
+            0
+          ],
+          "parentName": "3rd Floor"
+        }
+      ],
+      "method": "LLM"
+    },
+    {
+      "order": 1,
+      "selected_pois": [
+        {
+          "id": 5,
+          "name": "Elevator 2nd Floor",
+          "vector": null,
+          "title": "Elevator 2nd Floor",
+          "poiName": "Elevator 2nd Floor",
+          "description": "",
+          "type": "Elevator",
+          "position": [
+            0.5619999766349792,
+            -4.543000221252441,
+            -7.620572090148926
+          ],
+          "rotation": [
+            0,
+            196.26608276367188,
+            0
+          ],
+          "localPosition": [
+            0.5619999766349792,
+            -4.543000221252441,
+            -7.620572090148926
+          ],
+          "localRotation": [
+            0,
+            196.26608276367188,
+            0
+          ],
+          "parentName": "POIs"
+        },
+        {
+          "id": 6,
+          "name": "Elevator 3rd Floor",
+          "vector": null,
+          "title": "Elevator 3rd Floor",
+          "poiName": "Elevator 3rd Floor",
+          "description": "",
+          "type": "Elevator",
+          "position": [
+            0.5619999766349792,
+            0.0560000017285347,
+            -7.620572090148926
+          ],
+          "rotation": [
+            0,
+            196.26608276367188,
+            0
+          ],
+          "localPosition": [
+            0.5619999766349792,
+            0.0560000017285347,
+            -7.620572090148926
+          ],
+          "localRotation": [
+            0,
+            196.26608276367188,
+            0
+          ],
+          "parentName": "POIs"
+        },
+        {
+          "id": 4,
+          "name": "Elevator 1st Floor",
+          "vector": null,
+          "title": "Elevator 1st Floor",
+          "poiName": "Elevator 1st Floor",
+          "description": "",
+          "type": "Elevator",
+          "position": [
+            0.19939550757408142,
+            -9.062000274658203,
+            -7.620572090148926
+          ],
+          "rotation": [
+            0,
+            196.26608276367188,
+            0
+          ],
+          "localPosition": [
+            0.19939550757408142,
+            -9.062000274658203,
+            -7.620572090148926
+          ],
+          "localRotation": [
+            0,
+            196.26608276367188,
+            0
+          ],
+          "parentName": "POIs"
+        }
+      ],
+      "method": "LLM"
+    }
+  ]
+}
+"""
+
 @router.post("/ai/graph-workflow/response", dependencies=[NeedsOllama])
 async def graph_workflow_response(
         triage_output: ResponseAgentOutput
