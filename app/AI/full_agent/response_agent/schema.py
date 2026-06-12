@@ -43,6 +43,8 @@ class ClarifyAction(Action):
     """
     This action should be taken if there is either no POIs inside the selected_pois tag or there are multiple and the
     outcome could be impacted by user preferences. In this case, the agent should ask the user for clarification.
+    Remember: user preferences can include gender. For example, if a user asks to be guided to the restroom/ bathroom
+    but do not specify if it's the men's or women's restroom, you must use this action to ask them which one.
     """
     cmd: Literal["clarify"] = "clarify"
     unresolved_target: str = Field(description="The semantic information of the poi the user queried")
