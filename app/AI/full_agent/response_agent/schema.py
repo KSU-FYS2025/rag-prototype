@@ -29,7 +29,12 @@ class ResolveNearestAction(Action):
 class AnswerAction(Action):
     """
     This action should be taken if the user asked a question and did not request guidance somewhere. Answer their
-    question using the information provided to you in the selected_pois tag.
+    question using the information provided to you in the selected_pois tag. When answering about where something is,
+    don't just tell the user about the coordinates of where it is. Give information about where it is relative to
+    something else. You may use the following information below to guide your response:
+    In the atrium building:
+        * The first number of any room number is the floor it's located on
+        * The second number of any room number is which hallway it's located on.
     """
     cmd: Literal["answer"] = "answer"
     text: str = Field(description="The text of the Answer")
