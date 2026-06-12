@@ -315,16 +315,16 @@ def search_poi(
             output_fields=fields,
             filter=filter_expression
         )
+    
+    output: list[tuple[dict, float]] = []
     for x in res:
         for hit in x:
             if hit:
-                logging.info(f"entity type: {type(hit['entity'])}")
-                for k, v in dict(hit["entity"]).items():
-                    logging.info(f"  {k}: {type(v)}")
-    return [
-        (cast(dict, _to_native(hit["entity"])), float(hit["distance"]))
-        for x in res for hit in x if hit
-    ]
+                entity = cast(dict, _to_native(dict(hit["entity"])))
+                logging.info(f"converted entity: { {k: type(v) for k, v in entity.items()} }")
+                output.append((entity, float(hit["distance"])))
+
+    return output
 
 # def search_poi(
 #        query: str,
