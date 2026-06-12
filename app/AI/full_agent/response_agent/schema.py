@@ -50,8 +50,8 @@ class ClarifyAction(Action):
     unresolved_target: str = Field(description="The semantic information of the poi the user queried")
     reason: str = Field(description="The reason the agent was not able to resolve this query.")
     suggestions: List[ClarificationSuggestion] = Field(description="Suggestions for POIs that exist")
-    prompt: str = Field(description="The prompt that will be shown to the user. Must include all the suggestions in "
-                                    "suggestions.")
+    prompt: str = Field(description="The prompt that will be shown to the user. Must include the reason inside the "
+                                    "reason field formed as a question to ask to the user.")
 
 # Command = Annotated[
 #     Union[
