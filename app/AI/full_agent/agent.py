@@ -2,7 +2,7 @@ from google.adk.workflow import node
 
 from app.AI.full_agent.conversation_agent.agent import conversation_agent
 from app.AI.full_agent.response_agent.agent import response_agent
-from app.AI.full_agent.root_agent.agent import root_agent
+from app.AI.full_agent.root_agent.agent import root_agent as intent_agent
 from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.agent import triage_agent
 from app.AI.full_agent.search_agent.agent import search_workflow
@@ -25,11 +25,10 @@ def navigation_router(node_input: RootOutput):
     else:
         return Event(route="navigation")
 
-
 full_workflow = Workflow(
     name="full_workflow",
     edges=[
-        ("START", root_agent, navigation_router),
+        ("START", intent_agent, navigation_router),
         (navigation_router,
              {
                  "conversational": conversation_agent,
@@ -38,3 +37,5 @@ full_workflow = Workflow(
          )
     ]
 )
+
+root_agent = full_workflow
