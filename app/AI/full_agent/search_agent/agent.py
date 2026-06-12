@@ -94,7 +94,7 @@ async def parallel_router(
         POIs=results,
     )
 
-    return Event(output=results)
+    return Event(output=results_obj)
 
 # @node(name="distance_calculator", rerun_on_resume=True)
 # async def distance_calculator(
