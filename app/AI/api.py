@@ -160,6 +160,7 @@ async def graph_workflow_triage(
 
 """
 {
+  "user_query": "Take me to room 3436 then to the closest elevator.",
   "targets": [
     {
       "order": 1,
