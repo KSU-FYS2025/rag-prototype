@@ -143,15 +143,6 @@ synthesis_agent = Agent(
                 'you should return all of them, so that the Unity client can decide which is the closest. You are '
                 'allowed to return an empty list inside the selected_pois key IF none of the POIs you are given are '
                 'close enough. You may decide what close enough is.',
-    # instruction='Take in the data provided to you and create a path between the Points of Interest that most closely '
-    #             'match the user\'s request. Only use the information presented to you within the POI\'s data fields to '
-    #             'reach a conclusion, do not rely on any outside knowledge in your decision making process other than '
-    #             'common sense. If the POI has a room number as its name, the first digit is always the floor of the room '
-    #             'and the second digit is which end of the building it is on. Included in your information is a list of '
-    #             'POIs for each query the user has made, as well as distances between them (only the relevant distances '
-    #             'are included). You must plan a path for the user taking into account their wishes. Inside each entry '
-    #             'inside each nested list is both the POI as well as the semantic similarity to information extracted '
-    #             'from the user\'s query. Be sure to keep the order of the objects the same as was provided to you.',
     input_schema=ParallelOutput,
     output_schema=SearchOutput
 )
