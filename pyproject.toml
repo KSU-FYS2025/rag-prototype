@@ -25,6 +25,9 @@ dependencies = [
     "requests>=2.32.5",
 ]
 
+[tool.uv.sources]
+google-adk = { git = "https://github.com/he-yufeng/adk-python", branch = "fix/workflow-empty-state" }
+
 # Suggested by fastmcp docs
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
