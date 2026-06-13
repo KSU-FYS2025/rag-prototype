@@ -40,7 +40,7 @@ async def search_poi_node(
     if not results:
         logging.info(f"search_poi failed with filter: {node_input.filter}\nTrying again without filter")
         results = search_poi(query, top_n, fields)
-    return Event(output=results)
+    return Event(output=results, partial=True)
 
 
 @node(name="validate_pois", rerun_on_resume=True)
@@ -56,7 +56,7 @@ async def validate_pois(
         except TypeError as e:
             raise TypeError(f"Unable to validate POI: {item}!\n{e}")
 
-    return Event(output=collect)
+    return Event(output=collect, partial=True)
 
 def make_base_workflow(i: int) -> Workflow:
     return Workflow(
@@ -95,7 +95,7 @@ async def parallel_router(
         POIs=results,
     )
 
-    return Event(output=results_obj)
+    return Event(output=results_obj, partial=True)
 
 # @node(name="distance_calculator", rerun_on_resume=True)
 # async def distance_calculator(
