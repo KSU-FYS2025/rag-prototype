@@ -52,7 +52,8 @@ class POI(BaseModel):
         return embedding_fn.encode_documents([f"Name: {data["name"]}\nPOI Name: {data["poiName"]}\nTitle: {data["title"]}\nDescription: {data["description"]}\nType: {data["type"]}\nParent: {data["parentName"]}"])
 
     @model_validator(mode="before")
-    def convert_to_list(self, data: Any) -> Any:
+    @classmethod
+    def convert_to_list(cls, data: Any) -> Any:
         # Convert position and rotation from dict to list if necessary
         if isinstance(data, dict):
             for field in ["position", "rotation", "localPosition", "localRotation"]:
