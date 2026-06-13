@@ -315,16 +315,20 @@ def search_poi(
             output_fields=fields,
             filter=filter_expression
         )
-    
-    output: list[tuple[dict, float]] = []
-    for x in res:
-        for hit in x:
-            if hit:
-                entity = cast(dict, _to_native(dict(hit["entity"])))
-                logging.info(f"converted entity: { {k: type(v) for k, v in entity.items()} }")
-                output.append((entity, float(hit["distance"])))
 
-    return output
+    return [
+        (
+            {
+                **hit["entity"],
+                "position": list(hit["entity"]["position"]),
+                "rotation": list(hit["entity"]["rotation"]),
+                "localPosition": list(hit["entity"]["localPosition"]),
+                "localRotation": list(hit["entity"]["localRotation"])
+            },
+            float(hit["distance"])
+        )
+        for x in res for hit in x if hit
+    ]
 
 # def search_poi(
 #        query: str,
