@@ -1,0 +1,342 @@
+{
+  "eval_set_id": "full_agent_eval_set_1",
+  "name": "full_agent_eval_set_1",
+  "eval_cases": [
+    {
+      "eval_id": "Take_me_to_room_3436",
+      "conversation": [
+        {
+          "invocation_id": "e-c7ecd3dd-1be8-4b3e-b4cf-fde43ee369b8",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Take me to room 3436"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "{\"user_query\": \"Take me to room 3436\", \"response\": \"Navigating to Room 3436.\", \"actions\": [{\"order\": 0, \"cmd\": \"navigation\", \"id\": 151, \"target_label\": \"Room 3436\"}]}"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to room 3436\", \"intent\": \"navigation_guidance\", \"confidence\": 1.0}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "triage_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to room 3436\", \"targets\": [{\"order\": 0, \"intent\": \"navigation_guidance\", \"target_type\": \"explicit\", \"filter\": \"name LIKE '%3436%'\", \"semantics\": \"Room 3436\", \"source\": \"LLM\"}], \"extraction_method\": \"llm\"}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "synthesis_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to room 3436\", \"validations\": [{\"order\": 0, \"selected_pois\": [{\"id\": 151, \"name\": \"Room 3436\", \"vector\": null, \"title\": \"Room 3436\", \"poiName\": \"Room 3436\", \"description\": \"\", \"type\": \"Room\", \"position\": [-1.063999891281128, 0.2370000034570694, -48.78099822998047], \"rotation\": [0.0, 280.4602355957031, 0.0], \"localPosition\": [-2.9749999046325684, 0.2370000034570694, -48.78099822998047], \"localRotation\": [0.0, 280.4602355957031, 0.0], \"parentName\": \"3rd Floor\"}], \"method\": \"LLM\"}]}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1781367124.565466
+        }
+      ],
+      "session_input": {
+        "app_name": "full_agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1781368233.626237
+    },
+    {
+      "eval_id": "Take_me_to_the_closest_elevator",
+      "conversation": [
+        {
+          "invocation_id": "e-3b738268-ad06-4938-b920-cf7344457998",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Take me to the closest elevator"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "{\"user_query\": \"Take me to the closest elevator\", \"response\": \"Guiding you to the nearest elevator.\", \"actions\": [{\"order\": 0, \"cmd\": \"resolve_nearest\", \"candidate_ids\": [5, 6, 4], \"target_label\": \"elevator\"}]}"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to the closest elevator\", \"intent\": \"navigation_guidance\", \"confidence\": 0.95}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "triage_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to the closest elevator\", \"targets\": [{\"order\": 0, \"intent\": \"navigation_guidance\", \"target_type\": \"implicit\", \"filter\": \"name LIKE '%Elevator%'\", \"semantics\": \"closest elevator, lift\", \"source\": \"LLM\"}], \"extraction_method\": \"llm\"}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "synthesis_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\n  \"user_query\": \"Take me to the closest elevator\",\n  \"validations\": [\n    {\n      \"order\": 0,\n      \"selected_pois\": [\n        {\n          \"id\": 5,\n          \"name\": \"Elevator 2nd Floor\",\n          \"poiName\": \"Elevator 2nd Floor\",\n          \"description\": \"\",\n          \"position\": [\n            0.5619999766349792,\n            -4.543000221252441,\n            -7.620572090148926\n          ]\n        },\n        {\n          \"id\": 6,\n          \"name\": \"Elevator 3rd Floor\",\n          \"poiName\": \"Elevator 3rd Floor\",\n          \"description\": \"\",\n          \"position\": [\n            0.5619999766349792,\n            0.0560000017285347,\n            -7.620572090148926\n          ]\n        },\n        {\n          \"id\": 4,\n          \"name\": \"Elevator 1st Floor\",\n          \"poiName\": \"Elevator 1st Floor\",\n          \"description\": \"\",\n          \"position\": [\n            0.19939550757408142,\n            -9.062000274658203,\n            -7.620572090148926\n          ]\n        }\n      ],\n      \"method\": \"LLM\"\n    }\n  ]\n}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1781368278.2838814
+        }
+      ],
+      "session_input": {
+        "app_name": "full_agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1781368294.9750562
+    },
+    {
+      "eval_id": "Take_me_to_the_bathroom",
+      "conversation": [
+        {
+          "invocation_id": "e-1dc09363-d8ea-4fc3-a934-7b0986e9b48c",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Take me to the bathroom"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "{\"user_query\": \"Take me to the bathroom\", \"response\": \"I found several restrooms. Which restroom would you like to go to, men's or women's?\", \"actions\": [{\"order\": 0, \"cmd\": \"clarify\", \"unresolved_target\": \"bathroom\", \"reason\": \"The user did not specify whether they want the men's or women's restroom.\", \"suggestions\": [{\"id\": 12, \"name\": \"Women's Restroom 1st Floor\"}, {\"id\": 7, \"name\": \"Women's Restroom 3rd Floor\"}, {\"id\": 11, \"name\": \"Women's Restroom 2nd Floor\"}, {\"id\": 9, \"name\": \"Men's Restroom 1st Floor\"}, {\"id\": 10, \"name\": \"Men's Restroom 3rd Floor\"}], \"prompt\": \"Which restroom would you like to go to, men's or women's?\"}]}"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to the bathroom\", \"intent\": \"navigation_guidance\", \"confidence\": 0.95}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "triage_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to the bathroom\", \"targets\": [{\"order\": 0, \"intent\": \"navigation_guidance\", \"target_type\": \"implicit\", \"filter\": \"name LIKE '%Bathroom%'\", \"semantics\": \"bathroom\", \"source\": \"LLM\"}], \"extraction_method\": \"llm\"}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "synthesis_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to the bathroom\", \"validations\": [{\"order\": 0, \"selected_pois\": [{\"id\": 12, \"name\": \"Women's Restroom 1st Floor\", \"poiName\": \"Women's Restroom 1st Floor\", \"description\": \"\", \"position\": [-0.44656792283058167, -8.812000274658203, -11.871427536010742]}, {\"id\": 7, \"name\": \"Women's Restroom 3rd Floor\", \"poiName\": \"Women's Restroom 3rd Floor\", \"description\": \"\", \"position\": [7.103494644165039, 0.0559999942779541, 12.894818305969238]}, {\"id\": 11, \"name\": \"Women's Restroom 2nd Floor\", \"poiName\": \"Women's Restroom 2nd Floor\", \"description\": \"\", \"position\": [-0.16715875267982483, -4.434000015258789, -11.549670219421387]}, {\"id\": 9, \"name\": \"Men's Restroom 1st Floor\", \"poiName\": \"Men's Restroom 1st Floor\", \"description\": \"\", \"position\": [6.125999927520752, -8.76200008392334, 13.015000343322754]}, {\"id\": 10, \"name\": \"Men's Restroom 3rd Floor\", \"poiName\": \"Men's Restroom 3rd Floor\", \"description\": \"\", \"position\": [-2.6489999294281006, 0.0559999942779541, -12.41100025177002]}], \"method\": \"LLM\"}]}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1781368321.4176755
+        }
+      ],
+      "session_input": {
+        "app_name": "full_agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1781368340.8717797
+    },
+    {
+      "eval_id": "Where_is_room_3431",
+      "conversation": [
+        {
+          "invocation_id": "e-8ba94327-8774-4302-a648-814b7f107f02",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Where is room 3431?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "{\"user_query\": \"Where is room 3431?\", \"response\": \"Room 3431 is located on the third floor, in the fourth hallway.\", \"actions\": [{\"order\": 0, \"cmd\": \"answer\", \"text\": \"Room 3431 is located on the third floor, in the fourth hallway.\", \"source_ids\": [87]}]}"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Where is room 3431?\", \"intent\": \"navigation_query\", \"confidence\": 0.95}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "triage_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Where is room 3431?\", \"targets\": [{\"order\": 0, \"intent\": \"navigation_query\", \"target_type\": \"explicit\", \"filter\": \"name LIKE '%3431%'\", \"semantics\": \"Room 3431\", \"source\": \"LLM\"}], \"extraction_method\": \"llm\"}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "synthesis_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Where is room 3431?\", \"validations\": [{\"order\": 0, \"selected_pois\": [{\"id\": 87, \"name\": \"Room 3431\", \"poiName\": \"Room 3431\", \"description\": \"\", \"position\": [0.9880000352859497, 0.3070000112056732, -46.3129997253418]}], \"method\": \"LLM\"}]}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1781368355.224773
+        }
+      ],
+      "session_input": {
+        "app_name": "full_agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1781368368.0976906
+    },
+    {
+      "eval_id": "Test_all_actions",
+      "conversation": [
+        {
+          "invocation_id": "e-961f8a23-6293-4bbb-afa8-76ce5906a8fa",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Take me to room 3436, then to the closest elevator, then to the bathroom. Also, where is room 3431?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "{\"user_query\": \"Take me to room 3436, then to the closest elevator, then to the bathroom. Also, where is room 3431?\", \"response\": \"Alright, I'll guide you to room 3436 first, then to the closest elevator. After that, I'll need to know which bathroom you'd like to go to, men's or women's? Also, room 3431 is on the 3rd floor, in the 4th hallway.\", \"actions\": [{\"order\": 0, \"cmd\": \"navigation\", \"id\": 151, \"target_label\": \"Room 3436\"}, {\"order\": 1, \"cmd\": \"resolve_nearest\", \"candidate_ids\": [5, 6, 4], \"target_label\": \"elevator\"}, {\"order\": 2, \"cmd\": \"clarify\", \"unresolved_target\": \"bathroom\", \"reason\": \"multiple restrooms found and gender preference is needed\", \"suggestions\": [{\"id\": 12, \"name\": \"Women's Restroom 1st Floor\"}, {\"id\": 7, \"name\": \"Women's Restroom 3rd Floor\"}, {\"id\": 11, \"name\": \"Women's Restroom 2nd Floor\"}, {\"id\": 9, \"name\": \"Men's Restroom 1st Floor\"}, {\"id\": 10, \"name\": \"Men's Restroom 3rd Floor\"}], \"prompt\": \"I found multiple restrooms. Which bathroom would you like to go to, men's or women's?\"}, {\"order\": 3, \"cmd\": \"answer\", \"text\": \"Room 3431 is on the 3rd floor, in the 4th hallway.\", \"source_ids\": [87]}]}"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "root_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\":\"Take me to room 3436, then to the closest elevator, then to the bathroom. Also, where is room 3431?\",\"intent\":\"navigation_guidance\",\"confidence\":0.95}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "triage_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to room 3436, then to the closest elevator, then to the bathroom. Also, where is room 3431?\", \"targets\": [{\"order\": 0, \"intent\": \"navigation_guidance\", \"target_type\": \"explicit\", \"filter\": \"name LIKE '%3436%'\", \"semantics\": \"Room 3436\", \"source\": \"LLM\"}, {\"order\": 1, \"intent\": \"navigation_guidance\", \"target_type\": \"implicit\", \"filter\": \"name LIKE '%elevator%' OR name LIKE '%lift%'\", \"semantics\": \"closest elevator\", \"source\": \"LLM\"}, {\"order\": 2, \"intent\": \"navigation_guidance\", \"target_type\": \"implicit\", \"filter\": \"name LIKE '%restroom%' OR name LIKE '%bathroom%' OR name LIKE '%washroom%' OR name LIKE '%lavatory%' OR name LIKE '%WC%'\", \"semantics\": \"bathroom\", \"source\": \"LLM\"}, {\"order\": 3, \"intent\": \"navigation_query\", \"target_type\": \"explicit\", \"filter\": \"name LIKE '%3431%'\", \"semantics\": \"Room 3431\", \"source\": \"LLM\"}], \"extraction_method\": \"llm\"}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "synthesis_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\"user_query\": \"Take me to room 3436, then to the closest elevator, then to the bathroom. Also, where is room 3431?\", \"validations\": [{\"order\": 0, \"selected_pois\": [{\"id\": 151, \"name\": \"Room 3436\", \"poiName\": \"Room 3436\", \"description\": \"\", \"position\": [-1.063999891281128, 0.2370000034570694, -48.78099822998047]}], \"method\": \"LLM\"}, {\"order\": 1, \"selected_pois\": [{\"id\": 5, \"name\": \"Elevator 2nd Floor\", \"poiName\": \"Elevator 2nd Floor\", \"description\": \"\", \"position\": [0.5619999766349792, -4.543000221252441, -7.620572090148926]}, {\"id\": 6, \"name\": \"Elevator 3rd Floor\", \"poiName\": \"Elevator 3rd Floor\", \"description\": \"\", \"position\": [0.5619999766349792, 0.0560000017285347, -7.620572090148926]}, {\"id\": 4, \"name\": \"Elevator 1st Floor\", \"poiName\": \"Elevator 1st Floor\", \"description\": \"\", \"position\": [0.19939550757408142, -9.062000274658203, -7.620572090148926]}], \"method\": \"LLM\"}, {\"order\": 2, \"selected_pois\": [{\"id\": 12, \"name\": \"Women's Restroom 1st Floor\", \"poiName\": \"Women's Restroom 1st Floor\", \"description\": \"\", \"position\": [-0.44656792283058167, -8.812000274658203, -11.871427536010742]}, {\"id\": 7, \"name\": \"Women's Restroom 3rd Floor\", \"poiName\": \"Women's Restroom 3rd Floor\", \"description\": \"\", \"position\": [7.103494644165039, 0.0559999942779541, 12.894818305969238]}, {\"id\": 11, \"name\": \"Women's Restroom 2nd Floor\", \"poiName\": \"Women's Restroom 2nd Floor\", \"description\": \"\", \"position\": [-0.16715875267982483, -4.434000015258789, -11.549670219421387]}, {\"id\": 9, \"name\": \"Men's Restroom 1st Floor\", \"poiName\": \"Men's Restroom 1st Floor\", \"description\": \"\", \"position\": [6.125999927520752, -8.76200008392334, 13.015000343322754]}, {\"id\": 10, \"name\": \"Men's Restroom 3rd Floor\", \"poiName\": \"Men's Restroom 3rd Floor\", \"description\": \"\", \"position\": [-2.6489999294281006, 0.0559999942779541, -12.41100025177002]}], \"method\": \"LLM\"}, {\"order\": 3, \"selected_pois\": [{\"id\": 87, \"name\": \"Room 3431\", \"poiName\": \"Room 3431\", \"description\": \"\", \"position\": [0.9880000352859497, 0.3070000112056732, -46.3129997253418]}], \"method\": \"LLM\"}]}"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1781368415.3019369
+        }
+      ],
+      "session_input": {
+        "app_name": "full_agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1781368476.8682678
+    }
+  ],
+  "creation_timestamp": 1781365358.399165
+}
