@@ -10,7 +10,6 @@ dependencies = [
     "pymilvus[model,milvus_lite]>=2.7.0",
     "Flax",
     "websockets>=15.0.1",
-    "google-generativeai>=0.8.6",
     "google-genai>=1.64.0",
     "fastmcp>=3.3.1",
     "pytest>=9.0.3",
