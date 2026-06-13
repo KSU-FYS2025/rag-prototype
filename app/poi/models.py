@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Optional, Any, Literal, Callable, Type, Tuple, TypeVar
 
-from pydantic import BaseModel, create_model, Field
+from pydantic import BaseModel, create_model, Field, model_validator
 from pydantic.fields import FieldInfo
 from pymilvus import DataType, MilvusClient
 
@@ -51,6 +51,14 @@ class POI(BaseModel):
     def generate_embedding_json(cls, data: dict):
         return embedding_fn.encode_documents([f"Name: {data["name"]}\nPOI Name: {data["poiName"]}\nTitle: {data["title"]}\nDescription: {data["description"]}\nType: {data["type"]}\nParent: {data["parentName"]}"])
 
+    @model_validator(mode="before")
+    def convert_to_list(self, data: Any) -> Any:
+        # Convert position and rotation from dict to list if necessary
+        if isinstance(data, dict):
+            for field in ["position", "rotation", "localPosition", "localRotation"]:
+                if field in data and not isinstance(data[field], list):
+                    data[field] = list(data[field])
+        return data
 
 @partial_model
 class POIOptional(POI):
