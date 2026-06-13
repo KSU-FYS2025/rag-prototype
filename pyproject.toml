@@ -20,6 +20,7 @@ dependencies = [
     "httpx>=0.28.1",
     "pytest-asyncio>=1.4.0",
     "google-adk>=2.0.0",
+    "google-adk[eval]",
     "pydantic>=2.12.4",
     "requests>=2.32.5",
 ]
