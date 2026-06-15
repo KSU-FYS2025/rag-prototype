@@ -4,20 +4,13 @@ import requests
 adk_data = {
     "app_name": "full_agent",
     "user_id": "user",
-    "session_id": "test_1",
+    "evalset_name": "full_agent_eval_set_large_2"
 }
 
-run_url = "http://10.96.50.180:8080/run"
-session_url =\
-    f"http://10.96.50.180:8080/apps/{adk_data['app_name']}/users/{adk_data['user_id']}/sessions/{adk_data['session_id']}"
-
-# Delete session if exists
-res = requests.delete(session_url)
-print(res.json())
-
-# Create session
-res = requests.post(session_url)
-print(res.json())
+adk_url = "http://10.96.50.180:8080"
+app_url = f"{adk_url}/apps/{adk_data['app_name']}"
+run_url = f"{adk_url}/run"
+eval_set_url = f"{adk_url}/dev/apps/{adk_data['app_name']}/eval_sets/{adk_data['evalset_name']}"
 
 # Load queries from ExcelQueries.json
 json_data = ""
@@ -25,11 +18,21 @@ with open("ExcelQueries.json", "r") as file:
     json_data = json.load(file)
 
 # Send chat request for all queries in ExcelQueries.json
-for query in json_data:
+for i, query in enumerate(json_data):
+    # Generate new session_id for each test case
+    session_id = f"Test_{i}"
+    session_url = f"{app_url}/users/{adk_data['user_id']}/sessions/{session_id}"
+    # Delete session if present
+    requests.delete(session_url)
+
+    # Create session
+    requests.post(session_url)
+
+    # Create data to post
     data = {
         "app_name": adk_data["app_name"],
         "user_id": adk_data["user_id"],
-        "session_id": adk_data["session_id"],
+        "session_id": session_id,
         "new_message": {
             "parts": [
                 {"text": query}
@@ -37,6 +40,17 @@ for query in json_data:
             "role": "user"
         }
     }
+
+    # Post data, print response
     res = requests.post(run_url, json=data)
     print(res.json())
 
+    # Add session (data we just posted) to evalset
+    requests.post(
+        f"{eval_set_url}/add_session",
+        json={
+            "evalId": adk_data["evalset_name"],
+            "sessionId": session_id,
+            "userId": adk_data["user_id"],
+        }
+    )
