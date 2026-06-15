@@ -1,0 +1,1517 @@
+[
+  {
+    "query": "Can you take me to Room 2224?",
+    "result": {
+      "user_query": "Can you take me to Room 2224?",
+      "response": "Navigating to Room 2224.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 64,
+          "target_label": "Room 2224"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to Room 1031.",
+    "result": {
+      "user_query": "Navigate me to Room 1031.",
+      "response": "Navigating to Room 1031.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 43,
+          "target_label": "Room 1031"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to Room 2041.",
+    "result": {
+      "user_query": "Take me to Room 2041.",
+      "response": "Okay, I will guide you to Room 2041.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 60,
+          "target_label": "Room 2041"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to Room 1122.",
+    "result": {
+      "user_query": "Navigate me to Room 1122.",
+      "response": "Navigating to Room 1122.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 51,
+          "target_label": "Room 1122"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is Room 2229?",
+    "result": {
+      "user_query": "Where is Room 2229?",
+      "response": "Room 2229 is located on the second floor in the second hallway.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "answer",
+          "text": "Room 2229 is located on the second floor in the second hallway.",
+          "source_ids": [
+            54
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you show me how to get to Room 1216?",
+    "result": {
+      "user_query": "Can you show me how to get to Room 1216?",
+      "response": "Navigating to Room 1216.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 39,
+          "target_label": "Room 1216"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to Room 2119.",
+    "result": {
+      "user_query": "Navigate me to Room 2119.",
+      "response": "Navigating to Room 2119.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 77,
+          "target_label": "Room 2119"
+        }
+      ]
+    }
+  },
+  {
+    "query": "How do I get to Room 3117?",
+    "result": {
+      "user_query": "How do I get to Room 3117?",
+      "response": "Navigating to Room 3117.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 156,
+          "target_label": "Room 3117"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to Room 3332.",
+    "result": {
+      "user_query": "Take me to Room 3332.",
+      "response": "I am now guiding you to Room 3332.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 159,
+          "target_label": "Room 3332"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is Room 1212?",
+    "result": {
+      "user_query": "Where is Room 1212?",
+      "response": "Room 1212 is located on the first floor in hallway 2.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "answer",
+          "text": "Room 1212 is located on the first floor in hallway 2.",
+          "source_ids": [
+            40
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you direct me to Room 2050?",
+    "result": {
+      "user_query": "Can you direct me to Room 2050?",
+      "response": "I can direct you to Room 2050.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 69,
+          "target_label": "Room 2050"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to Room 1227.",
+    "result": {
+      "user_query": "Take me to Room 1227.",
+      "response": "Navigating to Room 1227.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 19,
+          "target_label": "Room 1227"
+        }
+      ]
+    }
+  },
+  {
+    "query": "How do I get to Room 3223?",
+    "result": {
+      "user_query": "How do I get to Room 3223?",
+      "response": "I can guide you to Room 3223.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 167,
+          "target_label": "Room 3223"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to Room 2225.",
+    "result": {
+      "user_query": "Navigate me to Room 2225.",
+      "response": "Navigating to Room 2225.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 55,
+          "target_label": "Room 2225"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is Room 1050?",
+    "result": {
+      "user_query": "Where is Room 1050?",
+      "response": "Room 1050 is located on the first floor, in the fifth hallway (hallway 05).",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "answer",
+          "text": "Room 1050 is located on the first floor, in the fifth hallway (hallway 05).",
+          "source_ids": [
+            41
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "query": "How do I get to the Women's Restroom on the 2nd floor?",
+    "result": {
+      "user_query": "How do I get to the Women's Restroom on the 2nd floor?",
+      "response": "I can guide you to the Women's Restroom on the 2nd Floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 11,
+          "target_label": "Women's Restroom 2nd Floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is the Men's Restroom on the 3rd floor?",
+    "result": {
+      "user_query": "Where is the Men's Restroom on the 3rd floor?",
+      "response": "I'm guiding you to the Men's Restroom on the 3rd Floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 10,
+          "target_label": "Men's Restroom"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you direct me to the West Entrance on the 1st floor?",
+    "result": {
+      "user_query": "Can you direct me to the West Entrance on the 1st floor?",
+      "response": "Navigating to the West Entrance on the 1st floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 0,
+          "target_label": "West Entrance on the 1st floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "How do I get to the elevator on the 2nd floor?",
+    "result": {
+      "user_query": "How do I get to the elevator on the 2nd floor?",
+      "response": "I can guide you to the elevator on the 2nd floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 5,
+          "target_label": "elevator on the 2nd floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the stairwell on the 3rd floor.",
+    "result": {
+      "user_query": "Take me to the stairwell on the 3rd floor.",
+      "response": "Navigating to the stairwell on the 3rd floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 13,
+          "target_label": "Stairwell 3rd Floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the South Entrance on the 1st floor.",
+    "result": {
+      "user_query": "Take me to the South Entrance on the 1st floor.",
+      "response": "Leading the way to the South Entrance on the 1st floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 3,
+          "target_label": "South Entrance on the 1st floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to use the bathroom. Where is the nearest one?",
+    "result": {
+      "user_query": "I need to use the bathroom. Where is the nearest one?",
+      "response": "There are multiple restrooms available. Do you prefer the men's or women's restroom?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "bathroom",
+          "reason": "The gender of the restroom was not specified.",
+          "suggestions": [
+            {
+              "id": 12,
+              "name": "Women's Restroom 1st Floor"
+            },
+            {
+              "id": 7,
+              "name": "Women's Restroom 3rd Floor"
+            },
+            {
+              "id": 11,
+              "name": "Women's Restroom 2nd Floor"
+            },
+            {
+              "id": 9,
+              "name": "Men's Restroom 1st Floor"
+            },
+            {
+              "id": 10,
+              "name": "Men's Restroom 3rd Floor"
+            }
+          ],
+          "prompt": "There are multiple restrooms available. Do you prefer the men's or women's restroom?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to get to a different floor. Where are the stairs?",
+    "result": {
+      "user_query": "I need to get to a different floor. Where are the stairs?",
+      "response": "I see multiple stairwells. I will guide you to the nearest one.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            14,
+            13,
+            15
+          ],
+          "target_label": "stairs"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to get outside as fast as possible. What is the closest exit?",
+    "result": {
+      "user_query": "I need to get outside as fast as possible. What is the closest exit?",
+      "response": "I will guide you to the closest exit.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            2,
+            1,
+            3,
+            0
+          ],
+          "target_label": "exit"
+        }
+      ]
+    }
+  },
+  {
+    "query": "My class uses Apple computers. Where is that room?",
+    "result": {
+      "user_query": "My class uses Apple computers. Where is that room?",
+      "response": "I'm sorry, I don't have information about a specific room associated with Apple computers. Could you please specify which room you are referring to?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "room with Apple computers",
+          "reason": "No specific room associated with Apple computers was found.",
+          "suggestions": [],
+          "prompt": "I'm sorry, I don't have information about a specific room associated with Apple computers. Could you please specify which room you are referring to?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to get to a room for my foreign language class. Where would that be?",
+    "result": {
+      "user_query": "I need to get to a room for my foreign language class. Where would that be?",
+      "response": "Foreign language classes are typically held in several rooms on the 3rd floor. For example, Room 3411 is on the 3rd floor in hallway 4, and rooms 3315, 3317, 3312, and 3319 are all on the 3rd floor in hallway 3.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "answer",
+          "text": "Foreign language classes are typically held in several rooms on the 3rd floor. For example, Room 3411 is on the 3rd floor in hallway 4, and rooms 3315, 3317, 3312, and 3319 are all on the 3rd floor in hallway 3.",
+          "source_ids": [
+            95,
+            102,
+            103,
+            155,
+            104
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "query": "I have a game design lab session. Where do I go?",
+    "result": {
+      "user_query": "I have a game design lab session. Where do I go?",
+      "response": "I found multiple rooms for game design labs. Which room number are you looking for?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "game design lab session",
+          "reason": "There are multiple rooms that could be a game design lab. Please specify which room number you are looking for.",
+          "suggestions": [
+            {
+              "id": 69,
+              "name": "Room 2050"
+            },
+            {
+              "id": 83,
+              "name": "Room 3439"
+            },
+            {
+              "id": 84,
+              "name": "Room 3437"
+            },
+            {
+              "id": 152,
+              "name": "Room 3432"
+            },
+            {
+              "id": 87,
+              "name": "Room 3431"
+            }
+          ],
+          "prompt": "I found multiple rooms for game design labs. Which room number are you looking for?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I am a part-time staff member. Where is my office?",
+    "result": {
+      "user_query": "I am a part-time staff member. Where is my office?",
+      "response": "I cannot tell you exactly where your office is without more information. Do you know your office number or the department you work for?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "my office",
+          "reason": "The system needs more information to identify your specific office, such as an office number or department.",
+          "suggestions": [],
+          "prompt": "I cannot tell you exactly where your office is without more information. Do you know your office number or the department you work for?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where can I find a conference room on the 3rd floor?",
+    "result": {
+      "user_query": "Where can I find a conference room on the 3rd floor?",
+      "response": "I'm sorry, I couldn't find any conference rooms on the 3rd floor. Is there another floor you're interested in, or are you looking for a different type of room?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "conference room on the 3rd floor",
+          "reason": "I could not find any conference rooms on the 3rd floor.",
+          "suggestions": [],
+          "prompt": "I could not find any conference rooms on the 3rd floor. Would you like me to look for conference rooms on a different floor or a different type of room?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to find a computer lab on the 2nd floor.",
+    "result": {
+      "user_query": "I need to find a computer lab on the 2nd floor.",
+      "response": "I couldn't find any computer labs on the 2nd floor. Would you like me to guide you to a computer lab on a different floor?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "computer lab on the 2nd floor",
+          "reason": "no computer labs were found on the 2nd floor",
+          "suggestions": [],
+          "prompt": "I couldn't find any computer labs on the 2nd floor. Would you like me to guide you to a computer lab on a different floor?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to Room 1212 first and then to Room 2119 after.",
+    "result": {
+      "user_query": "Take me to Room 1212 first and then to Room 2119 after.",
+      "response": "Alright, I'll guide you to Room 1212 first, and then to Room 2119.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 40,
+          "target_label": "Room 1212"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 77,
+          "target_label": "Room 2119"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you navigate me from the West Entrance on the 1st floor to Room 1031?",
+    "result": {
+      "user_query": "Can you navigate me from the West Entrance on the 1st floor to Room 1031?",
+      "response": "Navigating from the West Entrance on the 1st floor to Room 1031.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 43,
+          "target_label": "Room 1031"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the Men's Restroom on the 1st floor and then to Room 2041.",
+    "result": {
+      "user_query": "Take me to the Men's Restroom on the 1st floor and then to Room 2041.",
+      "response": "First, I will guide you to the Men's Restroom on the 1st floor. After that, I will guide you to Room 2041.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 9,
+          "target_label": "Men's Restroom 1st Floor"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 60,
+          "target_label": "Room 2041"
+        }
+      ]
+    }
+  },
+  {
+    "query": "First bring me to Room 3117 and then to the elevator on the 3rd floor.",
+    "result": {
+      "user_query": "First bring me to Room 3117 and then to the elevator on the 3rd floor.",
+      "response": "Okay, guiding you to Room 3117. After that, I couldn't find the elevator on the 3rd floor. Can you please specify which elevator you are looking for?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 156,
+          "target_label": "Room 3117"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "the elevator on the 3rd floor",
+          "reason": "I couldn't find the elevator on the 3rd floor.",
+          "suggestions": [],
+          "prompt": "I couldn't find the elevator on the 3rd floor. Can you please specify which elevator you are looking for?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to go to Room 1126 and then Room 1129.",
+    "result": {
+      "user_query": "I need to go to Room 1126 and then Room 1129.",
+      "response": "Alright, guiding you to Room 1126, and then to Room 1129.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 50,
+          "target_label": "Room 1126"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 48,
+          "target_label": "Room 1129"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to the Women's Restroom on the 3rd floor and then to Room 3332.",
+    "result": {
+      "user_query": "Navigate me to the Women's Restroom on the 3rd floor and then to Room 3332.",
+      "response": "Navigating you to the Women's Restroom on the 3rd floor, and then to Room 3332.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 7,
+          "target_label": "Women's Restroom 3rd Floor"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 159,
+          "target_label": "Room 3332"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to Room 2031 first and then to the stairwell on the 2nd floor.",
+    "result": {
+      "user_query": "Take me to Room 2031 first and then to the stairwell on the 2nd floor.",
+      "response": "Alright, I will guide you to Room 2031 and then to the stairwell on the 2nd floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 74,
+          "target_label": "Room 2031"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 14,
+          "target_label": "Stairwell 2nd Floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you bring me to Room 1216 and then Room 2225?",
+    "result": {
+      "user_query": "Can you bring me to Room 1216 and then Room 2225?",
+      "response": "Certainly! I will guide you to Room 1216 first, and then to Room 2225.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 39,
+          "target_label": "Room 1216"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 55,
+          "target_label": "Room 2225"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I want to go to Room 3229 first then Room 3223.",
+    "result": {
+      "user_query": "I want to go to Room 3229 first then Room 3223.",
+      "response": "Leading you to Room 3229 first, then I'll guide you to Room 3223.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 163,
+          "target_label": "Room 3229"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 167,
+          "target_label": "Room 3223"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the East Entrance on the 1st floor and then to Room 1050.",
+    "result": {
+      "user_query": "Take me to the East Entrance on the 1st floor and then to Room 1050.",
+      "response": "I can guide you to the East Entrance on the 1st floor, and then to Room 1050.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 1,
+          "target_label": "East Entrance 1st Floor"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 41,
+          "target_label": "Room 1050"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to Room 2112 and then to Room 2120.",
+    "result": {
+      "user_query": "Navigate me to Room 2112 and then to Room 2120.",
+      "response": "Navigating to Room 2112.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 79,
+          "target_label": "Room 2112"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 81,
+          "target_label": "Room 2120"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Bring me to Room 3411 and then to the Men's Restroom on the 3rd floor.",
+    "result": {
+      "user_query": "Bring me to Room 3411 and then to the Men's Restroom on the 3rd floor.",
+      "response": "Okay, I will guide you to Room 3411 and then to the Men's Restroom on the 3rd floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 95,
+          "target_label": "Room 3411"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 10,
+          "target_label": "Men's Restroom on the 3rd floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to Room 2213 and then to Room 2217.",
+    "result": {
+      "user_query": "Take me to Room 2213 and then to Room 2217.",
+      "response": "Alright, I will guide you to Room 2213 first, and then to Room 2217.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 58,
+          "target_label": "Room 2213"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 57,
+          "target_label": "Room 2217"
+        }
+      ]
+    }
+  },
+  {
+    "query": "First take me to Room 1113 and then to the stairwell on the 1st floor.",
+    "result": {
+      "user_query": "First take me to Room 1113 and then to the stairwell on the 1st floor.",
+      "response": "First, I will guide you to Room 1113. After that, I will take you to the stairwell on the 1st floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 44,
+          "target_label": "Room 1113"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 15,
+          "target_label": "stairwell on the 1st floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to Room 3131 and then to Room 3237.",
+    "result": {
+      "user_query": "Navigate me to Room 3131 and then to Room 3237.",
+      "response": "Navigating to Room 3131. After that, I will guide you to Room 3237.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 172,
+          "target_label": "Room 3131"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 161,
+          "target_label": "Room 3237"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to use the restroom and then find a research room on the 3rd floor.",
+    "result": {
+      "user_query": "I need to use the restroom and then find a research room on the 3rd floor.",
+      "response": "Okay, I will guide you to the Women's Restroom on the 1st Floor, and then to the nearest research room on the 3rd floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 12,
+          "target_label": "restroom"
+        },
+        {
+          "order": 1,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            102,
+            103,
+            104,
+            155
+          ],
+          "target_label": "research room"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to stop by a professor's office on the 3rd floor and then find a large lecture room on the 1st floor that holds at least 70 students.",
+    "result": {
+      "user_query": "I need to stop by a professor's office on the 3rd floor and then find a large lecture room on the 1st floor that holds at least 70 students.",
+      "response": "I can guide you to the nearest professor's office on the 3rd floor. Regarding a large lecture room on the 1st floor that holds at least 70 students, I couldn't find any rooms that match this specific capacity. Would you like me to guide you to a different lecture room, or would you like to try a different capacity?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            102,
+            103,
+            104
+          ],
+          "target_label": "professor's office"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "large lecture room on the 1st floor that holds at least 70 students",
+          "reason": "No POIs were found matching your criteria",
+          "suggestions": [],
+          "prompt": "I couldn't find a large lecture room on the 1st floor that holds at least 70 students. Would you like me to guide you to a different lecture room, or would you like to try a different capacity?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to check in at the reception area near the 2122 rooms and then get to an open computer lab.",
+    "result": {
+      "user_query": "I need to check in at the reception area near the 2122 rooms and then get to an open computer lab.",
+      "response": "I can guide you to the reception area near room 2122. After that, I couldn't find a specific open computer lab. Which computer lab would you like to go to?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 82,
+          "target_label": "reception area near the 2122 rooms"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "open computer lab",
+          "reason": "The system could not identify a specific 'open' computer lab, and requires further clarification.",
+          "suggestions": [],
+          "prompt": "The system could not identify a specific 'open' computer lab, and requires further clarification. Which computer lab would you like to go to?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the break room first and then to a classroom that fits about 35 students on the 2nd floor.",
+    "result": {
+      "user_query": "Take me to the break room first and then to a classroom that fits about 35 students on the 2nd floor.",
+      "response": "I couldn't find any POIs labeled as a break room. Also, I found several classrooms on the 2nd floor, but I don't have information about their capacity to confirm which one fits 35 students. Do you have a specific classroom in mind from Room 2050, Room 2217, Room 2212, Room 2213, Room 2221?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "break room",
+          "reason": "I couldn't find any POIs labeled as a break room.",
+          "suggestions": [],
+          "prompt": "I couldn't find any POIs labeled as a break room. Can you please provide more details?"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "classroom that fits about 35 students on the 2nd floor",
+          "reason": "I found several classrooms on the 2nd floor, but I don't have information about their capacity to confirm which one fits 35 students.",
+          "suggestions": [
+            {
+              "id": 69,
+              "name": "Room 2050"
+            },
+            {
+              "id": 57,
+              "name": "Room 2217"
+            },
+            {
+              "id": 67,
+              "name": "Room 2212"
+            },
+            {
+              "id": 58,
+              "name": "Room 2213"
+            },
+            {
+              "id": 56,
+              "name": "Room 2221"
+            }
+          ],
+          "prompt": "I found several classrooms on the 2nd floor, but I don't have information about their capacity to confirm which one fits 35 students. Do you have a specific classroom in mind from Room 2050, Room 2217, Room 2212, Room 2213, Room 2221?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to visit someone in the part-time staff office and then get to the biggest classroom on the 1st floor.",
+    "result": {
+      "user_query": "I need to visit someone in the part-time staff office and then get to the biggest classroom on the 1st floor.",
+      "response": "I couldn't find a 'part-time staff office'. Can you please specify which office you are looking for?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "part-time staff office",
+          "reason": "POI not found",
+          "suggestions": [],
+          "prompt": "I couldn't find a 'part-time staff office'. Can you please specify which office you are looking for?"
+        },
+        {
+          "order": 1,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            30,
+            28,
+            32
+          ],
+          "target_label": "biggest classroom on the 1st floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "First I need to drop by the foreign language lab then head to a classroom that seats at least 36 students.",
+    "result": {
+      "user_query": "First I need to drop by the foreign language lab then head to a classroom that seats at least 36 students.",
+      "response": "I couldn't find any foreign language lab. Could you provide more details?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "foreign language lab",
+          "reason": "I couldn't find any foreign language lab.",
+          "suggestions": [],
+          "prompt": "I couldn't find any foreign language lab. Could you provide more details?"
+        },
+        {
+          "order": 1,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            92,
+            153,
+            89,
+            169,
+            114
+          ],
+          "target_label": "a classroom that seats at least 36 students"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to go to the computer research lab on the 3rd floor then stop by the men's restroom on that same floor.",
+    "result": {
+      "user_query": "I need to go to the computer research lab on the 3rd floor then stop by the men's restroom on that same floor.",
+      "response": "I couldn't find the computer research lab on the 3rd floor. Can you provide more details? Once we resolve that, I can then guide you to the Men's Restroom on the 3rd floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "computer research lab on the 3rd floor",
+          "reason": "The specified computer research lab on the 3rd floor could not be found.",
+          "suggestions": [],
+          "prompt": "I couldn't find a computer research lab on the 3rd floor. Can you provide more details?"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 10,
+          "target_label": "men's restroom on the 3rd floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I have to meet someone in a conference room on the 3rd floor and then head down to a computer classroom on the 1st floor.",
+    "result": {
+      "user_query": "I have to meet someone in a conference room on the 3rd floor and then head down to a computer classroom on the 1st floor.",
+      "response": "I will guide you to the nearest conference room on the 3rd floor and then to the nearest computer classroom on the 1st floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            100,
+            95,
+            149,
+            113,
+            102
+          ],
+          "target_label": "a conference room on the 3rd floor"
+        },
+        {
+          "order": 1,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            30,
+            40,
+            33,
+            28,
+            31
+          ],
+          "target_label": "a computer classroom on the 1st floor"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the DWMA lab and then to the foreign language lab both on the 2nd floor.",
+    "result": {
+      "user_query": "Take me to the DWMA lab and then to the foreign language lab both on the 2nd floor.",
+      "response": "I will take you to the nearest DWMA lab. I couldn't find a foreign language lab. Could you please specify a more precise name or location?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            82,
+            77
+          ],
+          "target_label": "DWMA lab"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "foreign language lab",
+          "reason": "No matching foreign language lab found.",
+          "suggestions": [],
+          "prompt": "I couldn't find a foreign language lab. Could you please specify a more precise name or location?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to visit a research lab on the 3rd floor and then find the open lab nearby.",
+    "result": {
+      "user_query": "I need to visit a research lab on the 3rd floor and then find the open lab nearby.",
+      "response": "I can guide you to the nearest research lab on the 3rd floor. Regarding an open lab, I couldn't find any information about an 'open lab' by that name. Could you please specify which open lab you are referring to or if you meant something else?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            104,
+            102,
+            103,
+            101,
+            155
+          ],
+          "target_label": "research lab on the 3rd floor"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "open lab nearby",
+          "reason": "No POIs were found matching 'open lab'.",
+          "suggestions": [],
+          "prompt": "I couldn't find any information about an 'open lab' by that name. Could you please specify which open lab you are referring to or if you meant something else?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I want to stop by the tutoring center and then get to a classroom for 50 students.",
+    "result": {
+      "user_query": "I want to stop by the tutoring center and then get to a classroom for 50 students.",
+      "response": "I couldn't find a specific tutoring center, nor could I find a specific classroom that can accommodate 50 students. Could you please provide more details for both?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "tutoring center",
+          "reason": "I couldn't find a specific tutoring center.",
+          "suggestions": [],
+          "prompt": "I couldn't find a specific tutoring center. Could you please specify which one you are looking for, or if you meant a general area?"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "classroom for 50 students",
+          "reason": "I couldn't find a specific classroom that can accommodate 50 students.",
+          "suggestions": [],
+          "prompt": "I couldn't find a specific classroom that can accommodate 50 students. Could you provide more details, like a room number or a general area?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you take me somewhere I can get tutoring help and then to my lab class that focuses on game design?",
+    "result": {
+      "user_query": "Can you take me somewhere I can get tutoring help and then to my lab class that focuses on game design?",
+      "response": "Okay, I will guide you to Room 3331 for tutoring help, and then to Room 2050 for your game design lab class.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "navigation",
+          "id": 110,
+          "target_label": "tutoring help"
+        },
+        {
+          "order": 1,
+          "cmd": "navigation",
+          "id": 69,
+          "target_label": "lab class that focuses on game design"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I need to store something and then use the restroom on the 1st floor.",
+    "result": {
+      "user_query": "I need to store something and then use the restroom on the 1st floor.",
+      "response": "I couldn't find any specific storage facilities. Can you clarify what you need to store or what kind of storage you are looking for? Also, there are multiple restrooms on the first floor. Which one would you like to go to, men's or women's?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "a place to store something",
+          "reason": "There are no specific storage facilities found.",
+          "suggestions": [],
+          "prompt": "I couldn't find any specific storage facilities. Can you clarify what you need to store or what kind of storage you are looking for?"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "restroom on the 1st floor",
+          "reason": "There are multiple restrooms on the first floor (men's and women's).",
+          "suggestions": [
+            {
+              "id": 12,
+              "name": "Women's Restroom 1st Floor"
+            },
+            {
+              "id": 9,
+              "name": "Men's Restroom 1st Floor"
+            }
+          ],
+          "prompt": "Which restroom on the first floor would you like to go to, men's or women's?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to a storage room on the 3rd floor first and then to the nearest exit.",
+    "result": {
+      "user_query": "Take me to a storage room on the 3rd floor first and then to the nearest exit.",
+      "response": "I will guide you to a storage room on the 3rd floor, and then to the nearest exit.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            104,
+            103,
+            102
+          ],
+          "target_label": "a storage room on the 3rd floor"
+        },
+        {
+          "order": 1,
+          "cmd": "resolve_nearest",
+          "candidate_ids": [
+            2,
+            1,
+            3,
+            0
+          ],
+          "target_label": "the nearest exit"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I want to find the MAC computer classroom and then head to the humanities English lab.",
+    "result": {
+      "user_query": "I want to find the MAC computer classroom and then head to the humanities English lab.",
+      "response": "I couldn't find the MAC computer classroom or the humanities English lab. Can you provide more details for each?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "MAC computer classroom",
+          "reason": "No POIs were found for 'MAC computer classroom'.",
+          "suggestions": [],
+          "prompt": "I couldn't find a 'MAC computer classroom'. Can you provide more details?"
+        },
+        {
+          "order": 1,
+          "cmd": "clarify",
+          "unresolved_target": "humanities English lab",
+          "reason": "No POIs were found for 'humanities English lab'.",
+          "suggestions": [],
+          "prompt": "I couldn't find a 'humanities English lab'. Can you provide more details?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you take me to the campus bookstore?",
+    "result": {
+      "user_query": "Can you take me to the campus bookstore?",
+      "response": "I couldn't find any location called the campus bookstore. Is there another name for it, or perhaps another location I can help you with?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "campus bookstore",
+          "reason": "No POI found for 'campus bookstore'.",
+          "suggestions": [],
+          "prompt": "I couldn't find any location called the campus bookstore. Is there another name for it, or perhaps another location I can help you with?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is Room 1500?",
+    "result": {
+      "user_query": "Where is Room 1500?",
+      "response": "I couldn't find Room 1500. Could you please provide more details or confirm the room number?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "Room 1500",
+          "reason": "Room 1500 could not be found.",
+          "suggestions": [],
+          "prompt": "I couldn't find Room 1500. Could you please provide more details or confirm the room number?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to the 4th floor study lounge.",
+    "result": {
+      "user_query": "Navigate me to the 4th floor study lounge.",
+      "response": "I couldn't find a \"4th floor study lounge\". Is there something else I can help you with?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "4th floor study lounge",
+          "reason": "No POI found for \"4th floor study lounge\".",
+          "suggestions": [],
+          "prompt": "I couldn't find a \"4th floor study lounge\". Is there something else I can help you with?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the swimming pool on the 1st floor.",
+    "result": {
+      "user_query": "Take me to the swimming pool on the 1st floor.",
+      "response": "I couldn't find a swimming pool on the 1st floor. Would you like me to guide you to a different location?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "swimming pool on the 1st floor",
+          "reason": "I couldn't find a swimming pool on the 1st floor.",
+          "suggestions": [],
+          "prompt": "I couldn't find a swimming pool on the 1st floor. Is there a different location you had in mind?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the fitness center.",
+    "result": {
+      "user_query": "Take me to the fitness center.",
+      "response": "I couldn't find a fitness center. Is there something else I can help you with?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "fitness center",
+          "reason": "No fitness center was found.",
+          "suggestions": [],
+          "prompt": "I couldn't find a fitness center. Can you provide more details or is there something else I can help you with?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is the printing kiosk near Room 2050?",
+    "result": {
+      "user_query": "Where is the printing kiosk near Room 2050?",
+      "response": "I'm sorry, I couldn't find a printing kiosk near Room 2050. Can I help you find something else?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "printing kiosk",
+          "reason": "No printing kiosks were found near Room 2050.",
+          "suggestions": [],
+          "prompt": "I'm sorry, I couldn't find a printing kiosk near Room 2050. Can I help you find something else?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you direct me to Room 4210?",
+    "result": {
+      "user_query": "Can you direct me to Room 4210?",
+      "response": "I couldn't find Room 4210. Can you confirm the room name or number?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "Room 4210",
+          "reason": "Could not find Room 4210.",
+          "suggestions": [],
+          "prompt": "I couldn't find Room 4210. Can you confirm the room name or number?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is the student advising office on the 2nd floor?",
+    "result": {
+      "user_query": "Where is the student advising office on the 2nd floor?",
+      "response": "The student advising office, also known as Room 2122/Reception, is located on the second floor in the first hallway.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "answer",
+          "text": "The student advising office, also known as Room 2122/Reception, is located on the second floor in the first hallway.",
+          "source_ids": [
+            82
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "query": "Navigate me to the library on the 3rd floor.",
+    "result": {
+      "user_query": "Navigate me to the library on the 3rd floor.",
+      "response": "I couldn't find a library on the 3rd floor. Could you please provide more details or specify a different location?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "the library on the 3rd floor",
+          "reason": "Could not find a library on the 3rd floor.",
+          "suggestions": [],
+          "prompt": "I couldn't find a library on the 3rd floor. Could you please provide more details or specify a different location?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is the financial aid office?",
+    "result": {
+      "user_query": "Where is the financial aid office?",
+      "response": "I couldn't find the financial aid office. Is there something else I can help you find?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "financial aid office",
+          "reason": "No POIs were found for your query.",
+          "suggestions": [],
+          "prompt": "I couldn't find the financial aid office. Is there something else I can help you find?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Take me to the rooftop terrace.",
+    "result": {
+      "user_query": "Take me to the rooftop terrace.",
+      "response": "I'm sorry, I couldn't find a rooftop terrace. Could you please specify which one you are referring to?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "rooftop terrace",
+          "reason": "No POI found for your query",
+          "suggestions": [],
+          "prompt": "I'm sorry, I couldn't find a rooftop terrace. Could you please specify which one you are referring to?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "How do I get to the student lounge on the 1st floor?",
+    "result": {
+      "user_query": "How do I get to the student lounge on the 1st floor?",
+      "response": "I couldn't find a student lounge on the 1st floor.",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "student lounge on the 1st floor",
+          "reason": "I was unable to find a student lounge on the 1st floor.",
+          "suggestions": [],
+          "prompt": "I was unable to find a student lounge on the 1st floor. Is there another floor you'd like to check for a student lounge, or perhaps a different type of lounge you're looking for?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Where is the nursing suite on the 2nd floor?",
+    "result": {
+      "user_query": "Where is the nursing suite on the 2nd floor?",
+      "response": "I'm sorry, I couldn't find a nursing suite on the 2nd floor. Can I help you find something else?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "nursing suite on the 2nd floor",
+          "reason": "No nursing suite was found on the 2nd floor.",
+          "suggestions": [],
+          "prompt": "I'm sorry, I couldn't find a nursing suite on the 2nd floor. Can I help you find something else?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Can you take me to Room B100 in the basement?",
+    "result": {
+      "user_query": "Can you take me to Room B100 in the basement?",
+      "response": "I could not find Room B100 in the basement. Can you please specify which room you would like to go to?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "Room B100 in the basement",
+          "reason": "I could not find Room B100 in the basement.",
+          "suggestions": [],
+          "prompt": "Can you please specify which room you would like to go to?"
+        }
+      ]
+    }
+  },
+  {
+    "query": "I heard there is a meditation room somewhere on the 2nd floor. Can you take me there?",
+    "result": {
+      "user_query": "I heard there is a meditation room somewhere on the 2nd floor. Can you take me there?",
+      "response": "I couldn't find a meditation room on the 2nd floor. Did you mean a different location or perhaps it's known by another name?",
+      "actions": [
+        {
+          "order": 0,
+          "cmd": "clarify",
+          "unresolved_target": "meditation room on the 2nd floor",
+          "reason": "No meditation room was found on the 2nd floor.",
+          "suggestions": [],
+          "prompt": "I couldn't find a meditation room on the 2nd floor. Did you mean a different location or perhaps it's known by another name?"
+        }
+      ]
+    }
+  }
+]
