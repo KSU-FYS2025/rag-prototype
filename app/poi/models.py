@@ -1,3 +1,5 @@
+import json
+import logging
 from copy import deepcopy
 from typing import Optional, Any, Literal, Callable, Type, Tuple, TypeVar
 
@@ -24,6 +26,57 @@ def partial_model(model: Type[BaseModel]):
             for field_name, field_info in model.model_fields.items()
         }
     )
+
+class POIDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+
+    @staticmethod
+    def object_hook(json_data: dict) -> dict:
+        for i, poi in enumerate(json_data["pois"]):
+            # Transform into database format (turns position objects into arrays)
+            json_data["pois"][i]["position"] = [
+                poi["position"]["x"],
+                poi["position"]["y"],
+                poi["position"]["z"]
+            ]
+            json_data["pois"][i]["rotation"] = [
+                poi["rotation"]["x"],
+                poi["rotation"]["y"],
+                poi["rotation"]["z"]
+            ]
+            json_data["pois"][i]["localPosition"] = [
+                poi["localPosition"]["x"],
+                poi["localPosition"]["y"],
+                poi["localPosition"]["z"]
+            ]
+            json_data["pois"][i]["localRotation"] = [
+                poi["localRotation"]["x"],
+                poi["localRotation"]["y"],
+                poi["localRotation"]["z"]
+            ]
+            json_data["pois"][i]["id"] = poi["identification"]
+
+        try:
+            vectors = POI.batch_generate_embedding_json(json_data["pois"])
+
+            def mapfunc(vector, poi_item):
+                poi_item["vector"] = vector
+                return poi_item
+
+            json_data["pois"] = list(map(mapfunc, vectors, json_data["pois"]))
+
+        except Exception as e:
+            # If embedding fails due to network issues, log and continue
+            # The app can still start, but vector search may not be available
+            logging.warning(
+                f"Failed to generate embedding for POI: {e}. "
+                f"This may be due to network issues. Vector search may be unavailable."
+            )
+            embedding_init_failed = True
+            # Create a dummy embedding if network fails
+
+        return json_data
 
 class POI(BaseModel):
     """
