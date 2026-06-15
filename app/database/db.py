@@ -94,7 +94,7 @@ class EmbeddingFn:
                 "Call initialize() at startup or check server logs for initialization errors."
             )
         # Use the underlying sentence transformer method
-        return self._embedding_fn.encode(queries, convert_to_tensor=True)
+        return self._embedding_fn.encode_query(queries, convert_to_tensor=True)
 
     def encode_documents(self, documents: List[str]):
         if self._embedding_fn is None:
@@ -103,7 +103,7 @@ class EmbeddingFn:
                 "Call initialize() at startup or check server logs for initialization errors."
             )
         # Use the underlying sentence transformer method
-        return self._embedding_fn.encode(documents, convert_to_tensor=True)
+        return self._embedding_fn.encode_document(documents, convert_to_tensor=True)
 
 embedding_fn = EmbeddingFn()
 # Initialize the embedding function globally upon module load to ensure all functions (like search_poi) can use it.

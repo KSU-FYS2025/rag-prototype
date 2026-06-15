@@ -52,42 +52,47 @@ async def lifespan(app: FastAPI):
         with open(poi_json_path, "r") as db_file:
             json_data = json.load(db_file)
             id_counter = 0
-            for poi in json_data["pois"]:
+            for i, poi in enumerate(json_data["pois"]):
                 # Transform into database format (turns position objects into arrays)
-                poi["position"] = [
+                json_data["pois"][i]["position"] = [
                     poi["position"]["x"],
                     poi["position"]["y"],
                     poi["position"]["z"]
                 ]
-                poi["rotation"] = [
+                json_data["pois"][i]["rotation"] = [
                     poi["rotation"]["x"],
                     poi["rotation"]["y"],
                     poi["rotation"]["z"]
                 ]
-                poi["localPosition"] = [
+                json_data["pois"][i]["localPosition"] = [
                     poi["localPosition"]["x"],
                     poi["localPosition"]["y"],
                     poi["localPosition"]["z"]
                 ]
-                poi["localRotation"] = [
+                json_data["pois"][i]["localRotation"] = [
                     poi["localRotation"]["x"],
                     poi["localRotation"]["y"],
                     poi["localRotation"]["z"]
                 ]
-                poi["id"] = poi["identification"]
-                try:
-                    embedding = POI.generate_embedding_json(poi)
-                    poi["vector"] = embedding[0]
-                except Exception as e:
-                    # If embedding fails due to network issues, log and continue
-                    # The app can still start, but vector search may not be available
-                    logging.warning(
-                        f"Failed to generate embedding for POI {poi.get('id', 'unknown')}: {e}. "
-                        f"This may be due to network issues. Vector search may be unavailable."
-                    )
-                    embedding_init_failed = True
-                    # Create a dummy embedding if network fails
-                    poi["vector"] = [0.0] * 768
+                json_data["pois"][i]["id"] = poi["identification"]
+            try:
+                vectors = POI.batch_generate_embedding_json(json_data["pois"])
+
+                def mapfunc(vector, poi_item):
+                    poi_item["vector"] = vector
+                    return poi_item
+
+                json_data["pois"] = list(map(mapfunc, vectors, json_data["pois"]))
+                
+            except Exception as e:
+                # If embedding fails due to network issues, log and continue
+                # The app can still start, but vector search may not be available
+                logging.warning(
+                    f"Failed to generate embedding for POI: {e}. "
+                    f"This may be due to network issues. Vector search may be unavailable."
+                )
+                embedding_init_failed = True
+                # Create a dummy embedding if network fails
 
         logging.info(f"Loaded {len(json_data['pois'])} POIs from file")
 

@@ -42,14 +42,25 @@ class POI(BaseModel):
     localRotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local rotation of the POI")
     parentName: str = Field(default="", description="What collection of POIs the POI belongs to.")
 
-    def generate_embedding(self):
+    def generate_embedding_str(self):
         # Embedding based on key textual descriptors
-        text = f"Name: {self.name}\nPOI Name: {self.poiName}\nTitle: {self.title}\nDescription: {self.description}\nType: {self.type}\nParent: {self.parentName}"
-        self.vector = embedding_fn.encode_documents([text])
+        return f"Name: {self.name}\nPOI Name: {self.poiName}\nTitle: {self.title}\nDescription: {self.description}\nType: {self.type}\nParent: {self.parentName}"
+
+    def generate_embedding(self):
+        self.vector = embedding_fn.encode_documents([self.generate_embedding_str()])
+
+    @classmethod
+    def generate_embedding_str_json(cls, data: dict):
+        return f"Name: {data["name"]}\nPOI Name: {data["poiName"]}\nTitle: {data["title"]}\nDescription: {data["description"]}\nType: {data["type"]}\nParent: {data["parentName"]}"
 
     @classmethod
     def generate_embedding_json(cls, data: dict):
-        return embedding_fn.encode_documents([f"Name: {data["name"]}\nPOI Name: {data["poiName"]}\nTitle: {data["title"]}\nDescription: {data["description"]}\nType: {data["type"]}\nParent: {data["parentName"]}"])
+        return embedding_fn.encode_documents([POI.generate_embedding_str_json(data)])
+
+    @classmethod
+    def batch_generate_embedding_json(cls, data: list[dict]):
+        embedding_data = [POI.generate_embedding_str_json(item) for item in data]
+        return list(embedding_fn.encode_documents(embedding_data))
 
     @model_validator(mode="before")
     @classmethod
