@@ -147,6 +147,20 @@ async def graph_workflow_full(
 ):
     return await run_adk_workflow(user_query, full_workflow, ["synthesis_agent", "response_agent"])
 
+@router.post("/ai/graph-workflow/full_batch", dependencies=[NeedsOllama])
+async def graph_workflow_full(
+        user_query: list[str]
+):
+    collect = []
+    for query in user_query:
+        res = await run_adk_workflow(query, full_workflow, ["synthesis_agent", "response_agent"])
+        collect.append({
+            "query": query,
+            "result": res
+        })
+    
+    return collect
+
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
 async def graph_workflow_root(
         user_query: str
