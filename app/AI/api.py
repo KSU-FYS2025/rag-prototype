@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from typing import Optional
 
 import ollama
@@ -10,6 +11,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.sessions import Session, InMemorySessionService
 from google.genai import types
+from google.genai.errors import ServerError
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse, JSONResponse, Response
 from google.adk import Workflow, Runner
@@ -151,14 +153,21 @@ async def graph_workflow_full(
 async def graph_workflow_full(
         user_query: list[str]
 ):
+    backoff_factor = 2
     collect = []
     for query in user_query:
-        res = await run_adk_workflow(query, full_workflow, ["synthesis_agent", "response_agent"])
-        collect.append({
-            "query": query,
-            "result": res
-        })
-    
+        for i in range(5): # Max retry 5 times
+            try:
+                res = await run_adk_workflow(query, full_workflow, ["synthesis_agent", "response_agent"])
+                collect.append({
+                    "query": query,
+                    "result": res
+                })
+                break
+            except ServerError:
+                logging.info(f"server error, likely caused by high demand. Retrying in {(backoff_factor ** i) / 100} seconds...")
+                time.sleep((backoff_factor ** i) / 100)
+
     return collect
 
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
