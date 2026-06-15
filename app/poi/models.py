@@ -33,6 +33,8 @@ class POIDecoder(json.JSONDecoder):
 
     @staticmethod
     def object_hook(json_data: dict) -> dict:
+        if "pois" not in json_data:
+            raise Exception(f"No pois data found in json data: {json_data}")
         for i, poi in enumerate(json_data["pois"]):
             # Transform into database format (turns position objects into arrays)
             json_data["pois"][i]["position"] = [

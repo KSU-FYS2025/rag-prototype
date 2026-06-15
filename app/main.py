@@ -49,6 +49,7 @@ async def lifespan(app: FastAPI):
 
         logging.info(f"Loading POI data from: {poi_json_path}")
         json_data = None
+        
         with open(poi_json_path, "r") as db_file:
             json_data = json.load(db_file, cls=POIDecoder)
 
