@@ -39,3 +39,4 @@ full_workflow = Workflow(
 )
 
 root_agent = full_workflow
+agent = full_workflow
