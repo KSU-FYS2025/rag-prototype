@@ -1,0 +1,135 @@
+# install.packages("rjson")
+library(rjson)
+
+# Load the JSON file
+json_data <- fromJSON(file = "results/full_agent_full_agent_eval_set_large_4_1781621727.9051986.json")
+
+# Extract queries
+queries <- json_data$evalCaseResults
+# session_details <- sapply(queries, function(x) x$sessionDetails)
+
+get_timestamps <- function(query) {
+  timestamps <- sapply(query$sessionDetails$events, function(e) e$timestamp)
+  max(timestamps) - min(timestamps)
+}
+
+get_user_query <- function(query) {
+  events <- query$sessionDetails$events
+  user_event <- Filter(function(e) !is.null(e$content$role) && e$content$role == "user", events)
+  user_event[[1]]$content$parts[[1]]$text
+}
+
+get_cmds <- function(query) {
+  response_text <- query$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text
+  response_json <- fromJSON(response_text)
+
+  sapply(response_json$actions, function(a) a$cmd)
+}
+
+# Build a data frame directly
+results <- data.frame(
+  user_query  = sapply(queries, get_user_query),
+  time_delta  = sapply(queries, get_timestamps),
+  cmds        = I(sapply(queries, get_cmds))  # Use I() to store lists in a data frame
+)
+
+# Get the user query with the longest time delta
+longest_idx <- which.max(results$time_delta)
+results$user_query[longest_idx]
+results$cmds[longest_idx]
+
+results$cmds[results$cmds == c("resolve_nearest", "resolve_nearest")]
+
+results[which(sapply(queries, function(query) {
+  response_text <- query$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text
+  cmds <- sapply(fromJSON(response_text)$actions, function(a) a$cmd)
+  sum(cmds == "resolve_nearest") == 2
+})), ]
+
+results[which.max(ifelse(sapply(queries, function(query) {
+  response_text <- query$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text
+  cmds <- sapply(fromJSON(response_text)$actions, function(a) a$cmd)
+  "navigation" %in% cmds
+}), results$time_delta, NA)), ]
+
+# Graph the results
+barplot(
+    results$time_delta,
+    names.arg = results$cmds,
+    las = 2,  # Rotate x-axis labels for better readability
+    main = "Time Delta for Each User Query",
+    ylab = "Time Delta (seconds)",
+    col = "blue"
+)
+
+boxplot(
+    results$time_delta,
+    horizontal = TRUE,
+    names = "Time Delta",
+    main = "Boxplot of Time Deltas",
+    ylab = "Time Delta (seconds)",
+    col = "orange"
+)
+
+cmds <- table(unlist(results$cmds))
+
+# Calculate Percentages
+percentages <- round(100 * cmds / sum(cmds), 1)
+
+# Create label strings
+pie_labels <- paste0(names(cmds), " ", percentages, "%")
+pie(
+    cmds,
+    labels = pie_labels,
+    main = "Distribution of Commands",
+    col = rainbow(length(unique(results$cmds)))
+)
+
+cmd_times <- do.call(rbind, lapply(queries, function(query) {
+  response_text <- query$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text
+  response_json <- fromJSON(response_text)
+
+  timestamps <- sapply(query$sessionDetails$events, function(e) e$timestamp)
+  runtime <- max(timestamps) - min(timestamps)
+
+  data.frame(
+    cmd     = sapply(response_json$actions, function(a) a$cmd),
+    runtime = runtime
+  )
+}))
+
+boxplot(runtime ~ cmd, data = cmd_times,
+        main = "Runtime by Command Type",
+        xlab = "Command",
+        ylab = "Runtime (s)",
+        col  = c("steelblue", "tomato", "seagreen", "goldenrod")
+)
+
+get_agent_times <- function(query) {
+  events <- query$sessionDetails$events
+
+  timestamps <- sapply(events, function(e) e$timestamp)
+  start <- min(timestamps)
+
+  agent_events <- Filter(function(e) {
+    !is.null(e$usageMetadata) && !is.null(e$author)
+  }, events)
+
+  data.frame(
+    user_query = events[[1]]$content$parts[[1]]$text,
+    agent      = sapply(agent_events, function(e) e$author),
+    runtime    = sapply(agent_events, function(e) e$timestamp - start)
+  )
+}
+
+agent_times <- do.call(rbind, lapply(queries, get_agent_times))
+
+agent_times$agent <- factor(agent_times$agent,
+                            levels = c("root_agent", "triage_agent", "synthesis_agent", "response_agent"))
+
+boxplot(runtime ~ agent, data = agent_times,
+        main = "Runtime by Agent",
+        xlab = "Agent",
+        ylab = "Runtime (s)",
+        col  = c("steelblue", "tomato", "seagreen", "goldenrod"),
+        names = c("Agent 1 - Root", "Agent 2 - triage", "Agent 3 - synthesis", "Agent 4 - response"))
