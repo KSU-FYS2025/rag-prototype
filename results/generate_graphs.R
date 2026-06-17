@@ -1,4 +1,4 @@
-# install.packages("rjson")
+install.packages("rjson")
 library(rjson)
 
 # Load the JSON file
@@ -133,3 +133,31 @@ boxplot(runtime ~ agent, data = agent_times,
         ylab = "Runtime (s)",
         col  = c("steelblue", "tomato", "seagreen", "goldenrod"),
         names = c("Agent 1 - Root", "Agent 2 - triage", "Agent 3 - synthesis", "Agent 4 - response"))
+
+# Create CSV file for user queries, responses, and POI IDs returned
+get_poi_ids <- function(query) {
+  response_text <- query$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text
+  response_json <- fromJSON(response_text)
+
+  ids <- unlist(lapply(response_json$actions, function(a) {
+    if (!is.null(a$id)) a$id
+    else if (!is.null(a$candidate_ids)) a$candidate_ids
+    else if (!is.null(a$suggestions)) sapply(a$suggestions, function(s) s$id)
+    else NULL
+  }))
+
+  if (is.null(ids)) NA else paste(ids, collapse = ";")
+}
+
+get_final_response <- function(query) {
+  response_text <- query$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text
+  fromJSON(response_text)$response
+}
+
+summary_table <- data.frame(
+  user_query     = results$user_query,
+  final_response = sapply(queries, get_final_response),
+  poi_ids        = sapply(queries, get_poi_ids)
+)
+
+write.csv(summary_table, "summary.csv", row.names = FALSE)
