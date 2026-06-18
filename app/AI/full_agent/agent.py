@@ -1,7 +1,7 @@
 from google.adk.workflow import node
 
 from app.AI.full_agent.conversation_agent.agent import conversation_agent
-from app.AI.full_agent.response_agent.agent import response_agent
+from app.AI.full_agent.actions_agent.agent import actions_agent
 from app.AI.full_agent.root_agent.agent import root_agent as intent_agent
 from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.agent import triage_agent
@@ -14,7 +14,7 @@ from app.AI.schema import NavigationIntent
 navigation_workflow = Workflow(
     name='navigation_workflow',
     edges=[
-        ("START", triage_agent, search_workflow, response_agent),
+        ("START", triage_agent, search_workflow, actions_agent),
     ]
 )
 

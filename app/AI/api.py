@@ -17,8 +17,8 @@ from starlette.responses import StreamingResponse, JSONResponse, Response
 from google.adk import Workflow, Runner
 
 from app.AI.full_agent import search_agent
-from app.AI.full_agent.response_agent.agent import response_agent
-from app.AI.full_agent.response_agent.schema import ResponseAgentOutput
+from app.AI.full_agent.actions_agent.agent import actions_agent
+from app.AI.full_agent.actions_agent.schema import ResponseAgentOutput
 from app.AI.full_agent.root_agent.agent import root_agent
 from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
@@ -147,7 +147,7 @@ async def run_adk_workflow(
 async def graph_workflow_full(
         user_query: str
 ):
-    return await run_adk_workflow(user_query, full_workflow, ["synthesis_agent", "response_agent"])
+    return await run_adk_workflow(user_query, full_workflow, ["synthesis_agent", "actions_agent"])
 
 @router.post("/ai/graph-workflow/full_batch", dependencies=[NeedsOllama])
 async def graph_workflow_full(
@@ -158,7 +158,7 @@ async def graph_workflow_full(
     for query in user_query:
         for i in range(5): # Max retry 5 times
             try:
-                res = await run_adk_workflow(query, full_workflow, ["synthesis_agent", "response_agent"])
+                res = await run_adk_workflow(query, full_workflow, ["synthesis_agent", "actions_agent"])
                 collect.append({
                     "query": query,
                     "result": res
@@ -357,7 +357,7 @@ async def graph_workflow_search(
 async def graph_workflow_response(
         triage_output: SearchOutput
 ):
-    return await run_adk_workflow(triage_output, response_agent, "response_agent")
+    return await run_adk_workflow(triage_output, actions_agent, "actions_agent")
 
 @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 async def user_query_step_1(

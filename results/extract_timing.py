@@ -77,7 +77,7 @@ def extract_timing(data: dict) -> None:
                 author = e.get("author", "unknown")
                 ts = e["timestamp"]
                 since_start = ts - first_ts
-                if author == "response_agent":
+                if author == "actions_agent":
                     full_response = e["content"]["parts"][0]["text"]
                     response_json = json.loads(full_response)
                     for action in response_json["actions"]:
