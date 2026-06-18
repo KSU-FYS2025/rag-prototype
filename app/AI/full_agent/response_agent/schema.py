@@ -71,6 +71,6 @@ class ClarifyAction(Action):
 Command = Union[NavigationAction, ResolveNearestAction, AnswerAction, ClarifyAction]
 
 class ResponseAgentOutput(BaseResponse):
-    response: str = Field(description="The final response from the Unity runner that will be spoken to the user.")
+    # response: str = Field(description="The final response from the Unity runner that will be spoken to the user.")
     actions: List[Command] = Field(description="The list of actions the Unity runner will take. This should be in the "
                                                "order the Unity runner takes them.")
