@@ -23,6 +23,8 @@ dependencies = [
     "google-adk[eval]",
     "pydantic>=2.12.4",
     "requests>=2.32.5",
+    "pyrefly>=0.60.0",
+    "ruff>=0.15.18",
 ]
 
 [tool.uv.sources]
