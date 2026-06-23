@@ -18,7 +18,7 @@ from google.adk import Workflow, Runner
 
 from app.AI.full_agent import search_agent
 from app.AI.full_agent.actions_agent.agent import actions_agent
-from app.AI.full_agent.actions_agent.schema import ResponseAgentOutput
+from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
 from app.AI.full_agent.root_agent.agent import root_agent
 from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
