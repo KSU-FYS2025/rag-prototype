@@ -68,7 +68,8 @@ class ClarifyAction(Action):
 #     Discriminator("cmd")
 # ]
 
-Command = Union[NavigationAction, ResolveNearestAction, AnswerAction, ClarifyAction]
+type Command = NavigationAction | ResolveNearestAction | AnswerAction | ClarifyAction
+
 
 class ActionsAgentOutput(BaseResponse):
     # response: str = Field(description="The final response from the Unity runner that will be spoken to the user.")
