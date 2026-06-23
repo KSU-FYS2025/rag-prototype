@@ -4,10 +4,10 @@ from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import QueryClassifier
 
 llm_step = Agent(
-    model='gemini-2.5-flash',
-    name='root_agent',
-    description='Agent responsible for searching the vector database for POIs.',
-    instruction='''You are the third agent within a chain meant to provide navigation support. Your role is to take each
+    model="gemini-2.5-flash",
+    name="root_agent",
+    description="Agent responsible for searching the vector database for POIs.",
+    instruction="""You are the third agent within a chain meant to provide navigation support. Your role is to take each
     query provided to you and use the search_poi_tool() tool to find them within the vector database. You will need to
     generate a filter for each one, but that is all the reasoning you are intended to do. The following is the layout of
     the JSON data you will receive.
@@ -34,7 +34,7 @@ llm_step = Agent(
             "selected_ids": <list<int>>, id(s) of elements found within vector search
         }
     }
-    ''',
+    """,
     input_schema=QueryClassifier,
     output_schema=SearchOutput,
 )

@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Optional, Any, Literal, Callable, Type, Tuple, TypeVar
+from typing import Optional, Any, Type, Tuple
 
 from pydantic import BaseModel, create_model, Field, model_validator
 from pydantic.fields import FieldInfo
@@ -12,11 +12,14 @@ from app.database.db import embedding_fn
 
 # https://stackoverflow.com/a/76560886
 def partial_model(model: Type[BaseModel]):
-    def make_field_optional(field: FieldInfo, default: Any = None) -> Tuple[Any, FieldInfo]:
+    def make_field_optional(
+        field: FieldInfo, default: Any = None
+    ) -> Tuple[Any, FieldInfo]:
         new = deepcopy(field)
         new.default = default
         new.annotation = Optional[field.annotation]  # type: ignore
         return new.annotation, new
+
     return create_model(
         model.__name__,
         __base__=model,
@@ -24,8 +27,9 @@ def partial_model(model: Type[BaseModel]):
         **{
             field_name: make_field_optional(field_info)
             for field_name, field_info in model.model_fields.items()
-        }
+        },
     )
+
 
 class POIDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
@@ -40,22 +44,22 @@ class POIDecoder(json.JSONDecoder):
             json_data["pois"][i]["position"] = [
                 poi["position"]["x"],
                 poi["position"]["y"],
-                poi["position"]["z"]
+                poi["position"]["z"],
             ]
             json_data["pois"][i]["rotation"] = [
                 poi["rotation"]["x"],
                 poi["rotation"]["y"],
-                poi["rotation"]["z"]
+                poi["rotation"]["z"],
             ]
             json_data["pois"][i]["localPosition"] = [
                 poi["localPosition"]["x"],
                 poi["localPosition"]["y"],
-                poi["localPosition"]["z"]
+                poi["localPosition"]["z"],
             ]
             json_data["pois"][i]["localRotation"] = [
                 poi["localRotation"]["x"],
                 poi["localRotation"]["y"],
-                poi["localRotation"]["z"]
+                poi["localRotation"]["z"],
             ]
             json_data["pois"][i]["id"] = poi["identification"]
 
@@ -80,22 +84,42 @@ class POIDecoder(json.JSONDecoder):
 
         return json_data
 
+
 class POI(BaseModel):
     """
     Aligned strictly with Unity POIData from POIExtractor.cs
     """
+
     id: int = Field(description="Unique identifier of the POI")
     name: str = Field(description="Name of the POI")
-    vector: Optional[list[float]] = Field(default=None, description="Vector embedding representation of the POI")
-    title: str = Field(default="", description="Title of the POI. Brief information about what the POI is.")
-    poiName: str = Field(description="Name of the POI. Will be the same as title a majority of the time.")
+    vector: Optional[list[float]] = Field(
+        default=None, description="Vector embedding representation of the POI"
+    )
+    title: str = Field(
+        default="",
+        description="Title of the POI. Brief information about what the POI is.",
+    )
+    poiName: str = Field(
+        description="Name of the POI. Will be the same as title a majority of the time."
+    )
     description: str = Field(description="Brief description of the POI")
-    type: str = Field(default="Room", description="Type of the POI. What it represents at a high level")
+    type: str = Field(
+        default="Room",
+        description="Type of the POI. What it represents at a high level",
+    )
     position: list[float] = Field(description="Position of the POI")
-    rotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Rotation of the POI")
-    localPosition: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local position of the POI")
-    localRotation: list[float] = Field(default=[0.0, 0.0, 0.0], description="Local rotation of the POI")
-    parentName: str = Field(default="", description="What collection of POIs the POI belongs to.")
+    rotation: list[float] = Field(
+        default=[0.0, 0.0, 0.0], description="Rotation of the POI"
+    )
+    localPosition: list[float] = Field(
+        default=[0.0, 0.0, 0.0], description="Local position of the POI"
+    )
+    localRotation: list[float] = Field(
+        default=[0.0, 0.0, 0.0], description="Local rotation of the POI"
+    )
+    parentName: str = Field(
+        default="", description="What collection of POIs the POI belongs to."
+    )
 
     def generate_embedding_str(self):
         # Embedding based on key textual descriptors
@@ -106,7 +130,7 @@ class POI(BaseModel):
 
     @classmethod
     def generate_embedding_str_json(cls, data: dict):
-        return f"Name: {data["name"]}\nPOI Name: {data["poiName"]}\nTitle: {data["title"]}\nDescription: {data["description"]}\nType: {data["type"]}\nParent: {data["parentName"]}"
+        return f"Name: {data['name']}\nPOI Name: {data['poiName']}\nTitle: {data['title']}\nDescription: {data['description']}\nType: {data['type']}\nParent: {data['parentName']}"
 
     @classmethod
     def generate_embedding_json(cls, data: dict):
@@ -126,6 +150,7 @@ class POI(BaseModel):
                 if field in data and not isinstance(data[field], list):
                     data[field] = list(data[field])
         return data
+
 
 @partial_model
 class POIOptional(POI):
@@ -175,25 +200,25 @@ def get_poi_schema():
         field_name="position",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
-        max_capacity=3
+        max_capacity=3,
     )
     poiSchema.add_field(
         field_name="rotation",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
-        max_capacity=3
+        max_capacity=3,
     )
     poiSchema.add_field(
         field_name="localPosition",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
-        max_capacity=3
+        max_capacity=3,
     )
     poiSchema.add_field(
         field_name="localRotation",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
-        max_capacity=3
+        max_capacity=3,
     )
     poiSchema.add_field(
         field_name="vector",
@@ -219,4 +244,3 @@ def dump_and_trim_none(obj: BaseModel) -> dict:
     print(f"items: {obj.model_dump().items()}")
     new = {key: value for key, value in obj.model_dump().items() if value is not None}
     return new
-

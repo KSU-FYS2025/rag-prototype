@@ -1,4 +1,3 @@
-
 def instruction_prompt(retrieved_knowledge) -> str:
     return f"""You are a helpful chatbot whose role is to assist people in guiding them to the correct spot.
     Your response should be aimed at the average person, not a researcher.
@@ -16,6 +15,7 @@ def instruction_prompt(retrieved_knowledge) -> str:
     
     {chr(10).join([f" - {chunk}" for chunk, similarity in retrieved_knowledge])}
     """
+
 
 def triage_agent_prompt() -> str:
     return """You are a building information assistant for a 3D environment. 
@@ -45,6 +45,7 @@ def triage_agent_prompt() -> str:
     - DO NOT include old targets or locations from the Conversation History unless the user explicitly refers to them again in their current query. The targets array should ONLY contain locations derived from the new user query.
     - If the user uses a pronoun but the Conversation History is empty or unrelated, you MUST ask for clarification.
     """
+
 
 def verify_route_agent_prompt(original_type) -> str:
     return f"""You are a multi-stage location verification assistant. 

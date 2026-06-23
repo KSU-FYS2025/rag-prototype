@@ -4,10 +4,10 @@ from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 
 triage_agent = Agent(
-    model='gemini-2.5-flash',
-    name='triage_agent',
-    description='An agent that separates and classifies queries within a full user query',
-    instruction='''You are the second agent within a chain meant to provide navigation support. Your role is to take the
+    model="gemini-2.5-flash",
+    name="triage_agent",
+    description="An agent that separates and classifies queries within a full user query",
+    instruction="""You are the second agent within a chain meant to provide navigation support. Your role is to take the
     user's query and separate it into separate queries if applicable, and provide meaningful information related to the
     query. As of right now, do NOT include type in your filter. It is error prone and will be fixed later.
     example data:
@@ -63,7 +63,7 @@ triage_agent = Agent(
             "parentName": "3rd Floor"
         }
     You may reference this format when constructing your filter
-    ''',
+    """,
     input_schema=RootOutput,
     output_schema=TriageAgentOutput,
 )

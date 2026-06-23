@@ -5,20 +5,15 @@ import time
 from typing import Optional
 
 import ollama
-from fastapi import APIRouter, WebSocket
-from fastapi.params import Depends
-from google.adk.apps import App
-from google.adk.runners import InMemoryRunner
-from google.adk.sessions import Session, InMemorySessionService
+from fastapi import APIRouter
+from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from google.genai.errors import ServerError
 from pydantic import BaseModel
-from starlette.responses import StreamingResponse, JSONResponse, Response
+from starlette.responses import StreamingResponse
 from google.adk import Workflow, Runner
 
-from app.AI.full_agent import search_agent
 from app.AI.full_agent.actions_agent.agent import actions_agent
-from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
 from app.AI.full_agent.root_agent.agent import root_agent
 from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
@@ -36,54 +31,65 @@ def json_serializable(data):
         return {k: json_serializable(v) for k, v in data.items()}
     elif isinstance(data, list):
         return [json_serializable(item) for item in data]
-    elif hasattr(data, '__class__') and data.__class__.__name__ == 'RepeatedScalarContainer':
+    elif (
+        hasattr(data, "__class__")
+        and data.__class__.__name__ == "RepeatedScalarContainer"
+    ):
         return list(data)
-    elif hasattr(data, 'tolist'): # Handle numpy arrays if they appear
+    elif hasattr(data, "tolist"):  # Handle numpy arrays if they appear
         return data.tolist()
     return data
 
-def generate_chat_response(model_name: str, messages: list, format_str: Optional[str]) -> str:
+
+def generate_chat_response(
+    model_name: str, messages: list, format_str: Optional[str]
+) -> str:
     if model_name.lower().startswith("gemini"):
         from google import genai
         from google.genai import types
+
         api_key = os.environ.get("GEMINI_API_KEY", "")
         if not api_key:
             print("WARNING: GEMINI_API_KEY environment variable is not set!")
         client = genai.Client(api_key=api_key)
-        
-        system_instruction = next((msg["content"] for msg in messages if msg["role"] == "system"), None)
+
+        system_instruction = next(
+            (msg["content"] for msg in messages if msg["role"] == "system"), None
+        )
         gemini_history = []
         for msg in messages:
             if msg["role"] != "system":
                 # Convert 'assistant' -> 'model', leaving 'user' alone
                 role = "user" if msg["role"] == "user" else "model"
-                gemini_history.append({"role": role, "parts": [{"text": msg["content"]}]})
-                
+                gemini_history.append(
+                    {"role": role, "parts": [{"text": msg["content"]}]}
+                )
+
         config_args = {}
         if system_instruction:
             config_args["system_instruction"] = system_instruction
         if format_str == "json":
             config_args["response_mime_type"] = "application/json"
-            
+
         response = client.models.generate_content(
             model=model_name,
             contents=gemini_history,
-            config=types.GenerateContentConfig(**config_args) if config_args else None
+            config=types.GenerateContentConfig(**config_args) if config_args else None,
         )
         return response.text
     else:
         # Fallback to Ollama
         import ollama
-        kwargs = {
-            "model": model_name,
-            "messages": messages
-        }
+
+        kwargs = {"model": model_name, "messages": messages}
         if format_str:
             kwargs["format"] = format_str
         res = ollama.chat(**kwargs)
         return res["message"]["content"]
 
+
 router = APIRouter()
+
 
 def check_author(event_author: str, target_author: list[str] | str):
     if isinstance(target_author, str):
@@ -91,10 +97,11 @@ def check_author(event_author: str, target_author: list[str] | str):
     else:
         return event_author in target_author
 
+
 async def run_adk_workflow(
-        user_query: str | BaseModel,
-        workflow: Workflow,
-        target_author: list[str] | str | None = None,
+    user_query: str | BaseModel,
+    workflow: Workflow,
+    target_author: list[str] | str | None = None,
 ) -> dict | str | None:
     session_service = InMemorySessionService()
     runner = Runner(
@@ -103,19 +110,23 @@ async def run_adk_workflow(
         session_service=session_service,
     )
 
-    await session_service.create_session(app_name=f"RagPrototypeADK{workflow.name}", user_id="example_user", session_id="example_session")
+    await session_service.create_session(
+        app_name=f"RagPrototypeADK{workflow.name}",
+        user_id="example_user",
+        session_id="example_session",
+    )
 
     user_content: types.Content
 
     if isinstance(user_query, str):
         user_content = types.Content(role="user", parts=[types.Part(text=user_query)])
     else:
-        user_content = types.Content(role="user", parts=[types.Part(text=json.dumps(user_query.model_dump()))])
+        user_content = types.Content(
+            role="user", parts=[types.Part(text=json.dumps(user_query.model_dump()))]
+        )
 
     response = runner.run_async(
-        user_id="example_user",
-        session_id="example_session",
-        new_message=user_content
+        user_id="example_user", session_id="example_session", new_message=user_content
     )
 
     author_filter = target_author or workflow.name
@@ -143,44 +154,44 @@ async def run_adk_workflow(
     logging.info(f"Final output: {output}")
     return output
 
+
 @router.get("/ai/graph-workflow/full", dependencies=[NeedsOllama])
-async def graph_workflow_full(
-        user_query: str
-):
-    return await run_adk_workflow(user_query, full_workflow, ["synthesis_agent", "actions_agent"])
+async def graph_workflow_full(user_query: str):
+    return await run_adk_workflow(
+        user_query, full_workflow, ["synthesis_agent", "actions_agent"]
+    )
+
 
 @router.post("/ai/graph-workflow/full_batch", dependencies=[NeedsOllama])
-async def graph_workflow_full(
-        user_query: list[str]
-):
+async def graph_workflow_full(user_query: list[str]):
     backoff_factor = 2
     collect = []
     for query in user_query:
-        for i in range(5): # Max retry 5 times
+        for i in range(5):  # Max retry 5 times
             try:
-                res = await run_adk_workflow(query, full_workflow, ["synthesis_agent", "actions_agent"])
-                collect.append({
-                    "query": query,
-                    "result": res
-                })
+                res = await run_adk_workflow(
+                    query, full_workflow, ["synthesis_agent", "actions_agent"]
+                )
+                collect.append({"query": query, "result": res})
                 break
             except ServerError:
-                logging.info(f"server error, likely caused by high demand. Retrying in {(backoff_factor ** i) / 100} seconds...")
-                time.sleep((backoff_factor ** i) / 100)
+                logging.info(
+                    f"server error, likely caused by high demand. Retrying in {(backoff_factor**i) / 100} seconds..."
+                )
+                time.sleep((backoff_factor**i) / 100)
 
     return collect
 
+
 @router.get("/ai/graph-workflow/root", dependencies=[NeedsOllama])
-async def graph_workflow_root(
-        user_query: str
-):
+async def graph_workflow_root(user_query: str):
     return await run_adk_workflow(user_query, root_agent)
 
+
 @router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
-async def graph_workflow_triage(
-        user_query: str
-):
+async def graph_workflow_triage(user_query: str):
     return await run_adk_workflow(user_query, triage_agent_adk)
+
 
 """
 {
@@ -207,11 +218,11 @@ async def graph_workflow_triage(
 }
 """
 
+
 @router.post("/ai/graph-workflow/search", dependencies=[NeedsOllama])
-async def graph_workflow_search(
-        triage_output: TriageAgentOutput
-):
+async def graph_workflow_search(triage_output: TriageAgentOutput):
     return await run_adk_workflow(triage_output, search_workflow, "synthesis_agent")
+
 
 """
 {
@@ -353,18 +364,17 @@ async def graph_workflow_search(
 }
 """
 
+
 @router.post("/ai/graph-workflow/response", dependencies=[NeedsOllama])
-async def graph_workflow_response(
-        triage_output: SearchOutput
-):
+async def graph_workflow_response(triage_output: SearchOutput):
     return await run_adk_workflow(triage_output, actions_agent, "actions_agent")
 
-@router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
-async def user_query_step_1(
-        poi_query: str
-) -> StreamingResponse:
-    retrieved_knowledge = search_poi(poi_query, 5, ["label", "tags", "pos", "description"])
 
+@router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
+async def user_query_step_1(poi_query: str) -> StreamingResponse:
+    retrieved_knowledge = search_poi(
+        poi_query, 5, ["label", "tags", "pos", "description"]
+    )
 
     model = os.environ.get("AI_MODEL", "qwen2.5:3b")
 
@@ -372,14 +382,15 @@ async def user_query_step_1(
         if model.lower().startswith("gemini"):
             from google import genai
             from google.genai import types
+
             client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
-            
+
             res = client.models.generate_content_stream(
                 model=model,
                 contents=[{"role": "user", "parts": [{"text": poi_query}]}],
                 config=types.GenerateContentConfig(
                     system_instruction=instruction_prompt(retrieved_knowledge)
-                )
+                ),
             )
             for chunk in res:
                 yield chunk.text
@@ -387,22 +398,24 @@ async def user_query_step_1(
             stream = ollama.chat(
                 model=model,
                 messages=[
-                    {"role": "system", "content": instruction_prompt(retrieved_knowledge)},
-                    {"role": "user", "content": poi_query}
+                    {
+                        "role": "system",
+                        "content": instruction_prompt(retrieved_knowledge),
+                    },
+                    {"role": "user", "content": poi_query},
                 ],
-                stream=True
+                stream=True,
             )
             for chunk in stream:
                 yield chunk["message"]["content"]
 
     return StreamingResponse(response())
 
-@router.get("/ai/triage_agent", tags=["poi", "ai", "triage_agent"], dependencies=[NeedsOllama])
-def triage_agent(
-        user_query: str,
-        context: dict = None,
-        history: list = None
-) -> dict:
+
+@router.get(
+    "/ai/triage_agent", tags=["poi", "ai", "triage_agent"], dependencies=[NeedsOllama]
+)
+def triage_agent(user_query: str, context: dict = None, history: list = None) -> dict:
     model = os.environ.get("AI_MODEL")
 
     # Construct a systematic prompt
@@ -417,12 +430,14 @@ def triage_agent(
         pos = context.get("position", [0, 0, 0])
         rot = context.get("rotation", [0, 0, 0])
         scene = context.get("scene", "Unknown")
-        full_prompt += f"[USER CONTEXT] Position: {pos}, Rotation: {rot}, Scene: {scene}\n"
+        full_prompt += (
+            f"[USER CONTEXT] Position: {pos}, Rotation: {rot}, Scene: {scene}\n"
+        )
 
     full_prompt += f"[USER QUERY] {user_query}"
 
     # STAGE 1: Triage
-    print(f"\n--- [STAGE 1: TRIAGE] ---")
+    print("\n--- [STAGE 1: TRIAGE] ---")
     print(f"Prompt sent to LLM:\n{full_prompt}")
 
     content = ""
@@ -431,9 +446,9 @@ def triage_agent(
             model_name=model,
             messages=[
                 {"role": "system", "content": triage_agent_prompt()},
-                {"role": "user", "content": full_prompt}
+                {"role": "user", "content": full_prompt},
             ],
-            format_str="json"
+            format_str="json",
         )
         print(f"LLM Raw Output: {content}")
 
@@ -471,33 +486,56 @@ def triage_agent(
                 semantics = target.get("semantics", "")
                 if semantics:
                     # STAGE 2: Search (Navigation)
-                    print(f"\n--- [STAGE 2: SEARCH (NAV)] ---")
+                    print("\n--- [STAGE 2: SEARCH (NAV)] ---")
                     search_filter = target.get("filter", "")
                     target_type = target.get("target_type", "generic")
 
-                    fetch_count = 5 # Fetch enough candidates for the AI to pick from
+                    fetch_count = 5  # Fetch enough candidates for the AI to pick from
 
-                    print(f"Searching for semantics: {semantics}. Type: {target_type}. Filter: {search_filter}")
+                    print(
+                        f"Searching for semantics: {semantics}. Type: {target_type}. Filter: {search_filter}"
+                    )
                     try:
                         raw_results = search_poi(
                             semantics,
                             fetch_count,
-                            ["id", "name", "poiName", "description", "type", "position"],
-                            filter_expression=search_filter
+                            [
+                                "id",
+                                "name",
+                                "poiName",
+                                "description",
+                                "type",
+                                "position",
+                            ],
+                            filter_expression=search_filter,
                         )
                         if not raw_results and search_filter:
                             print("Filter returned 0 results, retrying without filter.")
                             raw_results = search_poi(
                                 semantics,
                                 fetch_count,
-                                ["id", "name", "poiName", "description", "type", "position"]
+                                [
+                                    "id",
+                                    "name",
+                                    "poiName",
+                                    "description",
+                                    "type",
+                                    "position",
+                                ],
                             )
                     except Exception as filter_err:
                         print(f"Filter failed, retrying without filter: {filter_err}")
                         raw_results = search_poi(
                             semantics,
                             fetch_count,
-                            ["id", "name", "poiName", "description", "type", "position"]
+                            [
+                                "id",
+                                "name",
+                                "poiName",
+                                "description",
+                                "type",
+                                "position",
+                            ],
                         )
 
                     # --- AI Reranking / Validation ---
@@ -506,7 +544,9 @@ def triage_agent(
                         candidate_strings = []
                         for res in raw_results:
                             item = res[0]
-                            candidate_strings.append(f"ID: {item.get('id')} | Name: {item.get('name')} | Local Name: {item.get('poiName')} | Type: {item.get('type')}")
+                            candidate_strings.append(
+                                f"ID: {item.get('id')} | Name: {item.get('name')} | Local Name: {item.get('poiName')} | Type: {item.get('type')}"
+                            )
                         candidate_text = "\n".join(candidate_strings)
 
                         sys_prompt = f"""You are a STRICT JSON spatial filter API. The user requested to navigate: "{user_query}"
@@ -541,31 +581,47 @@ Example 3: { "selected_ids": [] }"""
                                 model_name=model,
                                 messages=[
                                     {"role": "system", "content": sys_prompt},
-                                    {"role": "user", "content": "Analyze the candidates and return the selected_ids JSON."}
+                                    {
+                                        "role": "user",
+                                        "content": "Analyze the candidates and return the selected_ids JSON.",
+                                    },
                                 ],
-                                format_str="json"
+                                format_str="json",
                             )
                             # Fallback if backticks apply
                             if "```json" in val_content:
-                                val_content = val_content.split("```json")[1].split("```")[0].strip()
+                                val_content = (
+                                    val_content.split("```json")[1]
+                                    .split("```")[0]
+                                    .strip()
+                                )
                             elif "```" in val_content:
-                                val_content = val_content.split("```")[1].split("```")[0].strip()
+                                val_content = (
+                                    val_content.split("```")[1].split("```")[0].strip()
+                                )
 
                             val_data = json.loads(val_content)
                             print(f"AI Selected IDs: {val_data}")
 
                             # Robustly extract selected_ids, protecting against hallucinations
-                            if isinstance(val_data, dict) and "selected_ids" in val_data:
+                            if (
+                                isinstance(val_data, dict)
+                                and "selected_ids" in val_data
+                            ):
                                 valid_ids = val_data["selected_ids"]
                             elif isinstance(val_data, list):
                                 valid_ids = val_data
                             else:
                                 if target.get("target_type") == "specific":
                                     valid_ids = []
-                                    print(f"Warning: STAGE 2.5 AI Hallucinated response or failed to emit 'selected_ids'. Assuming empty match for specific target.")
+                                    print(
+                                        "Warning: STAGE 2.5 AI Hallucinated response or failed to emit 'selected_ids'. Assuming empty match for specific target."
+                                    )
                                 else:
                                     valid_ids = None
-                                    print(f"Warning: STAGE 2.5 AI Hallucinated response or failed to emit 'selected_ids'. Bypassing filter.")
+                                    print(
+                                        "Warning: STAGE 2.5 AI Hallucinated response or failed to emit 'selected_ids'. Bypassing filter."
+                                    )
 
                             if valid_ids is not None and len(valid_ids) == 0:
                                 if target.get("target_type") == "specific":
@@ -577,30 +633,42 @@ Example 3: { "selected_ids": [] }"""
                             elif valid_ids:
                                 try:
                                     valid_ids = [int(v) for v in valid_ids]
-                                    raw_results = [r for r in raw_results if r[0].get("id") in valid_ids]
+                                    raw_results = [
+                                        r
+                                        for r in raw_results
+                                        if r[0].get("id") in valid_ids
+                                    ]
                                 except Exception:
-                                    pass # Ignore conversion error; filter fails
+                                    pass  # Ignore conversion error; filter fails
                         except Exception as e:
                             print(f"AI selection failed, returning empty. Error: {e}")
                             raw_results = []
 
                     # If this target is completely missing, and it's either specific OR there are absolutely no other valid targets remaining, we should tell the user!
                     if not raw_results:
-                        print(f"Aborting query: Target '{semantics}' could not be found.")
+                        print(
+                            f"Aborting query: Target '{semantics}' could not be found."
+                        )
 
                         # Only abort immediately if this is specific OR if this was the only target we had.
                         # (If they asked for 'Room 1' and 'food', and 'food' is missing, we still want to route them to Room 1.
                         # But if 'food' was the ONLY target and it's missing, we must apologize and abort).
-                        if target.get("target_type") == "specific" or len(data["targets"]) == 1:
+                        if (
+                            target.get("target_type") == "specific"
+                            or len(data["targets"]) == 1
+                        ):
                             try:
                                 msg_prompt = f"The user asked using this query: '{user_query}'. However, the location '{semantics}' does not exist or couldn't be found in our building database. Write a short, natural, and helpful response politely informing them of this, and ask if they want to double-check or navigate somewhere else instead. Consider the conversation history if any to make the response sound natural in context. Do not use quotes around your response."
                                 error_msg = generate_chat_response(
                                     model_name=model,
                                     messages=[
-                                        {"role": "system", "content": f"You are a helpful building navigation assistant. Use the conversation history below for context if needed.\n\n{full_prompt}"},
-                                        {"role": "user", "content": msg_prompt}
-                                    ]
-                                ).strip('\"')
+                                        {
+                                            "role": "system",
+                                            "content": f"You are a helpful building navigation assistant. Use the conversation history below for context if needed.\n\n{full_prompt}",
+                                        },
+                                        {"role": "user", "content": msg_prompt},
+                                    ],
+                                ).strip('"')
                             except Exception:
                                 error_msg = f"I couldn't find '{semantics}' in the building. Could you please double-check or clarify?"
 
@@ -608,18 +676,26 @@ Example 3: { "selected_ids": [] }"""
                                 "type": data.get("type", "navigation"),
                                 "response": error_msg,
                                 "targets": [],
-                                "actions": []
+                                "actions": [],
                             }
 
                     # Return only 'id' and 'name' to Unity as requested, securely
-                    target["poi_results"] = [{"id": res[0].get("id", 0), "name": res[0].get("name", "Unknown")} for res in raw_results]
-                    print(f"Found {len(target['poi_results'])} POI results for this target.")
+                    target["poi_results"] = [
+                        {
+                            "id": res[0].get("id", 0),
+                            "name": res[0].get("name", "Unknown"),
+                        }
+                        for res in raw_results
+                    ]
+                    print(
+                        f"Found {len(target['poi_results'])} POI results for this target."
+                    )
                     all_candidates_for_rag.extend(raw_results)
 
         # 2. Handle Inquiry: Use RAG to provide a grounded response
         if "inquiry" in intents:
             # STAGE 2: Search (Inquiry)
-            print(f"\n--- [STAGE 2: SEARCH (INQ)] ---")
+            print("\n--- [STAGE 2: SEARCH (INQ)] ---")
 
             # Use expanded semantics from targets if available, otherwise fallback to query
             search_term = user_query
@@ -633,34 +709,60 @@ Example 3: { "selected_ids": [] }"""
                 print("Reusing candidates from Navigation block for RAG Context.")
                 retrieved_knowledge = all_candidates_for_rag
             else:
-                print(f"Searching database for grounding context. Search Term: {search_term}. Filter: {search_filter}")
+                print(
+                    f"Searching database for grounding context. Search Term: {search_term}. Filter: {search_filter}"
+                )
                 try:
                     retrieved_knowledge = search_poi(
                         search_term,
                         10,  # Raise top_n for inquiry to capture more candidates
-                        ["id", "name", "poiName", "description", "type", "position", "parentName"],
-                        filter_expression=search_filter
+                        [
+                            "id",
+                            "name",
+                            "poiName",
+                            "description",
+                            "type",
+                            "position",
+                            "parentName",
+                        ],
+                        filter_expression=search_filter,
                     )
                     if not retrieved_knowledge and search_filter:
                         print("Filter returned 0 results, retrying without filter.")
                         retrieved_knowledge = search_poi(
                             search_term,
                             10,
-                            ["id", "name", "poiName", "description", "type", "position", "parentName"]
+                            [
+                                "id",
+                                "name",
+                                "poiName",
+                                "description",
+                                "type",
+                                "position",
+                                "parentName",
+                            ],
                         )
                 except Exception as filter_err:
                     print(f"Filter failed, retrying without filter: {filter_err}")
                     retrieved_knowledge = search_poi(
                         search_term,
                         10,
-                        ["id", "name", "poiName", "description", "type", "position", "parentName"]
+                        [
+                            "id",
+                            "name",
+                            "poiName",
+                            "description",
+                            "type",
+                            "position",
+                            "parentName",
+                        ],
                     )
                 print(f"Retrieved {len(retrieved_knowledge)} context items.")
 
             # Formulate a context-aware response using the second prompt style
             if retrieved_knowledge:
                 # STAGE 3: Inference (RAG)
-                print(f"\n--- [STAGE 3: INFERENCE (RAG)] ---")
+                print("\n--- [STAGE 3: INFERENCE (RAG)] ---")
                 knowledge_strings = []
                 for entity, dist in retrieved_knowledge:
                     knowledge_strings.append(
@@ -685,9 +787,12 @@ Simply describe all matched locations accurately. Use the conversation history p
                 data["response"] = generate_chat_response(
                     model_name=model,
                     messages=[
-                        {"role": "system", "content": f"{system_prompt_content}\n\n{full_prompt}"},
-                        {"role": "user", "content": user_query}
-                    ]
+                        {
+                            "role": "system",
+                            "content": f"{system_prompt_content}\n\n{full_prompt}",
+                        },
+                        {"role": "user", "content": user_query},
+                    ],
                 )
 
                 # If this is purely an inquiry, we do not want Unity to construct NavMesh routes.
@@ -696,10 +801,15 @@ Simply describe all matched locations accurately. Use the conversation history p
                     data["targets"] = []
 
                 # Return only 'id' and 'name' for the context used
-                data["context_used"] = [{"id": res[0]["id"], "name": res[0]["name"]} for res in retrieved_knowledge]
+                data["context_used"] = [
+                    {"id": res[0]["id"], "name": res[0]["name"]}
+                    for res in retrieved_knowledge
+                ]
                 print(f"Generated RAG Response: {data['response']}")
             else:
-                data["response"] = "I'm sorry, I couldn't find any information about that in our database."
+                data["response"] = (
+                    "I'm sorry, I couldn't find any information about that in our database."
+                )
 
         # 3. Handle Greeting / Others: Generate a direct conversational response
         if ("greeting" in intents or "others" in intents) and not data.get("response"):
@@ -709,47 +819,53 @@ Simply describe all matched locations accurately. Use the conversation history p
                 model_name=model,
                 messages=[
                     {"role": "system", "content": system_prompt_content},
-                    {"role": "user", "content": user_query}
-                ]
+                    {"role": "user", "content": user_query},
+                ],
             )
             print(f"Generated Chat Response: {data['response']}")
 
         # STAGE 4: Return
         final_data = json_serializable(data)
-        print(f"\n--- [STAGE 4: SERIALIZED RETURN] ---")
+        print("\n--- [STAGE 4: SERIALIZED RETURN] ---")
 
         # Pretty-print the response to the python terminal for debugging
         json_output = json.dumps(final_data, indent=2)
         print(f"Payload ready for Unity ({len(json_output)} chars):\n{json_output}")
 
         return final_data
-    except Exception as e:
+    except Exception:
         import logging
         import traceback
+
         error_details = traceback.format_exc()
-        logging.error(f"Failed to parse or process triage_agent response:\n{error_details}\nContent: {content}")
+        logging.error(
+            f"Failed to parse or process triage_agent response:\n{error_details}\nContent: {content}"
+        )
         # Print directly to stdout so it shows up in dev servers
         print(f"FATAL TRIAGE ERROR:\n{error_details}")
-        return {"type": "error", "message": "Failed to process query", "raw_content": content, "traceback": error_details}
+        return {
+            "type": "error",
+            "message": "Failed to process query",
+            "raw_content": content,
+            "traceback": error_details,
+        }
 
 
 def verify_route_agent(
-    user_query: str,
-    distances_payload: dict,
-    context: dict = None,
-    history: list = None
+    user_query: str, distances_payload: dict, context: dict = None, history: list = None
 ) -> dict:
     """Verifies the physical distances against the semantic meaning to pick the best overall POI and generate a realization."""
     model = os.environ.get("AI_MODEL")
-    print(f"\n--- [STAGE 5: ROUTE VERIFICATION] ---")
-    
+    print("\n--- [STAGE 5: ROUTE VERIFICATION] ---")
+
     # We expect distances_payload to have 'targets' array with POIs and 'distance'
     original_type = distances_payload.get("original_type", "navigation")
-    
+
     prompt = f"[USER QUERY] {user_query}\n\n[CALCULATED DISTANCES FROM UNITY]\n"
     import json
+
     prompt += json.dumps(distances_payload.get("targets", []), indent=2)
-    
+
     system_prompt_content = verify_route_agent_prompt(original_type)
 
     try:
@@ -757,54 +873,65 @@ def verify_route_agent(
             model_name=model,
             messages=[
                 {"role": "system", "content": system_prompt_content},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ],
-            format_str="json"
+            format_str="json",
         )
-        
+
         print(f"LLM Verification Raw Output: {content}")
-        
+
         if not content or not content.strip():
             print("Warning: LLM returned an empty string for verification.")
-            return {"type": "error", "message": "Backend AI returned empty verification response.", "actions": []}
-            
+            return {
+                "type": "error",
+                "message": "Backend AI returned empty verification response.",
+                "actions": [],
+            }
+
         # LLM might wrap JSON in backticks
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
             content = content.split("```")[1].split("```")[0].strip()
-            
+
         # Fallback to ast literal eval if strict json fails (because LLMs sometimes emit single quotes)
         try:
             data = json.loads(content)
         except json.JSONDecodeError:
             import ast
+
             print("Warning: Strict JSON failed, attempting AST evaluation.")
             data = ast.literal_eval(content)
-        
+
         selected_ids = data.get("selected_ids", [])
         # Provide fallback if AI still returns selected_id
         if "selected_id" in data and not selected_ids:
             selected_ids = [data["selected_id"]]
-            
+
         actions = []
         for pid in selected_ids:
             actions.append({"cmd": original_type, "id": pid})
-        
+
         # Package for unity
         final_data = {
             "type": original_type,
             "response": data.get("response", ""),
-            "actions": actions
+            "actions": actions,
         }
-        
+
         # Echo print
         json_output = json.dumps(final_data, indent=2)
         print(f"Verified Final Choice ({len(json_output)} chars):\n{json_output}")
-        
+
         return final_data
-    except Exception as e:
+    except Exception:
         import traceback
+
         error_details = traceback.format_exc()
         print(f"FATAL VERIFICATION ERROR:\n{error_details}")
-        return {"type": "error", "message": "Failed to verify route", "raw_content": "", "traceback": error_details}
+        return {
+            "type": "error",
+            "message": "Failed to verify route",
+            "raw_content": "",
+            "traceback": error_details,
+        }

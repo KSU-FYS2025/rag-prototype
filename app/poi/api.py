@@ -1,25 +1,26 @@
-import os
 
-import ollama
-from fastapi import APIRouter, Body, FastAPI, HTTPException
+from fastapi import APIRouter, Body, HTTPException
 from typing import Annotated, Optional
-from contextlib import asynccontextmanager
 
-from starlette.responses import StreamingResponse
 
-from app.poi.models import POI, POIOptional, get_poi_schema, get_index_params, dump_and_trim_none
+from app.poi.models import (
+    POI,
+    POIOptional,
+    dump_and_trim_none,
+)
 from app.poi.types import OneOrMore
-from app.dependencies import NeedsDb, NeedsOllama
-from app.database.db import create_collection, embedding_fn, search_poi
+from app.dependencies import NeedsDb
+from app.database.db import embedding_fn
 
 
 router = APIRouter()
 
+
 @router.get("/poi/", tags=["poi"])
 def get_poi(
-        poi_id: int,
-        # fields: Optional[str],
-        db: NeedsDb
+    poi_id: int,
+    # fields: Optional[str],
+    db: NeedsDb,
 ) -> OneOrMore[dict]:
     res = db.get(
         collection_name="poi",
@@ -33,10 +34,9 @@ def get_poi(
     else:
         return res
 
+
 @router.get("/poi/all", tags=["poi"])
-def get_all_poi(
-        db: NeedsDb
-) -> str:
+def get_all_poi(db: NeedsDb) -> str:
     """
 
     :param db:
@@ -51,11 +51,9 @@ def get_all_poi(
     )
     return str(res)
 
+
 @router.post("/poi/", tags=["poi"])
-def insert_poi(
-        poi: Annotated[OneOrMore[POI], Body()],
-        db: NeedsDb
-) -> str:
+def insert_poi(poi: Annotated[OneOrMore[POI], Body()], db: NeedsDb) -> str:
     """
     Inserts POI object(s) into poi collection. If vectors are not pre-specified,
     it will convert it to vectors automatically.
@@ -66,7 +64,10 @@ def insert_poi(
     :return:
     """
     if len(poi.pos) != 3:
-        raise HTTPException(status_code=400, detail="Pos info in body needs to be a 3 dimensional array of floating point values!!!")
+        raise HTTPException(
+            status_code=400,
+            detail="Pos info in body needs to be a 3 dimensional array of floating point values!!!",
+        )
 
     if type(poi) is POI:
         if not hasattr(poi, "vector") or poi.vector is None or poi.vector == []:
@@ -82,24 +83,19 @@ def insert_poi(
             delattr(poi, "id")
             data.append(_poi.model_dump(mode="json"))
 
-    res = db.insert(
-        collection_name="poi",
-        data=data
-    )
+    res = db.insert(collection_name="poi", data=data)
 
     return str(res)
 
+
 @router.put("/poi/", tags=["poi"])
 def update_poi(
-        poi_id: Annotated[int, Body()],
-        # May be moved to the url. Not certain.
-        poi: Annotated[POIOptional, Body()],
-        db: NeedsDb
+    poi_id: Annotated[int, Body()],
+    # May be moved to the url. Not certain.
+    poi: Annotated[POIOptional, Body()],
+    db: NeedsDb,
 ):
-    prev_poi = db.get(
-        collection_name="poi",
-        ids=poi_id
-    )
+    prev_poi = db.get(collection_name="poi", ids=poi_id)
     print(f"{prev_poi=}\n")
 
     poi_dump = dump_and_trim_none(poi)
@@ -111,37 +107,28 @@ def update_poi(
     print(f"{prev_poi=}\n")
     new_poi = POI(**prev_poi)
 
-
     if not hasattr(new_poi, "vector") or new_poi.vector is None or new_poi.vector == []:
         new_poi.generate_embedding()
     print("embedding generated!!!\n\n\n")
 
-    res = db.upsert(
-        collection_name="poi",
-        data=new_poi.model_dump()
-    )
+    res = db.upsert(collection_name="poi", data=new_poi.model_dump())
 
     return res
 
+
 @router.delete("/poi/", tags=["poi"])
 def delete_poi(
-        poi_id: Annotated[Optional[int], Body()],
-        poi_filter: Annotated[Optional[str], Body()],
-        db: NeedsDb
+    poi_id: Annotated[Optional[int], Body()],
+    poi_filter: Annotated[Optional[str], Body()],
+    db: NeedsDb,
 ):
     if poi_id and not poi_filter:
-        res = db.delete(
-            collection_name="poi",
-            ids=[poi_id]
-        )
+        res = db.delete(collection_name="poi", ids=[poi_id])
 
         return res
 
     elif (not poi_id) and poi_filter:
-        res = db.delete(
-            collection_name="poi",
-            filter=poi_filter
-        )
+        res = db.delete(collection_name="poi", filter=poi_filter)
 
         return res
 

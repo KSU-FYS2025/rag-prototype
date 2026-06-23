@@ -4,13 +4,18 @@ from typing import List
 from app.AI.schema import BaseResponse
 from app.poi.models import POI
 
+
 class Validation(BaseModel):
-    order: int = Field(description="The order of the POIs returned by the input. This MUST match your input.")
+    order: int = Field(
+        description="The order of the POIs returned by the input. This MUST match your input."
+    )
     selected_pois: List[POI] = Field(description="List of POIs chosen by the LLM.")
-    method: str = Field(default="LLM",description="MUST always be LLM")
+    method: str = Field(default="LLM", description="MUST always be LLM")
+
 
 class SearchOutput(BaseResponse):
     validations: List[Validation]
+
 
 # class Vector(BaseModel):
 #     dx: float = Field(description="x component of distance between two points")
@@ -26,13 +31,18 @@ class SearchOutput(BaseResponse):
 #     poi2: int = Field(description="id of second POI")
 #     distance: DistanceAndVector
 
+
 class POIAndSemanticDistance(BaseModel):
     poi: POI = Field(description="The POI object that this object is associated with")
-    semantic_distance: float = Field(description="The semantic distance between this POI and the semantic for this "
-                                                 "query.")
+    semantic_distance: float = Field(
+        description="The semantic distance between this POI and the semantic for this "
+        "query."
+    )
+
 
 class ParallelOutput(BaseResponse):
-    POIs: list[list[POIAndSemanticDistance]] = Field(description="List of POIs returned by the vector search as well as "
-                                                                 "their semantic distance from the semantic for this "
-                                                                 "query.")
-
+    POIs: list[list[POIAndSemanticDistance]] = Field(
+        description="List of POIs returned by the vector search as well as "
+        "their semantic distance from the semantic for this "
+        "query."
+    )
