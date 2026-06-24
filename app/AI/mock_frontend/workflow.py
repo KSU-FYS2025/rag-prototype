@@ -1,3 +1,6 @@
+import math
+
+from app.poi.models import POI
 from typing import Generator
 
 from google.adk import Workflow, Context
@@ -12,6 +15,7 @@ from app.AI.full_agent.actions_agent.schema import (
     NavigationAction,
 )
 from app.AI.full_agent.agent import full_workflow
+from app.database.db import get_db_gen
 
 workflow = Workflow(name="mock_frontend", edges=[("START", full_workflow)])
 
@@ -30,6 +34,14 @@ def proper_index[T](lst: list[T], item: T) -> int | None:
         return None
 
 
+def get_distance(this: list[float], other: list[float]) -> float:
+    return math.sqrt(
+        (this[0] - other[0]) ** 2
+        + (this[1] - other[1]) ** 2
+        + (this[2] - other[2]) ** 2
+    )
+
+
 def resolution_helper(
     _actions: list[Command],
 ) -> Generator[tuple[int, Command] | None, list[Command], None]:
@@ -38,11 +50,14 @@ def resolution_helper(
         action_types: list[str] = [action.cmd for action in actions]
         for resolution_stage in RESOLUTION_ORDER:
             index = proper_index(action_types, resolution_stage)
+            # If the current resolution stage does not exist in actions, skip it and go to the next one.
             if index is None:
                 continue
 
+            # If the resolution_stage is resolve nearest, and any of the actions beforehand are clarify, skip this
+            # resolution stage and go to the next one.
             if resolution_stage == "resolve_nearest" and any(
-                action.cmd == "clarify" for action in actions
+                action.cmd == "clarify" for action in actions[:index]
             ):
                 continue
 
@@ -61,21 +76,54 @@ async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
         assert output is not None
         index, action = output
 
+        resolved_action = None
         match action:
             case ResolveNearestAction() as action:
-                resolve_nearest(action)
+                resolved_action = resolve_nearest(
+                    action, None if index == 0 else actions[index - 1]
+                )
 
             case AnswerAction() as action:
-                resolve_answer(action)
+                resolved_action = resolve_answer(action)
 
             case ClarifyAction() as action:
-                resolve_clarify(action)
+                resolved_action = resolve_clarify(action)
 
             case NavigationAction() as action:
-                resolve_navigation(action)
+                resolved_action = resolve_navigation(action)
 
 
-def resolve_nearest(action: ResolveNearestAction): ...
+def resolve_nearest(
+    action: ResolveNearestAction, previous_action: Command | None = None
+) -> NavigationAction | None:
+    start_position: list[float] = [0, 0, 0]
+    if previous_action and isinstance(previous_action, NavigationAction):
+        prev_id = previous_action.id
+        with get_db_gen() as db:
+            res = db.search(
+                collection_name="poi",
+                limit=1,
+                filter=f'identification == "{prev_id}"',
+            )
+        prev_poi = POI(**[hit for x in res for hit in x if hit][0]["entity"])
+        start_position = prev_poi.position
+
+    # Now that we have start_position, we have to get the positions for each POI
+    poi_ids = action.candidate_ids
+    with get_db_gen() as db:
+        res = db.query(
+            collection_name="poi",
+            filter=f"identification in [{','.join(map(str, poi_ids))}]",
+        )
+
+    pois = [POI(**hit["entity"]) for x in res for hit in x if hit]
+    poi_distances = [(get_distance(poi.position, start_position), poi) for poi in pois]
+    distances_sorted = sorted(poi_distances, key=lambda x: x[0])
+    return NavigationAction(
+        order=action.order,
+        target_label=distances_sorted[0][1].name,
+        id=distances_sorted[0][1].id,
+    )
 
 
 def resolve_answer(action: AnswerAction): ...
