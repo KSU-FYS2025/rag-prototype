@@ -29,13 +29,14 @@ res = requests.post(
 
 print(res.json())
 
-# Load queries from ExcelQueries.json
+# Load queries from ExcelQueriesOld.json
 json_data = ""
-with open("ExcelQueries.json", "r") as file:
+with open("ExcelQueriesOld.json", "r") as file:
     json_data = json.load(file)
 
-# Send chat request for all queries in ExcelQueries.json
-for i, query in enumerate(json_data):
+# Send chat request for all queries in ExcelQueriesOld.json
+for i, data in enumerate(json_data):
+    query, category = data
     # Generate new session_id for each test case
     session_id = f"Test_{i}"
     session_url = f"{app_url}/users/{adk_data['user_id']}/sessions/{session_id}"
