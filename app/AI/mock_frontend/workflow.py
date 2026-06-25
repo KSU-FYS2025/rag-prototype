@@ -106,6 +106,7 @@ async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
 
         res_gen.send(actions)
 
+
 def resolve_nearest(
     action: ResolveNearestAction, previous_action: Command | None = None
 ) -> NavigationAction:
@@ -136,20 +137,19 @@ def resolve_nearest(
         order=action.order,
         target_label=distances_sorted[0][1].name,
         id=distances_sorted[0][1].id,
+        # Eventually, consider replacing this with an LLM generated message
+        response=f"Guiding you to {distances_sorted[0][1].name}.",
     )
 
 
 def resolve_answer(action: AnswerAction) -> Event:
-    return Event(
-        content=types.Content(
-            parts=[
-                types.Part.from_text(text=action.text)
-            ]
-        )
-    )
+    return Event(content=types.Content(parts=[types.Part.from_text(text=action.text)]))
 
 
 def resolve_clarify(action: ClarifyAction): ...
 
 
-def resolve_navigation(action: NavigationAction): ...
+def resolve_navigation(action: NavigationAction) -> Event:
+    return Event(
+        content=types.Content(parts=[types.Part.from_text(text=action.response)])
+    )
