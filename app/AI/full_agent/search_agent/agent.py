@@ -5,8 +5,8 @@ import re
 from google.adk import Workflow, Context, Event, Agent
 from google.adk.workflow import node
 from pymilvus import MilvusException
-from torch.distributed.checkpoint import default_planner
 
+from app.AI.full_agent.agent import planner_defaults
 from app.AI.full_agent.search_agent.schema import (
     SearchOutput,
     POIAndSemanticDistance,
@@ -153,7 +153,7 @@ synthesis_agent = Agent(
     "you should return all of them, so that the Unity client can decide which is the closest. You are "
     "allowed to return an empty list inside the selected_pois key IF none of the POIs you are given are "
     "close enough. You may decide what close enough is.",
-    planner=default_planner,
+    planner=planner_defaults,
     input_schema=ParallelOutput,
     output_schema=SearchOutput,
 )

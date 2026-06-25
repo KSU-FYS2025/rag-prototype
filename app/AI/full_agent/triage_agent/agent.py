@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
-from torch.distributed.checkpoint import default_planner
 
+from app.AI.full_agent.agent import planner_defaults
 from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 
@@ -65,7 +65,7 @@ triage_agent = Agent(
         }
     You may reference this format when constructing your filter
     """,
-    planner=default_planner,
+    planner=planner_defaults,
     input_schema=RootOutput,
     output_schema=TriageAgentOutput,
 )

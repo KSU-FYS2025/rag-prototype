@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
-from torch.distributed.checkpoint import default_planner
 
+from app.AI.full_agent.agent import planner_defaults
 from app.AI.full_agent.root_agent.schema import RootOutput
 
 root_agent = Agent(
@@ -14,6 +14,6 @@ root_agent = Agent(
                     "intent": <str>, MUST BE ONE OF THE FOLLOWING ["navigation_query", "navigation_guidance", "conversational"]
                     "confidence": <number>, How confident you are in the user intent from 0 to 1 (floating point number)
                 }""",
-    planner=default_planner,
+    planner=planner_defaults,
     output_schema=RootOutput,
 )

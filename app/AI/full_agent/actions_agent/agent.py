@@ -1,8 +1,8 @@
 from google.adk.agents.llm_agent import Agent
 from google.adk.tools import load_memory
-from torch.distributed.checkpoint import default_planner
 
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
+from app.AI.full_agent.agent import planner_defaults
 from app.AI.full_agent.search_agent.schema import SearchOutput
 
 actions_agent = Agent(
@@ -14,7 +14,7 @@ actions_agent = Agent(
     each object inside the validations tag, you must assign one action to it. Be sure to always take user preferences 
     into account if it is necessary. In cases where you need user preferences, you may use the load_memory tool to find
     any preferences need from previous conversations.""",
-    planner=default_planner,
+    planner=planner_defaults,
     input_schema=SearchOutput,
     output_schema=ActionsAgentOutput,
     tools=[load_memory],

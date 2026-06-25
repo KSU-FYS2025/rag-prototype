@@ -19,6 +19,9 @@ class NavigationAction(Action):
     target_label: str = Field(
         description="The semantic information of the query the user will be guided to"
     )
+    response: str = Field(
+        description="The response of the action. Will be spoken to the user."
+    )
 
 
 class ResolveNearestAction(Action):
