@@ -5,6 +5,8 @@ from typing import Generator
 
 from google.adk import Workflow, Context
 from google.adk.workflow import node
+from google.adk import Event
+from google.genai import types
 
 from app.AI.full_agent.actions_agent.schema import (
     ActionsAgentOutput,
@@ -72,7 +74,9 @@ def resolution_helper(
 async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
     actions = node_input.actions.copy()
 
-    for output in resolution_helper(actions):
+    res_gen = resolution_helper(actions)
+
+    for output in res_gen:
         assert output is not None
         index, action = output
 
@@ -92,10 +96,19 @@ async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
             case NavigationAction() as action:
                 resolved_action = resolve_navigation(action)
 
+        # If the action resolves into another action, replace the action with the new one
+        if isinstance(resolved_action, Command.__value__):
+            actions[index] = resolved_action
+
+        # If the action resolves into an event, yield it.
+        if isinstance(resolved_action, Event):
+            yield resolved_action
+
+        res_gen.send(actions)
 
 def resolve_nearest(
     action: ResolveNearestAction, previous_action: Command | None = None
-) -> NavigationAction | None:
+) -> NavigationAction:
     start_position: list[float] = [0, 0, 0]
     if previous_action and isinstance(previous_action, NavigationAction):
         prev_id = previous_action.id
@@ -126,7 +139,14 @@ def resolve_nearest(
     )
 
 
-def resolve_answer(action: AnswerAction): ...
+def resolve_answer(action: AnswerAction) -> Event:
+    return Event(
+        content=types.Content(
+            parts=[
+                types.Part.from_text(text=action.text)
+            ]
+        )
+    )
 
 
 def resolve_clarify(action: ClarifyAction): ...
