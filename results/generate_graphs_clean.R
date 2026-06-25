@@ -1,7 +1,7 @@
 install.packages("rjson")
 library(rjson)
 
-json_data <- fromJSON(file = "results/full_agent_full_agent_eval_set_large_9_enabled_1782402984.207768.json")
+json_data <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_10_enabled_1782416910.1893363.json")
 queries <- json_data$evalCaseResults
 
 # Load query type mapping from file
