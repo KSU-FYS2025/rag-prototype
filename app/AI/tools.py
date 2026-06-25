@@ -2,7 +2,10 @@ from app.database.db import search_poi
 
 
 def search_poi_tool(
-    query: str, top_n: int = 5, fields: list[str] | None = None, filter_expression: str = ""
+    query: str,
+    top_n: int = 5,
+    fields: list[str] | None = None,
+    filter_expression: str = "",
 ) -> list[tuple]:
     """Searches for information within in the vector database. Performs a vector search on a query.
     :param query: String to search for within the database
