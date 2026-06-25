@@ -2,7 +2,7 @@ install.packages("rjson")
 library(rjson)
 
 # Load the JSON file
-json_data <- fromJSON(file = "results/full_agent_full_agent_eval_set_large_5_1781790075.9050326.json")
+json_data <- fromJSON(file = "results/full_agent_full_agent_eval_set_large_9_enabled_1782402984.207768.json")
 
 # Extract queries
 queries <- json_data$evalCaseResults
