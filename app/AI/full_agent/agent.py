@@ -15,7 +15,7 @@ from app.AI.schema import NavigationIntent
 
 planner_defaults = BuiltInPlanner(
     thinking_config=types.ThinkingConfig(
-        include_thoughts=False,
+        include_thoughts=True,
     )
 )
 
