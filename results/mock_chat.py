@@ -4,7 +4,7 @@ import requests
 adk_data = {
     "app_name": "full_agent",
     "user_id": "user",
-    "evalset_name": "full_agent_eval_set_large_9_enabled",
+    "evalset_name": "full_agent_eval_set_large_10_enabled",
 }
 
 adk_url = "http://10.96.50.180:8080"
