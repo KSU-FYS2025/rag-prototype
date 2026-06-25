@@ -1,4 +1,6 @@
 from google.adk.workflow import node
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
 
 from app.AI.full_agent.conversation_agent.agent import conversation_agent
 from app.AI.full_agent.actions_agent.agent import actions_agent
@@ -10,6 +12,12 @@ from app.AI.full_agent.search_agent.agent import search_workflow
 from google.adk import Workflow, Event
 
 from app.AI.schema import NavigationIntent
+
+planner_defaults = BuiltInPlanner(
+    thinking_config=types.ThinkingConfig(
+        include_thoughts=False,
+    )
+)
 
 navigation_workflow = Workflow(
     name="navigation_workflow",

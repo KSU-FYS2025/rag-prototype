@@ -1,4 +1,5 @@
 from google.adk.agents.llm_agent import Agent
+from torch.distributed.checkpoint import default_planner
 
 from app.AI.full_agent.actions_agent.schema import Command
 from app.AI.full_agent.clarify_agent.schema import ClarifyInput
@@ -11,6 +12,7 @@ clarify_agent = Agent(
     "clarification action provided to you to accomplish this task. You must output this as one of the "
     "actions in the Command schema. You can only output a clarification action if and only if the user_input "
     "still does not resolve the clarification action.",
+    planner=default_planner,
     input_schema=ClarifyInput,
     output_schema=Command,
 )
