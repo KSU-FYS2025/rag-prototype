@@ -33,10 +33,10 @@ def partial_model(model: Type[BaseModel]):
 
 class POIDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(object_hook=self._object_hook, *args, **kwargs)
 
     @staticmethod
-    def object_hook(json_data: dict) -> dict:
+    def _object_hook(json_data: dict[str, Any]) -> Any:
         if "pois" not in json_data:
             return json_data
         for i, poi in enumerate(json_data["pois"]):
