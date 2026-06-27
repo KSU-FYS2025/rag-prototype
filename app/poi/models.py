@@ -20,14 +20,16 @@ def partial_model(model: Type[BaseModel]):
         new.annotation = Optional[field.annotation]  # type: ignore
         return new.annotation, new
 
+    field_definitions: dict[str, Any] = {
+        field_name: make_field_optional(field_info)
+        for field_name, field_info in model.model_fields.items()
+    }
+
     return create_model(
         model.__name__,
         __base__=model,
         __module__=model.__module__,
-        **{
-            field_name: make_field_optional(field_info)
-            for field_name, field_info in model.model_fields.items()
-        },
+        **field_definitions,
     )
 
 
