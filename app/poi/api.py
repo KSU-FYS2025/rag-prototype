@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Body, HTTPException
-from typing import Annotated, Optional
-
+from typing import Annotated, Optional, cast
 
 from app.poi.models import (
     POI,
@@ -62,24 +61,32 @@ def insert_poi(poi: Annotated[OneOrMore[POI], Body()], db: NeedsDb) -> str:
     :param db:
     :return:
     """
-    if len(poi.pos) != 3:
-        raise HTTPException(
-            status_code=400,
-            detail="Pos info in body needs to be a 3 dimensional array of floating point values!!!",
-        )
 
     if type(poi) is POI:
+        if len(poi.position) != 3:
+            raise HTTPException(
+                status_code=400,
+                detail="Pos info in body needs to be a 3 dimensional array of floating point values!!!",
+            )
+
         if not hasattr(poi, "vector") or poi.vector is None or poi.vector == []:
             poi.generate_embedding()
         # idk how I feel about this, but it's needed
         delattr(poi, "id")
         data = [poi.model_dump()]
     else:
+        poi = cast(list[POI], poi)
+        if any(len(_poi.position) != 3 for _poi in poi):
+            raise HTTPException(
+                status_code=400,
+                detail="Pos info in body needs to be a 3 dimensional array of floating point values!!!",
+            )
+
         data = []
         for _poi in poi:
-            if _poi.embe is None:
+            if _poi.vector is None:
                 _poi.generate_embedding()
-            delattr(poi, "id")
+            delattr(_poi, "id")
             data.append(_poi.model_dump(mode="json"))
 
     res = db.insert(collection_name="poi", data=data)
