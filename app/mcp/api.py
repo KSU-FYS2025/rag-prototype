@@ -1,5 +1,6 @@
 from fastmcp import FastMCP
 from fastapi import APIRouter
+from warnings import deprecated
 
 from app.database.db import search_poi
 
@@ -12,14 +13,19 @@ router = APIRouter(lifespan=mcp_app.lifespan)
 router.mount("/mcp", mcp_app)
 
 
+@deprecated("This file is unused and planned for removal!")
 @mcp.tool
 def ping() -> str:
     return "pong!"
 
 
+@deprecated("This file is unused and planned for removal!")
 @mcp.tool
 def search_poi(
-    query: str, top_n: int = 5, fields: list[str] = None, filter_expression: str = ""
+    query: str,
+    top_n: int = 5,
+    fields: list[str] | None = None,
+    filter_expression: str = "",
 ) -> list[tuple]:
     """Searches for information within in the vector database. Performs a vector search on a query.
     :param query: String to search for within the database
