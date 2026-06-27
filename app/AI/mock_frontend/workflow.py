@@ -7,6 +7,7 @@ from google.adk import Workflow, Context
 from google.adk.workflow import node
 from google.adk import Event
 from google.genai import types
+from google.adk.events import RequestInput
 
 from app.AI.full_agent.actions_agent.schema import (
     ActionsAgentOutput,
@@ -16,6 +17,7 @@ from app.AI.full_agent.actions_agent.schema import (
     ClarifyAction,
     NavigationAction,
 )
+from app.AI.full_agent.clarify_agent.agent import clarify_agent
 from app.AI.full_agent.agent import full_workflow
 from app.database.db import get_db_gen
 
@@ -91,7 +93,7 @@ async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
                 resolved_action = resolve_answer(action)
 
             case ClarifyAction() as action:
-                resolved_action = resolve_clarify(action)
+                resolved_action = await resolve_clarify(action, ctx)
 
             case NavigationAction() as action:
                 resolved_action = resolve_navigation(action)
@@ -146,7 +148,9 @@ def resolve_answer(action: AnswerAction) -> Event:
     return Event(content=types.Content(parts=[types.Part.from_text(text=action.text)]))
 
 
-def resolve_clarify(action: ClarifyAction): ...
+def resolve_clarify(action: ClarifyAction, ctx: Context):
+    user_input = RequestInput(message=action.prompt)
+    return ctx.run_node(clarify_agent, user_input)
 
 
 def resolve_navigation(action: NavigationAction) -> Event:
