@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Body, HTTPException
 from typing import Annotated, Optional
 
@@ -71,15 +70,15 @@ def insert_poi(poi: Annotated[OneOrMore[POI], Body()], db: NeedsDb) -> str:
 
     if type(poi) is POI:
         if not hasattr(poi, "vector") or poi.vector is None or poi.vector == []:
-            poi.generate_embedding(embedding_fn)
+            poi.generate_embedding()
         # idk how I feel about this, but it's needed
         delattr(poi, "id")
         data = [poi.model_dump()]
     else:
         data = []
         for _poi in poi:
-            if _poi.vector is None:
-                _poi.generate_embedding(embedding_fn)
+            if _poi.embe is None:
+                _poi.generate_embedding()
             delattr(poi, "id")
             data.append(_poi.model_dump(mode="json"))
 
