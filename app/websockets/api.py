@@ -1,3 +1,4 @@
+from starlette.routing import BaseRoute
 import logging
 from typing import Any
 
@@ -165,6 +166,9 @@ class Sync(WebSocketEndpoint):
         return res
 
 
-routes = [WebSocketRoute("/ws/AI", Triage), WebSocketRoute("/ws/sync", Sync)]
+routes: list[BaseRoute] = [
+    WebSocketRoute("/ws/AI", Triage),
+    WebSocketRoute("/ws/sync", Sync),
+]
 
 router = APIRouter(routes=routes)
