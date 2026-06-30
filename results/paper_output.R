@@ -124,8 +124,6 @@ generate_result_grid <- function(data, title, out_file) {
 			c("answer", "resolve_nearest", "navigation", "clarify"),
 			cex = 0.8,
 			fill = rainbow(length(cmds_table)))
-  print(percentages)
-  print(cmds_table)
   # axis(1, at = bp_c, labels = names(cmds_table), las = 2,
   #      lwd = 0.5, lwd.ticks = 0.5, cex.axis = 0.45)
   # axis(2, lwd = 0.5, lwd.ticks = 0.5, cex.axis = 0.55)
