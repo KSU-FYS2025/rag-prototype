@@ -132,3 +132,58 @@ boxplot(time_delta ~ query_type, data = results,
         ylab = "Duration (s)",
         col = c("steelblue", "skyblue", "tomato", "salmon", "goldenrod"),
         cex.axis = 0.8)
+
+
+# 1. Define your vectors
+thinking_disabled <- c(58, 6, 4, 7) / 75 * 100
+thinking_enabled  <- c(63, 5, 2, 5) / 75 * 100
+
+# 2. Combine as COLUMNS to get 2 bars total, each containing 4 stacked segments
+data_matrix <- cbind(thinking_disabled, thinking_enabled)
+
+# 3. Label the 2 bars (columns) and the 4 segments (rows)
+colnames(data_matrix) <- c("Thinking Disabled", "Thinking Enabled")
+rownames(data_matrix) <- c("ALL", "SOME", "STRANGE", "NONE")
+
+# 4. Open the PDF device with standard journal dimensions
+pdf("ieee_4_stacked_barplot.pdf", width = 6.5, height = 5)
+
+# 5. Configure Margins
+par(oma = c(0, 0, 3, 0))  # Large top outer margin for globally centered title
+par(mar = c(5, 4, 2, 8)) # Generous right margin to hold the 4-item legend
+
+# 6. IEEE VGTC High-Contrast, CVD-Safe 4-Color Palette (Okabe-Ito)
+# These four colors have distinct luminance profiles for grayscale printing
+ieee_colors <- c(
+  "#009E73", "#E69F00", "#56B4E9", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000"
+)
+
+# 7. Draw the Barplot
+barplot(data_matrix,
+        xlab = "",
+        ylab = "Percentage Occurrences",
+        col = ieee_colors,
+        ylim = c(0, 100), # Leave headroom for the chart space
+        border = "white",
+        las = 1) # Keeps Y-axis numbers reading horizontally
+
+# 8. Append the 4-item Legend in the expanded right margin
+par(xpd = TRUE)
+legend("topleft",
+       inset = c(1.02, 0), # Push out into the right margin area
+       legend = rownames(data_matrix),
+       fill = ieee_colors,
+       bty = "n",
+       cex = 0.9,
+       y.intersp = 1.2) # Clear vertical spacing between legend items
+
+# 9. Add the Globally Centered Title over the absolute center of the PDF
+mtext("Percentage Response Encoding by Thinking Mode",
+      side = 3,
+      line = 1,
+      outer = TRUE,
+      cex = 1.2,
+      font = 2)
+
+# 10. Finalize and save the PDF file
+dev.off()
