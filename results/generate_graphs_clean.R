@@ -57,22 +57,26 @@ results$query_type <- factor(results$query_type, levels = c(
 get_agent_times <- function(query) {
   events <- query$sessionDetails$events
   timestamps <- sapply(events, function(e) e$timestamp)
-  start <- timestamps[1]
+  session_start <- timestamps[1]
 
   agent_events <- Filter(function(e) {
     !is.null(e$usageMetadata) && !is.null(e$author)
   }, events)
 
+  agent_end <- sapply(agent_events, function(e) e$timestamp)
+  agent_start <- c(session_start, head(agent_end, -1))
+
   data.frame(
     user_query = events[[1]]$content$parts[[1]]$text,
     agent = sapply(agent_events, function(e) e$author),
-    runtime = sapply(agent_events, function(e) e$timestamp - start)
+    runtime = agent_end - agent_start
   )
 }
 
 agent_times <- do.call(rbind, lapply(queries, get_agent_times))
 agent_times$agent <- factor(agent_times$agent,
                             levels = c("root_agent", "triage_agent", "synthesis_agent", "response_agent"))
+
 
 # --- Plots ---
 
