@@ -148,7 +148,7 @@ def resolve_answer(action: AnswerAction) -> Event:
 
 
 @node(name="resolve_clarify", rerun_on_resume=True)
-def resolve_clarify(ctx: Context, action: ClarifyAction):
+async def resolve_clarify(ctx: Context, action: ClarifyAction):
     user_input = RequestInput(message=action.prompt)
     return ctx.run_node(clarify_agent, user_input)
 
