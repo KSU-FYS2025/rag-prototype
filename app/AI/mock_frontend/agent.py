@@ -71,7 +71,7 @@ def resolution_helper(
         actions = yield
 
 
-@node(name="resolve_actions")
+@node(name="resolve_actions", rerun_on_resume=True)
 async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
     actions = node_input.actions.copy()
 
