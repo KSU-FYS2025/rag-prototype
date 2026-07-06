@@ -17,5 +17,5 @@ actions_agent = Agent(
     planner=planner_defaults,
     input_schema=SearchOutput,
     output_schema=ActionsAgentOutput,
-    tools=[load_memory],
+    # tools=[load_memory],
 )
