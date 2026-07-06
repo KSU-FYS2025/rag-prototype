@@ -92,7 +92,7 @@ async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
                 resolved_action = resolve_answer(action)
 
             case ClarifyAction() as action:
-                resolved_action = await resolve_clarify(action, ctx)
+                resolved_action = await ctx.run_node(resolve_clarify, action)
 
             case NavigationAction() as action:
                 resolved_action = resolve_navigation(action)
@@ -147,7 +147,8 @@ def resolve_answer(action: AnswerAction) -> Event:
     return Event(content=types.Content(parts=[types.Part.from_text(text=action.text)]))
 
 
-def resolve_clarify(action: ClarifyAction, ctx: Context):
+@node(name="resolve_clarify", rerun_on_resume=True)
+def resolve_clarify(ctx: Context, action: ClarifyAction):
     user_input = RequestInput(message=action.prompt)
     return ctx.run_node(clarify_agent, user_input)
 
