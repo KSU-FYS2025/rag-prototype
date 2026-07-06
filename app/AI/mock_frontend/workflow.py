@@ -21,7 +21,9 @@ from app.AI.full_agent.clarify_agent.agent import clarify_agent
 from app.AI.full_agent.agent import full_workflow
 from app.database.db import get_db_gen
 
-workflow = Workflow(name="mock_frontend", edges=[("START", full_workflow)])
+mock_frontend_workflow = Workflow(
+    name="mock_frontend", edges=[("START", full_workflow)]
+)
 
 RESOLUTION_ORDER = [
     "resolve_nearest",
@@ -159,5 +161,5 @@ def resolve_navigation(action: NavigationAction) -> Event:
     )
 
 
-agent = workflow
-root_agent = workflow
+agent = mock_frontend_workflow
+root_agent = mock_frontend_workflow
