@@ -4,9 +4,9 @@ library(rjson)
 # FILE PATHS — update these to match your actual file locations
 # ---------------------------------------------------------------------------
 
-eval_set_path <- "results/evalset_results/full_agent_full_agent_eval_set_large_10_disabled_1782415557.690652.json"
+eval_set_path <- "results/evalset_results/full_agent_full_agent_eval_set_large_10_enabled_1782416910.1893363.json"
 poi_path <- "UpdatedFloorsAndFireinteraction_POIs.json"
-output_path <- "eval_results_with_pois.csv"
+output_path <- "eval_results_with_pois_enabled.csv"
 
 # ---------------------------------------------------------------------------
 # Sanity-check paths before doing any work
