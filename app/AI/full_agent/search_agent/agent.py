@@ -6,7 +6,7 @@ from google.adk import Workflow, Context, Event, Agent
 from google.adk.workflow import node
 from pymilvus import MilvusException
 
-from app.AI.full_agent.agent import planner_defaults
+from app.AI.full_agent.defaults import planner_defaults
 from app.AI.full_agent.search_agent.schema import (
     SearchOutput,
     POIAndSemanticDistance,

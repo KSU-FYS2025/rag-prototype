@@ -2,7 +2,7 @@ from google.adk.agents.llm_agent import Agent
 from google.adk.tools import load_memory
 
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
-from app.AI.full_agent.agent import planner_defaults
+from app.AI.full_agent.defaults import planner_defaults
 from app.AI.full_agent.search_agent.schema import SearchOutput
 
 actions_agent = Agent(

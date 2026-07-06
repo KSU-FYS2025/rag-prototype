@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 
-from app.AI.full_agent.agent import planner_defaults
+from app.AI.full_agent.defaults import planner_defaults
 from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 

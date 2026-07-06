@@ -1,7 +1,7 @@
 from google.adk.agents.llm_agent import Agent
 
 from app.AI.full_agent.actions_agent.schema import Command
-from app.AI.full_agent.agent import planner_defaults
+from app.AI.full_agent.defaults import planner_defaults
 from app.AI.full_agent.clarify_agent.schema import ClarifyInput
 
 clarify_agent = Agent(
