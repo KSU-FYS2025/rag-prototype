@@ -147,10 +147,15 @@ def resolve_answer(action: AnswerAction) -> Event:
     return Event(content=types.Content(parts=[types.Part.from_text(text=action.text)]))
 
 
-@node(name="resolve_clarify", rerun_on_resume=True)
-async def resolve_clarify(ctx: Context, node_input: ClarifyAction):
-    user_input = RequestInput(message=node_input.prompt)
-    return ctx.run_node(clarify_agent, user_input)
+@node(name="request_input", rerun_on_resume=True)
+async def request_input(ctx: Context, node_input: ClarifyAction):
+    yield RequestInput(message=node_input.prompt)
+
+
+resolve_clarify = Workflow(
+    name="resolve_clarify",
+    edges=[("START", request_input, clarify_agent)],
+)
 
 
 def resolve_navigation(action: NavigationAction) -> Event:
