@@ -157,3 +157,7 @@ def resolve_navigation(action: NavigationAction) -> Event:
     return Event(
         content=types.Content(parts=[types.Part.from_text(text=action.response)])
     )
+
+
+agent = workflow
+root_agent = workflow
