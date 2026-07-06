@@ -1,5 +1,6 @@
 import math
 
+from app.AI.mock_frontend.schema import ResolveClarifyAction
 from app.poi.models import POI
 from typing import Generator
 
@@ -150,6 +151,23 @@ def resolve_answer(action: AnswerAction) -> Event:
 @node(name="request_input", rerun_on_resume=True)
 async def request_input(ctx: Context, node_input: ClarifyAction):
     yield RequestInput(message=node_input.prompt)
+
+
+@node(name="echo", rerun_on_resume=True)
+async def echo[T](ctx: Context, node_input: T) -> T:
+    return node_input
+
+
+input_workflow = Workflow(
+    name="input_workflow",
+    edges=[("START", request_input, echo)],
+)
+
+
+@node(name="post_input", rerun_on_resume=True)
+async def handle_input(ctx: Context, node_input: ClarifyAction) -> ResolveClarifyAction:
+    user_input = await ctx.run_node(request_input, node_input)
+    return ResolveClarifyAction(clarification_action=node_input, user_input=user_input)
 
 
 resolve_clarify = Workflow(
