@@ -73,7 +73,7 @@ def resolution_helper(
         actions = yield
 
 
-@node(name="resolve_actions", rerun_on_resume=True)
+@node(name="resolve_actions", rerun_on_resume=False)
 async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput | ConversationOutput):
     if isinstance(node_input, ConversationOutput):
         yield Event(content=types.Content(parts=[types.Part.from_text(text=node_input.response)]))
@@ -157,7 +157,7 @@ async def request_input(ctx: Context, node_input: ClarifyAction):
     yield RequestInput(message=node_input.prompt, response_schema=str)
 
 
-@node(name="echo", rerun_on_resume=True)
+@node(name="echo", rerun_on_resume=False)
 async def echo[T](ctx: Context, node_input: T) -> T:
     return node_input
 
@@ -168,7 +168,7 @@ input_workflow = Workflow(
 )
 
 
-@node(name="post_input", rerun_on_resume=True)
+@node(name="post_input", rerun_on_resume=False)
 async def handle_input(ctx: Context, node_input: ClarifyAction) -> ResolveClarifyAction:
     user_input = await ctx.run_node(request_input, node_input)
     return ResolveClarifyAction(clarification_action=node_input, user_input=user_input)
