@@ -154,7 +154,7 @@ def resolve_answer(action: AnswerAction) -> Event:
 
 @node(name="request_input", rerun_on_resume=True)
 async def request_input(ctx: Context, node_input: ClarifyAction):
-    yield RequestInput(message=node_input.prompt)
+    yield RequestInput(message=node_input.prompt, response_schema=str)
 
 
 @node(name="echo", rerun_on_resume=True)
