@@ -1,5 +1,6 @@
 import math
 
+from app.AI.full_agent.conversation_agent.schema import ConversationOutput
 from app.AI.mock_frontend.schema import ResolveClarifyAction
 from app.poi.models import POI
 from typing import Generator
@@ -73,7 +74,10 @@ def resolution_helper(
 
 
 @node(name="resolve_actions", rerun_on_resume=True)
-async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput):
+async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput | ConversationOutput):
+    if isinstance(node_input, ConversationOutput):
+        yield Event(content=types.Content(parts=[types.Part.from_text(text=node_input.response)]))
+        return
     actions = node_input.actions.copy()
 
     res_gen = resolution_helper(actions)
