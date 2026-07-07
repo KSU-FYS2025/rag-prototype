@@ -146,20 +146,20 @@ thinking_enabled  <- c(63, 5, 2, 5) / 75 * 100
 data_matrix <- cbind(thinking_disabled, thinking_enabled)
 
 # 3. Label the 2 bars (columns) and the 4 segments (rows)
-colnames(data_matrix) <- c("Thinking Disabled", "Thinking Enabled")
-rownames(data_matrix) <- c("ALL", "SOME", "STRANGE", "NONE")
+colnames(data_matrix) <- c("Disabled", "Enabled")
+rownames(data_matrix) <- c("ALL", "SOME", "NONSTANDARD", "NONE")
 
 # 4. Open the PDF device with standard journal dimensions
-pdf("ieee_4_stacked_barplot.pdf", width = 6.5, height = 5)
+pdf("../ieee_4_stacked_barplot_shrinked.pdf", width = 4, height = 5)
 
 # 5. Configure Margins
 par(oma = c(0, 0, 3, 0))  # Large top outer margin for globally centered title
-par(mar = c(5, 4, 2, 8)) # Generous right margin to hold the 4-item legend
+par(mar = c(2, 4, 2, 8)) # Generous right margin to hold the 4-item legend
 
 # 6. IEEE VGTC High-Contrast, CVD-Safe 4-Color Palette (Okabe-Ito)
 # These four colors have distinct luminance profiles for grayscale printing
 ieee_colors <- c(
-  "#009E73", "#E69F00", "#56B4E9", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000"
+  "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000"
 )
 
 # 7. Draw the Barplot
@@ -182,9 +182,9 @@ legend("topleft",
        y.intersp = 1.2) # Clear vertical spacing between legend items
 
 # 9. Add the Globally Centered Title over the absolute center of the PDF
-mtext("Percentage Response Encoding by Thinking Mode",
+mtext("Percentage Response Encoding\nby Thinking Mode",
       side = 3,
-      line = 1,
+      line = 0,
       outer = TRUE,
       cex = 1.2,
       font = 2)
