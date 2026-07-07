@@ -152,9 +152,9 @@ def resolve_answer(action: AnswerAction) -> Event:
     return Event(content=types.Content(parts=[types.Part.from_text(text=action.text)]))
 
 
-@node(name="request_input", rerun_on_resume=False)
+@node(name="request_input", rerun_on_resume=True)
 async def request_input(ctx: Context, node_input: ClarifyAction):
-    return RequestInput(message=node_input.prompt, response_schema=str)
+    yield RequestInput(message=node_input.prompt, response_schema=str)
 
 
 @node(name="echo", rerun_on_resume=True)
