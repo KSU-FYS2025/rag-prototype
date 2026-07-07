@@ -6,7 +6,8 @@ from enum import Enum
 class BaseResponse(BaseModel):
     user_query: str = Field(
         description="The user's original query. MUST match the user's query exactly. Precision is important. Do NOT "
-                    "paraphrase or modify the original query in any way whatsoever."
+                    "paraphrase or modify the original query in any way whatsoever. The user's query will either be in "
+                    "the users's last event or in the user_query field of your input. Take whichever one is shorter."
     )
 
 
