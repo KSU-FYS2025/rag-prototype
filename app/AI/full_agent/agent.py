@@ -19,7 +19,7 @@ navigation_workflow = Workflow(
 )
 
 
-@node(name="navigation_router", rerun_on_resume=True)
+@node(name="navigation_router", rerun_on_resume=False)
 def navigation_router(node_input: RootOutput):
     if node_input.intent == NavigationIntent.CONVERSATIONAL:
         return Event(route="conversational")

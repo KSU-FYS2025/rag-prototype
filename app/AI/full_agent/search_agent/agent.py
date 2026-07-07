@@ -33,7 +33,7 @@ def sanitize_filter(filter_expr: str) -> str:
     return re.sub(r"'((?:[^']|'')*)'", swap_quotes, filter_expr)
 
 
-@node(name="search_poi", rerun_on_resume=True)
+@node(name="search_poi", rerun_on_resume=False)
 async def search_poi_node(node_input: QueryClassifier) -> Event:
     logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = (
@@ -57,7 +57,7 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
     return Event(output=results, partial=True)
 
 
-@node(name="validate_pois", rerun_on_resume=True)
+@node(name="validate_pois", rerun_on_resume=False)
 async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
     logging.info(f"validate_pois called with {node_input}")
     collect: list[POIAndSemanticDistance] = []
@@ -82,7 +82,7 @@ def make_base_workflow(i: int) -> Workflow:
     )
 
 
-@node(name="router", rerun_on_resume=True)
+@node(name="router", rerun_on_resume=False)
 async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
     node_input = TriageAgentOutput.model_validate(node_input.model_dump(mode="json"))
     logging.info(f"parallel_router called with {node_input}")
