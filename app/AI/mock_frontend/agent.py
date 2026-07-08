@@ -3,7 +3,7 @@ import math
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
 from app.AI.mock_frontend.schema import ResolveClarifyAction
 from app.poi.models import POI
-from typing import Generator
+from typing import Generator, Any, Tuple
 
 from google.adk import Workflow, Context
 from google.adk.workflow import node
@@ -46,71 +46,57 @@ def get_distance(this: list[float], other: list[float]) -> float:
         + (this[2] - other[2]) ** 2
     )
 
+@node(name="resolution_helper", rerun_on_resume=True)
+async def resolution_helper(ctx: Context):
+    actions_in = ctx.state["user:nav_output"]
+    actions_parsed = ActionsAgentOutput.model_validate(actions_in)
+    actions = actions_parsed.actions
 
-def resolution_helper(
-    _actions: list[Command],
-) -> Generator[tuple[int, Command] | None, list[Command], None]:
-    actions = _actions.copy()
-    while actions:
-        action_types: list[str] = [action.cmd for action in actions]
-        for resolution_stage in RESOLUTION_ORDER:
-            index = proper_index(action_types, resolution_stage)
-            # If the current resolution stage does not exist in actions, skip it and go to the next one.
-            if index is None:
-                continue
+    action_types: list[str] = [action.cmd for action in actions]
+    for stage in RESOLUTION_ORDER:
+        index = proper_index(action_types, stage)
+        # If the current resolution stage does not exist in actions, skip it and go to the next one.
+        if index is None:
+            continue
 
-            # If the resolution_stage is resolve nearest, and any of the actions beforehand are clarify, skip this
-            # resolution stage and go to the next one.
-            if resolution_stage == "resolve_nearest" and any(
-                action.cmd == "clarify" for action in actions[:index]
-            ):
-                continue
+        # If the stage is resolve_nearest and any of the actions beforehand are clarify, skip this resolution stage and
+        # go to the next one.
+        if stage == "resolve_nearest" and any(
+            action.cmd == "clarify" for action in actions[:index]
+        ):
+            continue
 
-            action = actions[index]
-            yield index, action
-            break
-
-        actions = yield
-
+        return Event(route="running", output=(index, actions))
+    return Event(route="done", output="Finished navigation")
 
 @node(name="resolve_actions", rerun_on_resume=True)
-async def resolve_actions(ctx: Context, node_input: ActionsAgentOutput | ConversationOutput):
-    if isinstance(node_input, ConversationOutput):
-        yield Event(content=types.Content(parts=[types.Part.from_text(text=node_input.response)]))
-        return
-    actions = node_input.actions.copy()
+async def resolve_actions(ctx: Context, node_input: Tuple[int, list[Command]]):
+    index, actions = node_input
+    action = actions[index]
 
-    res_gen = resolution_helper(actions)
+    resolved_action = None
+    match action:
+        case ResolveNearestAction() as action:
+            resolved_action = resolve_nearest(
+                action, None if index == 0 else actions[index - 1]
+            )
 
-    for output in res_gen:
-        assert output is not None
-        index, action = output
+        case AnswerAction() as action:
+            resolved_action = resolve_answer(action)
 
-        resolved_action = None
-        match action:
-            case ResolveNearestAction() as action:
-                resolved_action = resolve_nearest(
-                    action, None if index == 0 else actions[index - 1]
-                )
+        case ClarifyAction() as action:
+            resolved_action = await ctx.run_node(resolve_clarify, action)
 
-            case AnswerAction() as action:
-                resolved_action = resolve_answer(action)
+        case NavigationAction() as action:
+            resolved_action = resolve_navigation(action)
 
-            case ClarifyAction() as action:
-                resolved_action = await ctx.run_node(resolve_clarify, action)
+    # If the action resolves into another action, signal for post_res to replace it
+    if isinstance(resolved_action, Command.__value__):
+        return Event(output=(index, resolved_action))
 
-            case NavigationAction() as action:
-                resolved_action = resolve_navigation(action)
-
-        # If the action resolves into another action, replace the action with the new one
-        if isinstance(resolved_action, Command.__value__):
-            actions[index] = resolved_action
-
-        # If the action resolves into an event, yield it.
-        if isinstance(resolved_action, Event):
-            yield resolved_action
-
-        res_gen.send(actions)
+    # If the action resolves into an event, return it.
+    if isinstance(resolved_action, Event):
+        return resolved_action
 
 
 def resolve_nearest(
@@ -151,44 +137,64 @@ def resolve_nearest(
 def resolve_answer(action: AnswerAction) -> Event:
     return Event(content=types.Content(parts=[types.Part.from_text(text=action.text)]))
 
-
-@node(name="request_input", rerun_on_resume=True)
-async def request_input(ctx: Context, node_input: ClarifyAction):
-    yield RequestInput(message=node_input.prompt, response_schema=str)
-
-
-@node(name="echo", rerun_on_resume=True)
-async def echo[T](ctx: Context, node_input: T) -> T:
-    return node_input
-
-
-input_workflow = Workflow(
-    name="input_workflow",
-    edges=[("START", request_input, echo)],
-)
-
-
-@node(name="post_input", rerun_on_resume=True)
-async def handle_input(ctx: Context, node_input: ClarifyAction) -> ResolveClarifyAction:
-    user_input = await ctx.run_node(request_input, node_input)
-    return ResolveClarifyAction(clarification_action=node_input, user_input=user_input)
-
-
-resolve_clarify = Workflow(
-    name="resolve_clarify",
-    edges=[("START", request_input, clarify_agent)],
-)
-
-
 def resolve_navigation(action: NavigationAction) -> Event:
     return Event(
         content=types.Content(parts=[types.Part.from_text(text=action.response)])
     )
 
+def resolve_clarify(action: ClarifyAction) -> Event:
+    return Event(
+        content=types.Content(parts=[types.Part.from_text(text=f"CLARIFY: {action.prompt}")])
+    )
+
+@node(name="post_res", rerun_on_resume=True)
+def post_res(ctx: Context, node_input: tuple[int, Command]):
+    ...
+
+@node(name="save_to_state", rerun_on_resume=True)
+def save_to_state(ctx: Context, node_input: ActionsAgentOutput):
+    ctx.state["user:nav_output"] = node_input
+
+@node(name="resolve_conversation", rerun_on_resume=True)
+def resolve_conversation(ctx: Context, node_input: ActionsAgentOutput | ConversationOutput):
+    if isinstance(node_input, ConversationOutput):
+        return Event(route="conversation", output=node_input)
+    return Event(route="navigation", output=node_input)
+
+@node(name="skip_nav", rerun_on_resume=True)
+def skip_nav(ctx: Context, node_input: ActionsAgentOutput):
+    ...
+
+@node(name="setup_res", rerun_on_resume=True)
+def setup_res(ctx: Context, node_input: ActionsAgentOutput):
+    ...
+
+@node(name="echo", rerun_on_resume=True)
+def echo(ctx: Context, node_input: Any):
+    return Event(output=node_input)
 
 mock_frontend_workflow = Workflow(
     name="mock_frontend",
-    edges=[("START", full_workflow, resolve_actions)],
+    edges=[
+        ("START", skip_nav),
+        (skip_nav, {
+            "skip": (setup_res, resolve_actions),
+            "perform": (full_workflow, resolve_conversation),
+        }),
+        (resolve_actions, post_res),
+        (resolve_conversation, {
+            "conversation": echo,
+            "navigation": (save_to_state, resolution_helper),
+        }),
+        (resolution_helper, {
+            "done": echo,
+            "running": resolve_actions,
+        }),
+        (post_res, {
+            "clarify": echo,
+            "other": resolution_helper,
+        })
+    ],
 )
 
 agent = mock_frontend_workflow
