@@ -1,8 +1,8 @@
 install.packages("nortest")
 library(nortest)
 library(rjson)
-json_data_disabled <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_10_disabled_1782415557.690652.json")
-json_data_enabled <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_10_enabled_1782416910.1893363.json")
+json_data_disabled <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_12_disabled_1783532216.7194827.json")
+json_data_enabled <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_12_enabled_1783518451.6002152.json")
 
 # First hypothesis test: Are the query times for the evaluation with thinking enabled greater than the evaluation with
 # thinking disabled?
@@ -19,16 +19,27 @@ get_timestamps <- function(query) {
 }
 
 get_user_query <- function(query) {
-  events     <- query$sessionDetails$events
+  events <- query$sessionDetails$events
   user_event <- Filter(function(e) !is.null(e$content$role) && e$content$role == "user", events)
   user_event[[1]]$content$parts[[1]]$text
 }
 
+get_timestamps_enabled <- function(query) {
+  timestamps <- sapply(query$sessionDetails$events, function(e) e$timestamp)
+  timestamps[length(timestamps)] - timestamps[1]
+}
+
+get_user_query_enabled <- function(query) {
+  events <- query$sessionDetails$events
+  user_event <- Filter(function(e) !is.null(e$content$role) && e$content$role == "user", events)
+  tail(user_event[[1]]$content$parts, 1)[[1]]$text
+}
+
 time_delta_disabled <- sapply(queries_disabled, get_timestamps)
-time_delta_enabled <- sapply(queries_enabled, get_timestamps)
+time_delta_enabled <- sapply(queries_enabled, get_timestamps_enabled)
 
 queries_disabled_frame <- sapply(queries_disabled, get_user_query)
-queries_enabled_frame <- sapply(queries_enabled, get_user_query)
+queries_enabled_frame <- sapply(queries_enabled, get_user_query_enabled)
 
 df_disabled <- data.frame(queries = queries_disabled_frame, time_deltas = time_delta_disabled)
 df_enabled <- data.frame(queries = queries_enabled_frame, time_deltas = time_delta_enabled)
@@ -63,16 +74,16 @@ xbar <- data.mean
 s <- data.sd
 df <- n - 1
 
-t <- (xbar-mu)/(s/sqrt(n))
-print(pt(t, df, lower.tail=T))
+t <- (xbar - mu) / (s / sqrt(n))
+print(pt(t, df, lower.tail = T))
 
 wilcox.test(time_delta_disabled, time_delta_enabled, alternative = "less")
-t.test(log(time_delta_disabled), log(time_delta_enabled), alternative="less")
+t.test(log(time_delta_disabled), log(time_delta_enabled), alternative = "less")
 
 # Second hypothesis test: Is the accuracy for the test with thinking enabled greater than the test with thinking
 # disabled?
 
-successes <- c(63, 58)
+successes <- c(63, 64)
 totals <- c(75, 75)
 
 prop.test(x = successes, n = totals, alternative = "greater", correct = TRUE)

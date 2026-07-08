@@ -1,7 +1,7 @@
 install.packages("rjson")
 library(rjson)
 
-json_data <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_12_disabled_1783532216.7194827.json")
+json_data <- fromJSON(file = "results/evalset_results/full_agent_full_agent_eval_set_large_12_enabled_1783518451.6002152.json")
 queries <- json_data$evalCaseResults
 
 # Load query type mapping from file
@@ -19,15 +19,17 @@ get_timestamps <- function(query) {
 get_user_query <- function(query) {
   events <- query$sessionDetails$events
   user_event <- Filter(function(e) !is.null(e$content$role) && e$content$role == "user", events)
-  user_event[[1]]$content$parts[[1]]$text
+  tail(user_event[[1]]$content$parts, 1)[[1]]$text
 }
 
 get_cmds <- function(query) {
-  response_text <- query$evalMetricResultPerInvocation[[1]]$
+  responses <- query$evalMetricResultPerInvocation[[1]]$
     actualInvocation$
     finalResponse$
-    parts[[1]]$text
-  response_json <- fromJSON(response_text)
+    parts
+  # response_text <- responses[grepl("[{]", responses$text)]
+  response_text <- Filter(function(x) grepl("[{]", x$text), responses)
+  response_json <- fromJSON(response_text[[1]]$text)
   sapply(response_json$actions, function(a) a$cmd)
 }
 
@@ -67,7 +69,7 @@ get_agent_times <- function(query) {
   agent_start <- c(session_start, head(agent_end, -1))
 
   data.frame(
-    user_query = events[[1]]$content$parts[[1]]$text,
+    user_query = tail(events[[1]]$content$parts, 1)[[1]]$text,
     agent = sapply(agent_events, function(e) e$author),
     runtime = agent_end - agent_start
   )
@@ -104,24 +106,20 @@ pie(cmds, labels = pie_labels, main = "Distribution of Commands",
     col = rainbow(length(cmds)))
 
 cmd_times <- do.call(rbind, lapply(queries, function(query) {
-  response_text <- query$evalMetricResultPerInvocation[[1]]$
+  responses <- query$evalMetricResultPerInvocation[[1]]$
     actualInvocation$
     finalResponse$
-    parts[[1]]$text
-  response_json <- fromJSON(response_text)
+    parts
+  # response_text <- responses[grepl("^\\{", responses$text)]
+  response_text <- Filter(function(x) grepl("[{]", x$text), responses)
+  response_json <- fromJSON(response_text[[1]]$text)
   timestamps <- sapply(query$sessionDetails$events, function(e) e$timestamp)
   runtime <- timestamps[length(timestamps)] - timestamps[1]
-
-  cmds <- sapply(response_json$actions, function(a) a$cmd)
-  if (length(cmds) == 0) cmds <- NA_character_
-
   data.frame(
-    cmd = cmds,
+    cmd = sapply(response_json$actions, function(a) a$cmd),
     runtime = runtime
   )
 }))
-
-cmd_times <- cmd_times[!is.na(cmd_times$cmd),]
 
 boxplot(runtime ~ cmd, data = cmd_times,
         main = "Session Duration by Command Type",
@@ -134,7 +132,7 @@ boxplot(runtime ~ agent, data = agent_times,
         xlab = "Agent",
         ylab = "Elapsed Time from Session Start (s)",
         col = c("steelblue", "tomato", "seagreen", "goldenrod"),
-        names = c("Root", "Triage", "Synthesis", "Response"))
+        names = c("Root", "Triage", "Synthesis", "Actions"))
 
 boxplot(time_delta ~ query_type, data = results,
         main = "Session Duration by Query Type",
@@ -143,10 +141,9 @@ boxplot(time_delta ~ query_type, data = results,
         col = c("steelblue", "skyblue", "tomato", "salmon", "goldenrod"),
         cex.axis = 0.8)
 
-
 # 1. Define your vectors
-thinking_disabled <- c(58, 6, 4, 7) / 75 * 100
-thinking_enabled <- c(63, 5, 2, 5) / 75 * 100
+thinking_disabled <- c(64, 4, 3, 4) / 75 * 100
+thinking_enabled <- c(63, 6, 1, 5) / 75 * 100
 
 # 2. Combine as COLUMNS to get 2 bars total, each containing 4 stacked segments
 data_matrix <- cbind(thinking_disabled, thinking_enabled)
