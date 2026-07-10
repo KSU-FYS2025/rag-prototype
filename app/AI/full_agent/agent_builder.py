@@ -4,7 +4,7 @@ from google.adk.planners import BuiltInPlanner
 from google.genai import types
 from google.genai.types import Schema
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from google.adk import Agent
 
@@ -27,6 +27,8 @@ planner_defaults = BuiltInPlanner(
 
 
 class AgentConfig(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     model: str = Field(
         default="gemini-2.5-flash", description="The model to use for the agent"
     )
@@ -89,6 +91,7 @@ class AgentBuilder:
     Note: This is just a wrapper. When "instantiating" the class it will not
     return an instance of AgentBuilder, but rather adk.Agent.
     """
+
     def __new__(
         cls, config: AgentConfig | None = None, **kwargs: Unpack[AgentConfigDict]
     ) -> Agent:
