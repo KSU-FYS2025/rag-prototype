@@ -1,0 +1,97 @@
+from google.adk.agents.llm_agent import InstructionProvider, ToolUnion
+from google.adk.agents.readonly_context import ReadonlyContext
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
+from google.genai.types import Schema
+
+from pydantic import BaseModel, Field
+
+from google.adk import Agent
+
+from typing import overload, TypedDict, NotRequired, Unpack
+
+
+def shared_instruction_provider(context: ReadonlyContext) -> str:
+    agent_name = context.agent_name
+    with open(f"instructions/{agent_name}.md") as f:
+        instructions = f.readlines()
+
+    return "\n".join(instructions)
+
+
+planner_defaults = BuiltInPlanner(
+    thinking_config=types.ThinkingConfig(
+        include_thoughts=False,
+    )
+)
+
+
+class AgentConfig(BaseModel):
+    model: str = Field(
+        default="gemini-2.5-flash", description="The model to use for the agent"
+    )
+    name: str = Field(description="The name of the agent")
+    description: str = Field(description="The description of the agent")
+    instruction: str | InstructionProvider = Field(
+        default=shared_instruction_provider, description="The instruction of the agent"
+    )
+    planner: BuiltInPlanner = Field(
+        default=planner_defaults, description="The planner for the agent"
+    )
+    input_schema: type[BaseModel] | None = Field(
+        default=None, description="The input schema for the agent"
+    )
+    output_schema: type[BaseModel] | None = Field(
+        default=None, description="The output schema for the agent"
+    )
+    tools: list[ToolUnion] = Field(description="The tools available to the agent")
+
+
+class AgentConfigDict(TypedDict):
+    model: NotRequired[str]
+    name: str
+    description: str
+    instruction: NotRequired[str | InstructionProvider]
+    planner: NotRequired[BuiltInPlanner]
+    input_schema: NotRequired[type[BaseModel] | None]
+    output_schema: NotRequired[type[BaseModel] | None]
+    tools: list[ToolUnion]
+
+
+@overload
+def agent_builder(config: AgentConfig) -> Agent: ...
+
+
+@overload
+def agent_builder(config: AgentConfigDict) -> Agent: ...
+
+
+def agent_builder(config: AgentConfig | AgentConfigDict) -> Agent:
+    if isinstance(config, dict):
+        config = AgentConfig(**config)
+
+    return Agent(
+        model=config.model,
+        name=config.name,
+        description=config.description,
+        instruction=config.instruction,
+        planner=config.planner,
+        input_schema=config.input_schema,
+        output_schema=config.output_schema,
+        tools=config.tools,
+    )
+
+
+class AgentBuilder:
+    """
+    Drop-in replacement for adk.Agent with codebase defaults
+
+    Note: This is just a wrapper. When "instantiating" the class it will not
+    return an instance of AgentBuilder, but rather adk.Agent.
+    """
+    def __new__(
+        cls, config: AgentConfig | None = None, **kwargs: Unpack[AgentConfigDict]
+    ) -> Agent:
+        if not config:
+            return agent_builder(dict(kwargs))
+        return agent_builder(config)
