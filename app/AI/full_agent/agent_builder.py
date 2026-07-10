@@ -44,7 +44,7 @@ class AgentConfig(BaseModel):
     input_schema: type[BaseModel] | None = Field(
         default=None, description="The input schema for the agent"
     )
-    output_schema: type[BaseModel] | None = Field(
+    output_schema: types.SchemaUnion | None = Field(
         default=None, description="The output schema for the agent"
     )
     tools: list[ToolUnion] = Field(
