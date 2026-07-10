@@ -2,11 +2,11 @@ import asyncio
 import logging
 import re
 
-from google.adk import Workflow, Context, Event, Agent
+from google.adk import Workflow, Context, Event
 from google.adk.workflow import node
 from pymilvus import MilvusException
 
-from app.AI.full_agent.defaults import planner_defaults
+from app.AI.full_agent.agent_builder import AgentBuilder
 from app.AI.full_agent.search_agent.schema import (
     SearchOutput,
     POIAndSemanticDistance,
@@ -141,19 +141,9 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
 #
 #     return Event(output=distance_output)
 
-synthesis_agent = Agent(
-    model="gemini-2.5-flash",
+synthesis_agent = AgentBuilder(
     name="synthesis_agent",
     description="Agent that takes in all the vector search information and creates a path",
-    instruction="Included in your information is a list of POIs for each query the user has made as well as the "
-    "semantic distance from the user's query. You must plan a path for the user prioritizing the least "
-    "semantic distance. Please take into note: you do not have access to any information about distances "
-    "between POIs. DO NOT ASSUME DISTANCE BETWEEN POIs. If the user's query requires distance information, "
-    "return a list of POIs that are semantically similar. If there are multiple good candidates for a POI, "
-    "you should return all of them, so that the Unity client can decide which is the closest. You are "
-    "allowed to return an empty list inside the selected_pois key IF none of the POIs you are given are "
-    "close enough. You may decide what close enough is.",
-    planner=planner_defaults,
     input_schema=ParallelOutput,
     output_schema=SearchOutput,
 )
