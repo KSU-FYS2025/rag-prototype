@@ -2,10 +2,8 @@ from google.adk.agents.llm_agent import InstructionProvider, ToolUnion
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.planners import BuiltInPlanner
 from google.genai import types
-
-from pydantic import BaseModel, Field, ConfigDict
-
 from google.adk import Agent
+from pydantic import BaseModel, Field, ConfigDict
 
 from typing import overload, TypedDict, NotRequired, Unpack
 from functools import lru_cache
@@ -65,30 +63,6 @@ class AgentConfigDict(TypedDict):
     tools: NotRequired[list[ToolUnion]]
 
 
-@overload
-def agent_builder(config: AgentConfig) -> Agent: ...
-
-
-@overload
-def agent_builder(config: AgentConfigDict) -> Agent: ...
-
-
-def agent_builder(config: AgentConfig | AgentConfigDict) -> Agent:
-    if isinstance(config, dict):
-        config = AgentConfig(**config)
-
-    return Agent(
-        model=config.model,
-        name=config.name,
-        description=config.description,
-        instruction=config.instruction,
-        planner=config.planner,
-        input_schema=config.input_schema,
-        output_schema=config.output_schema,
-        tools=config.tools,
-    )
-
-
 class AgentBuilder:
     """
     Drop-in replacement for adk.Agent with codebase defaults
@@ -97,9 +71,22 @@ class AgentBuilder:
     return an instance of AgentBuilder, but rather adk.Agent.
     """
 
+    @classmethod
+    def _builder(cls, config: AgentConfig) -> Agent:
+        return Agent(
+            model=config.model,
+            name=config.name,
+            description=config.description,
+            instruction=config.instruction,
+            planner=config.planner,
+            input_schema=config.input_schema,
+            output_schema=config.output_schema,
+            tools=config.tools,
+        )
+
     def __new__(
         cls, config: AgentConfig | None = None, **kwargs: Unpack[AgentConfigDict]
     ) -> Agent:
         if not config:
-            return agent_builder(dict(kwargs))
-        return agent_builder(config)
+            config = AgentConfig(**kwargs)
+        return cls._builder(config)
