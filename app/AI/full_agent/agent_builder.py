@@ -13,7 +13,7 @@ from typing import overload, TypedDict, NotRequired, Unpack
 
 def shared_instruction_provider(context: ReadonlyContext) -> str:
     agent_name = context.agent_name
-    with open(f"instructions/{agent_name}.md") as f:
+    with open(f"app/AI/full_agent/instructions/{agent_name}.md") as f:
         instructions = f.readlines()
 
     return "\n".join(instructions)
