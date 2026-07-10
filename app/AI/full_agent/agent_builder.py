@@ -46,8 +46,8 @@ class AgentConfig(BaseModel):
     output_schema: type[BaseModel] | None = Field(
         default=None, description="The output schema for the agent"
     )
-    tools: list[ToolUnion] | None = Field(
-        description="The tools available to the agent"
+    tools: list[ToolUnion] = Field(
+        default_factory=list, description="The tools available to the agent"
     )
 
 
@@ -59,7 +59,7 @@ class AgentConfigDict(TypedDict):
     planner: NotRequired[BuiltInPlanner]
     input_schema: NotRequired[type[BaseModel] | None]
     output_schema: NotRequired[type[BaseModel] | None]
-    tools: list[ToolUnion]
+    tools: NotRequired[list[ToolUnion]]
 
 
 @overload
