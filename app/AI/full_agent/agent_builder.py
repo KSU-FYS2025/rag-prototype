@@ -2,21 +2,24 @@ from google.adk.agents.llm_agent import InstructionProvider, ToolUnion
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.planners import BuiltInPlanner
 from google.genai import types
-from google.genai.types import Schema
 
 from pydantic import BaseModel, Field, ConfigDict
 
 from google.adk import Agent
 
 from typing import overload, TypedDict, NotRequired, Unpack
+from functools import lru_cache
+
+
+@lru_cache(maxsize=None)
+def load_instructions(agent_name: str) -> str:
+    with open(f"app/AI/full_agent/instructions/{agent_name}.md") as f:
+        return f.read()
 
 
 def shared_instruction_provider(context: ReadonlyContext) -> str:
     agent_name = context.agent_name
-    with open(f"app/AI/full_agent/instructions/{agent_name}.md") as f:
-        instructions = f.readlines()
-
-    return "\n".join(instructions)
+    return load_instructions(agent_name)
 
 
 planner_defaults = BuiltInPlanner(
