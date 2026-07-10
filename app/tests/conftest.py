@@ -5,6 +5,11 @@ This file sets up the test environment with proper environment variables
 and ensures the database is initialized for all tests.
 """
 
+from ..main import app
+from ..database.db import embedding_fn, get_db_gen
+from ..poi.models import get_poi_schema, get_index_params
+from ..database.db import create_collection
+import json
 import os
 import pytest
 from pathlib import Path
@@ -32,13 +37,6 @@ if not os.environ.get("AI_MODEL"):
 # This is important for CI/CD where rate limiting might occur
 if not os.environ.get("EMBEDDING_RETRY_ATTEMPTS"):
     os.environ["EMBEDDING_RETRY_ATTEMPTS"] = "3"
-
-# Now import the FastAPI app (after environment is set)
-from ..main import app
-from ..database.db import embedding_fn, get_db_gen
-from ..poi.models import get_poi_schema, get_index_params
-from ..database.db import create_collection
-import json
 
 # Pre-initialize embedding model to cache it for all tests
 # This prevents repeated downloads/initialization during test runs

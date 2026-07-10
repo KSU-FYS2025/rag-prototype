@@ -1,7 +1,15 @@
+import warnings
+
 from google.adk.agents.llm_agent import Agent
 
 from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import QueryClassifier
+
+warnings.warn(
+    "This file currently isn't being used and will be removed in the future",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 llm_step = Agent(
     model="gemini-2.5-flash",

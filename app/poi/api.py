@@ -6,12 +6,12 @@ from app.poi.models import (
     POIOptional,
     dump_and_trim_none,
 )
-from app.poi.types import OneOrMore
 from app.dependencies import NeedsDb
-from app.database.db import embedding_fn
-
 
 router = APIRouter()
+
+
+type OneOrMore[T] = T | list[T]
 
 
 @router.get("/poi/", tags=["poi"])

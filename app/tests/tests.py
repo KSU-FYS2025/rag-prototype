@@ -5,19 +5,11 @@ from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
 
 from ..dependencies import needs_ollama
-from ..mcp.api import mcp
 from fastapi.testclient import TestClient
-
-
-@pytest.fixture
-async def main_mcp_client():
-    async with Client(transport=mcp) as mcp_client:
-        yield mcp_client
+import os
 
 
 def test_env(client: TestClient):
-    import os
-
     print("DB_URL:", os.environ.get("DB_URL"))
     print("POI_JSON_PATH:", os.environ.get("POI_JSON_PATH"))
 

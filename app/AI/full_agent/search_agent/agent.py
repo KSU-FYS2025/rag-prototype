@@ -18,11 +18,6 @@ from app.poi.models import POI
 
 logging.basicConfig(level=logging.INFO)
 
-# logging.getLogger("google_adk").setLevel(logging.DEBUG)
-# logging.getLogger("google.adk").setLevel(logging.DEBUG)
-# logging.getLogger("httpx").setLevel(logging.WARNING)
-# logging.getLogger("opentelemetry").setLevel(logging.WARNING)
-
 
 def sanitize_filter(filter_expr: str) -> str:
     # Replace single-quoted strings with double-quoted equivalents
@@ -106,40 +101,6 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
 
     return Event(output=results_obj, partial=True)
 
-
-# @node(name="distance_calculator", rerun_on_resume=True)
-# async def distance_calculator(
-#         node_input: list[list[POIAndSemanticDistance]]
-# ) -> Event:
-#     logging.info(f"distance_calculator called with {node_input}")
-#     distances: list[DistanceBetweenPOIs] = []
-#     for query1, query2 in zip(node_input, node_input[1:]):
-#         for poi_semantic1, poi_semantic2 in zip(query1, query2):
-#             poi1 = poi_semantic1.poi
-#             poi2 = poi_semantic2.poi
-#             distance_vector = Vector(
-#                 dx=poi2.localPosition[0] - poi1.localRotation[0],
-#                 dy=poi2.localPosition[1] - poi1.localRotation[1],
-#                 dz=poi2.localPosition[2] - poi1.localRotation[2]
-#             )
-#             distance_scalar = sqrt(distance_vector.dx**2 + distance_vector.dy**2 + distance_vector.dz**2)
-#
-#             distance_obj = DistanceAndVector(distance=distance_scalar, vector=distance_vector)
-#
-#             distances.append(DistanceBetweenPOIs(
-#                 poi1=poi1.id,
-#                 poi2=poi2.id,
-#                 distance=distance_obj
-#             ))
-#
-#     distance_output = DistanceOutput(
-#         POIs=node_input,
-#         distances=distances
-#     )
-#
-#     logging.info(f"synthesis_agent called with {distance_output}")
-#
-#     return Event(output=distance_output)
 
 synthesis_agent = AgentBuilder(
     name="synthesis_agent",

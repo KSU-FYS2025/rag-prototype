@@ -20,10 +20,7 @@ class QueryClassifier(BaseModel):
         description="Semantic information about the query that can be used to run a vector search. "
         "Include things like what the Point of Interest is, and any helpful explicit "
         "information.\n",
-        # examples=[
-        #     "EX1: ROOM 2131\n",
-        #     "EX2: bathroom, third floor"
-        # ]
+        examples=["EX1: ROOM 2131\n", "EX2: bathroom, third floor"],
     )
     source: str = Field(default="LLM", description="MUST always be LLM")
 

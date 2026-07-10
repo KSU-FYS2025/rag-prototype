@@ -1,3 +1,12 @@
+import warnings
+
+warnings.warn(
+    "This file uses the old setup and will be removed in the future. Use the new setup instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+
 def instruction_prompt(retrieved_knowledge) -> str:
     return f"""You are a helpful chatbot whose role is to assist people in guiding them to the correct spot.
     Your response should be aimed at the average person, not a researcher.

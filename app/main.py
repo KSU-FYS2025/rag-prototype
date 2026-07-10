@@ -7,7 +7,6 @@ import time
 from app.poi import api as poiapi
 from app.AI import api as aiapi
 from app.websockets import api as wsapi
-from app.mcp import api as mcp
 
 import logging
 from contextlib import asynccontextmanager
@@ -109,7 +108,6 @@ async def add_process_time(request: Request, call_next):
 app.include_router(poiapi.router)
 app.include_router(aiapi.router)
 app.include_router(wsapi.router)
-app.include_router(mcp.router)
 
 
 @app.get("/ping")

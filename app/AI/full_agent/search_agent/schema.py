@@ -14,22 +14,9 @@ class Validation(BaseModel):
 
 
 class SearchOutput(BaseResponse):
-    validations: List[Validation]
-
-
-# class Vector(BaseModel):
-#     dx: float = Field(description="x component of distance between two points")
-#     dy: float = Field(description="y component of distance between two points")
-#     dz: float = Field(description="z component of distance between two points")
-
-# class DistanceAndVector(BaseModel):
-#     distance: float = Field(description="Scalar distance between two points")
-#     vector: Vector = Field(description="Vector between two points")
-
-# class DistanceBetweenPOIs(BaseModel):
-#     poi1: int = Field(description="id of first POI")
-#     poi2: int = Field(description="id of second POI")
-#     distance: DistanceAndVector
+    validations: List[Validation] = Field(
+        description="List of validations that you are returning."
+    )
 
 
 class POIAndSemanticDistance(BaseModel):

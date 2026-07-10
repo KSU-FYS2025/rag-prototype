@@ -81,8 +81,6 @@ class POIDecoder(json.JSONDecoder):
                 f"Failed to generate embedding for POI: {e}. "
                 f"This may be due to network issues. Vector search may be unavailable."
             )
-            embedding_init_failed = True
-            # Create a dummy embedding if network fails
 
         return json_data
 
@@ -160,74 +158,74 @@ class POIOptional(POI):
 
 
 def get_poi_schema():
-    poiSchema = MilvusClient.create_schema(enable_dynamic_field=True)
-    poiSchema.add_field(
+    poi_schema = MilvusClient.create_schema(enable_dynamic_field=True)
+    poi_schema.add_field(
         field_name="id",
         datatype=DataType.INT64,
         is_primary=True,
         auto_id=False,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="name",
         datatype=DataType.VARCHAR,
         max_length=200,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="title",
         datatype=DataType.VARCHAR,
         max_length=200,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="poiName",
         datatype=DataType.VARCHAR,
         max_length=200,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="description",
         datatype=DataType.VARCHAR,
         max_length=1000,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="type",
         datatype=DataType.VARCHAR,
         max_length=100,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="parentName",
         datatype=DataType.VARCHAR,
         max_length=200,
     )
     # Coordinate arrays
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="position",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
         max_capacity=3,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="rotation",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
         max_capacity=3,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="localPosition",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
         max_capacity=3,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="localRotation",
         datatype=DataType.ARRAY,
         element_type=DataType.FLOAT,
         max_capacity=3,
     )
-    poiSchema.add_field(
+    poi_schema.add_field(
         field_name="vector",
         datatype=DataType.FLOAT_VECTOR,
         dim=768,
     )
-    return poiSchema
+    return poi_schema
 
 
 def get_index_params():
@@ -243,6 +241,5 @@ def get_index_params():
 
 
 def dump_and_trim_none(obj: BaseModel) -> dict:
-    print(f"items: {obj.model_dump().items()}")
     new = {key: value for key, value in obj.model_dump().items() if value is not None}
     return new
