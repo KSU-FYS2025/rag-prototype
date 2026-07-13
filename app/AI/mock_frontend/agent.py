@@ -263,10 +263,12 @@ mock_frontend_workflow = Workflow(
         (
             resume_resolution,
             {
-                "resume": (load_from_state, resolve_clarify, commit_change),
-                "full_workflow": (full_workflow, resolve_conversation),
+                "resume": load_from_state,
+                "full_workflow": full_workflow,
             },
         ),
+        (load_from_state, resolve_clarify, commit_change),
+        (full_workflow, resolve_conversation),
         (resolve_conversation, {"navigation": resolve_actions}),
         (
             resolve_actions,
