@@ -54,7 +54,6 @@ warnings.warn(
 
 # routes: list[BaseRoute] = [
 #     WebSocketRoute("/ws/AI", Triage),
-#     WebSocketRoute("/ws/sync", Sync),
 # ]
 
 router = APIRouter(routes=None)
