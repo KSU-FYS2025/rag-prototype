@@ -87,7 +87,7 @@ class ClarifyAction(Action):
     )
 
 
-type Command = NavigationAction | ResolveNearestAction | AnswerAction | ClarifyAction
+Command = NavigationAction | ResolveNearestAction | AnswerAction | ClarifyAction
 
 
 class ActionsAgentOutput(BaseResponse):

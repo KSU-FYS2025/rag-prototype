@@ -59,7 +59,7 @@ class AgentConfigDict(TypedDict):
     instruction: NotRequired[str | InstructionProvider]
     planner: NotRequired[BuiltInPlanner]
     input_schema: NotRequired[type[BaseModel] | None]
-    output_schema: NotRequired[type[BaseModel] | None]
+    output_schema: NotRequired[types.SchemaUnion | None]
     tools: NotRequired[list[ToolUnion]]
 
 
