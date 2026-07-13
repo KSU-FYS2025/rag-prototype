@@ -194,8 +194,8 @@ def save_to_state(ctx: Context, node_input: Tuple[ActionsAgentOutput, Command]):
     actions, action_to_resolve = node_input
     return Event(
         state={
-            "user:actions": actions,
-            "user:action_to_resolve": action_to_resolve,
+            "user:actions": actions.model_dump(),
+            "user:action_to_resolve": action_to_resolve.model_dump(),
             "user:resume_resolution": True,
         }
     )
@@ -205,6 +205,8 @@ def save_to_state(ctx: Context, node_input: Tuple[ActionsAgentOutput, Command]):
 def load_from_state(ctx: Context):
     actions = ctx.state.get("user:actions")
     action_to_resolve = ctx.state.get("user:action_to_resolve")
+    actions = ActionsAgentOutput.model_validate(actions)
+    action_to_resolve = ClarifyAction.model_validate(action_to_resolve)
     return Event(
         output=(actions, action_to_resolve),
         state={
