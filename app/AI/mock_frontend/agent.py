@@ -169,11 +169,11 @@ def navigation_respond(action: NavigationAction) -> Event:
 
 def clarify_respond(action: ClarifyAction) -> Event:
     return Event(
-        content=types.Content(parts=[types.Part.from_text(text=f"{action.prompt}")])
+        content=types.Content(parts=[types.Part.from_text(text=action.prompt)])
     )
 
 
-@node(name="remove_action", rerun_on_resume=True)
+@node(name="commit_change", rerun_on_resume=True)
 def commit_change(
     ctx: Context, node_input: Tuple[ActionsAgentOutput, Command, Command | None]
 ):
