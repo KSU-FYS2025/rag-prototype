@@ -1,0 +1,76 @@
+"user_query","system_response","poi_ids","poi_names"
+"I need to get to a different floor. Where are the stairs?","There are stairwells located on the 1st, 2nd, and 3rd floors.","14; 13; 15","Stairwell 2nd Floor; Stairwell 3rd Floor; Stairwell 1st Floor"
+"I need to find a computer lab on the 2nd floor.","computer lab","74; 81; 77; 69","Room 2031; Room 2120; Room 2119; Room 2050"
+"I have to meet someone in a conference room on the 3rd floor and then head down to a computer classroom on the 1st floor.","a conference room on the 3rd floor Alright, I'll guide you to the computer classroom, Room 1119, on the 1st floor.","156; 165; 45","Room 3117; Room 3217; Room 1119"
+"I need to check in at the reception area near the 2122 rooms and then get to an open computer lab.","Okay, I'll guide you to the reception area near the 2122 rooms first. open computer lab","82; 74; 19; 77; 79; 58","Room 2122/Reception; Room 2031; Room 1227; Room 2119; Room 2112; Room 2213"
+"I have a game design lab session. Where do I go?","Your game design lab session is in Room 2041. I can guide you there.","60","Room 2041"
+"Navigate me to the library on the 3rd floor.","I couldn't find a library on the 3rd floor. Is there another location you are looking for?",NA,NA
+"How do I get to the student lounge on the 1st floor?","I couldn't find a specific student lounge on the 1st floor. Is there a more specific name for the lounge you are looking for?",NA,NA
+"Where is Room 2229?","Room 2229 is a classroom located on the second floor, in the second hallway of the atrium building.","54","Room 2229"
+"Take me to Room 2213 and then to Room 2217.","I was unable to find Room 2213. Can you please specify which room you would like to go to? Navigating to Room 2217, the Technology Management Undergraduate Professor Lab.","57","Room 2217"
+"I need to stop by a professor's office on the 3rd floor and then find a large lecture room on the 1st floor that holds at least 70 students.","professor's office on the 3rd floor I can guide you to Room 1031, which is a lecture room on the 1st floor with a capacity of 70 students.","155; 103; 104; 102; 101; 43","Room 3312; Room 3317; Room 3319; Room 3315; Room 3313; Room 1031"
+"Can you direct me to the West Entrance on the 1st floor?","I couldn't find any entrance matching 'West Entrance on the 1st floor'. Is there another entrance you were looking for, or can you provide more details?",NA,NA
+"I need to visit someone in the part-time staff office and then get to the biggest classroom on the 1st floor.","Leading the way to the part-time staff office, Room 1126. Next, I'll guide you to the biggest classroom on the 1st floor, Room 1050.","50; 41","Room 1126; Room 1050"
+"I need to use the restroom and then find a research room on the 3rd floor.","restroom I couldn't find any research rooms on the 3rd floor. Is there a different type of room or floor you are looking for?","12; 7","Women's Restroom 1st Floor; Women's Restroom 3rd Floor"
+"I need to go to Room 1126 and then Room 1129.","Navigating to Room 1126. Next, navigating to Room 1129.","50; 48","Room 1126; Room 1129"
+"Can you direct me to Room 4210?","I couldn't find Room 4210. Can you confirm the room number or provide more details?",NA,NA
+"Take me to the break room first and then to a classroom that fits about 35 students on the 2nd floor.","Okay, navigating to the break room, Room 1123, first. Next, I'll guide you to Room 2039, a classroom on the second floor with a capacity of 50 students.","46; 61","Room 1123; Room 2039"
+"Take me to the DWMA lab and then to the foreign language lab both on the 2nd floor.","Okay, navigating to the DWMA lab on the second floor. Next, navigating to the foreign language lab on the second floor.","56; 63","Room 2221; Room 2228"
+"Can you direct me to Room 2050?","Guiding you to Room 2050.","69","Room 2050"
+"Navigate me to Room 2112 and then to Room 2120.","Navigating you to Room 2112. I could not find a POI named Room 2120. Is there another name for it or would you like to go somewhere else?","79","Room 2112"
+"Can you take me to Room B100 in the basement?",NA,NA,NA
+"Where is the nursing suite on the 2nd floor?","I couldn't find a nursing suite on the 2nd floor. Is there another location you are looking for, or a different name for it?",NA,NA
+"Take me to the Men's Restroom on the 1st floor and then to Room 2041.","Men's Restroom on the 1st floor Alright, leading the way to Room 2041.","174; 9; 60","Room 1110; Men's Restroom 1st Floor; Room 2041"
+"Where is the student advising office on the 2nd floor?","I couldn't find a student advising office on the 2nd floor. Is there a different floor you were looking for, or perhaps a different type of advising office?",NA,NA
+"I want to find the MAC computer classroom and then head to the humanities English lab.","Navigating to the MAC computer classroom, Room 2120. Next, I'll guide you to the humanities English lab, Room 2220.","81; 65","Room 2120; Room 2220"
+"Where is the financial aid office?","I could not find a financial aid office. Is there something else I can help you with?",NA,NA
+"Can you bring me to Room 1216 and then Room 2225?","Leading the way to Room 1216. Next, leading the way to Room 2225.","39; 55","Room 1216; Room 2225"
+"I need to go to the computer research lab on the 3rd floor then stop by the men's restroom on that same floor.","Okay, I'll guide you to the computer research lab on the 3rd floor. After that, I'll guide you to the men's restroom on the 3rd floor.","167; 10","Room 3223; Men's Restroom 3rd Floor"
+"I need to store something and then use the restroom on the 1st floor.","storage There are multiple restrooms on the first floor. Would you like to go to the men's or women's restroom?","33; 47; 174; 12","Room 1211; Room 1125; Room 1110; Women's Restroom 1st Floor"
+"Can you show me how to get to Room 1216?","I can show you how to get to Room 1216.","39","Room 1216"
+"I want to go to Room 3229 first then Room 3223.","I could not find Room 3229. Can you please provide more details? Alright, I will guide you to Room 3223.","167","Room 3223"
+"I want to stop by the tutoring center and then get to a classroom for 50 students.","I couldn't find a tutoring center. Is there a specific one you are looking for? Alright, I'll guide you to Room 1031, which has a capacity for 70 students.","43","Room 1031"
+"How do I get to Room 3223?","Navigating to Room 3223.","167","Room 3223"
+"I am a part-time staff member. Where is my office?","Your office is Room 1126. I can guide you there.","50","Room 1126"
+"Where is the Men's Restroom on the 3rd floor?","I will guide you to the Men's Restroom on the 3rd floor.","10","Men's Restroom 3rd Floor"
+"Take me to Room 2031 first and then to the stairwell on the 2nd floor.","Alright, navigating to Room 2031. Next, I'll take you to the Stairwell on the 2nd Floor.","74; 14","Room 2031; Stairwell 2nd Floor"
+"Where is Room 1050?","Room 1050 is located on the 1st floor.","41","Room 1050"
+"I need to visit a research lab on the 3rd floor and then find the open lab nearby.","research lab on the 3rd floor I will then guide you to the open lab, Room 3332.","153; 163; 159","Room 3428; Room 3229; Room 3332"
+"Navigate me to Room 2119.","Navigating you to Room 2119.","77","Room 2119"
+"Take me to Room 3332.","I'll guide you to Room 3332.","159","Room 3332"
+"Navigate me to Room 1122.","Navigating you to Room 1122.","51","Room 1122"
+"Take me to the East Entrance on the 1st floor and then to Room 1050.","Navigating to the East Entrance on the 1st floor. Next, navigating to Room 1050.","1; 41","East Entrance 1st Floor; Room 1050"
+"Navigate me to Room 1031.","Room 1031 was not found. Would you like to navigate to another room?",NA,NA
+"Navigate me to the 4th floor study lounge.","I couldn't find a study lounge specifically on the 4th floor. Is there another floor or a different kind of lounge you're looking for?",NA,NA
+"Navigate me to the Women's Restroom on the 3rd floor and then to Room 3332.","Navigating to the Women's Restroom on the 3rd floor. Next, navigating to Room 3332.","7; 159","Women's Restroom 3rd Floor; Room 3332"
+"Can you take me to the campus bookstore?","I couldn't find any POIs for a campus bookstore. Is there anything else I can help you with?",NA,NA
+"Can you take me to Room 2224?","I couldn't find a room with that number. Did you mean a different room?",NA,NA
+"Take me to Room 2041.","Leading you to Room 2041.","60","Room 2041"
+"My class uses Apple computers. Where is that room?","Okay, I can guide you to Room 2120, which is the MAC Computer classroom.","81","Room 2120"
+"Take me to the swimming pool on the 1st floor.","I couldn't find a swimming pool on the 1st floor. Is there another location or name for the swimming pool you are looking for?",NA,NA
+"Take me to Room 1212 first and then to Room 2119 after.","Navigating to Room 1212. Next, navigating to Room 2119.","40; 77","Room 1212; Room 2119"
+"Take me to the South Entrance on the 1st floor.","Navigating to the South Entrance on the 1st floor.","3","South Entrance 1st Floor"
+"Take me to the fitness center.","I couldn't find a fitness center. Can you please provide more details or confirm if you are looking for something else?",NA,NA
+"Can you take me somewhere I can get tutoring help and then to my lab class that focuses on game design?","I couldn't find any specific POIs related to 'tutoring help'. Could you please provide more details, such as a specific room number or a more precise name for the location? Alright, guiding you to Room 2041, which is the Computer Game Design Lab.","60","Room 2041"
+"Where is Room 1500?","I couldn't find Room 1500. Could you please provide more details or confirm the room number?",NA,NA
+"How do I get to the elevator on the 2nd floor?","I will guide you to the elevator on the 2nd floor.","5","Elevator 2nd Floor"
+"First I need to drop by the foreign language lab then head to a classroom that seats at least 36 students.","Alright, guiding you to the foreign language lab, Room 2228. classroom that seats at least 36 students","63; 41; 51; 43","Room 2228; Room 1050; Room 1122; Room 1031"
+"Take me to a storage room on the 3rd floor first and then to the nearest exit.","storage room on the 3rd floor exit","169; 157; 2; 1; 3","Room 3410; Room 3324; North Entrance 2nd Floor; East Entrance 1st Floor; South Entrance 1st Floor"
+"I need to use the bathroom. Where is the nearest one?","Which restroom would you like to be guided to? The men's or women's?","12; 7; 11; 9; 10","Women's Restroom 1st Floor; Women's Restroom 3rd Floor; Women's Restroom 2nd Floor; Men's Restroom 1st Floor; Men's Restroom 3rd Floor"
+"Navigate me to Room 2225.","Navigating you to Room 2225.","55","Room 2225"
+"Where is the printing kiosk near Room 2050?","I could not find a printing kiosk. Is there something else I can help you find?",NA,NA
+"Take me to the stairwell on the 3rd floor.","Guiding you to the stairwell on the 3rd floor.","13","Stairwell 3rd Floor"
+"Where can I find a conference room on the 3rd floor?","There are a couple of conference rooms on the 3rd floor. Room 3117 is located on the first hallway of the 3rd floor, and Room 3217 is on the second hallway of the 3rd floor.","156; 165","Room 3117; Room 3217"
+"Navigate me to Room 3131 and then to Room 3237.","Navigating to Room 3131. Next, navigating to Room 3237.","172; 161","Room 3131; Room 3237"
+"How do I get to the Women's Restroom on the 2nd floor?","Women's Restroom on the 2nd floor","70; 11","Room 2010; Women's Restroom 2nd Floor"
+"Take me to the rooftop terrace.","I couldn't find any 'rooftop terrace'. Would you like me to help you find something else?",NA,NA
+"Where is Room 1212?","Room 1212 is a research lab located on the first floor, in hallway 2. It is also known as J-106.","40","Room 1212"
+"How do I get to Room 3117?","Navigating to Room 3117.","156","Room 3117"
+"Can you navigate me from the West Entrance on the 1st floor to Room 1031?","I couldn't find 'West Entrance on the 1st floor'. Can you please clarify what you mean? I couldn't find 'Room 1031'. Can you please clarify what you mean?",NA,NA
+"First bring me to Room 3117 and then to the elevator on the 3rd floor.","Alright, leading the way to Room 3117. Next, I'll take you to the elevator on the 3rd floor.","156; 6","Room 3117; Elevator 3rd Floor"
+"Take me to Room 1227.","Navigating to Room 1227.","19","Room 1227"
+"I heard there is a meditation room somewhere on the 2nd floor. Can you take me there?","I couldn't find a meditation room on the 2nd floor. Would you like me to look for it on a different floor or search for something else?",NA,NA
+"Bring me to Room 3411 and then to the Men's Restroom on the 3rd floor.","Okay, navigating to Room 3411. Next, navigating to the Men's Restroom on the 3rd floor.","95; 10","Room 3411; Men's Restroom 3rd Floor"
+"I need to get to a room for my foreign language class. Where would that be?","You're looking for the Foreign Language Lab. I can guide you to Room 2228.","63","Room 2228"
+"I need to get outside as fast as possible. What is the closest exit?","exit","1; 2; 3","East Entrance 1st Floor; North Entrance 2nd Floor; South Entrance 1st Floor"
+"First take me to Room 1113 and then to the stairwell on the 1st floor.","Alright, navigating to Room 1113 now. Next, I'll guide you to the stairwell on the 1st floor.","44; 15","Room 1113; Stairwell 1st Floor"

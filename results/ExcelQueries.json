@@ -1,77 +1,302 @@
 [
-  "Can you take me to Room 2224?",
-  "Navigate me to Room 1031.",
-  "Take me to Room 2041.",
-  "Navigate me to Room 1122.",
-  "Where is Room 2229?",
-  "Can you show me how to get to Room 1216?",
-  "Navigate me to Room 2119.",
-  "How do I get to Room 3117?",
-  "Take me to Room 3332.",
-  "Where is Room 1212?",
-  "Can you direct me to Room 2050?",
-  "Take me to Room 1227.",
-  "How do I get to Room 3223?",
-  "Navigate me to Room 2225.",
-  "Where is Room 1050?",
-  "How do I get to the Women's Restroom on the 2nd floor?",
-  "Where is the Men's Restroom on the 3rd floor?",
-  "Can you direct me to the West Entrance on the 1st floor?",
-  "How do I get to the elevator on the 2nd floor?",
-  "Take me to the stairwell on the 3rd floor.",
-  "Take me to the South Entrance on the 1st floor.",
-  "I need to use the bathroom. Where is the nearest one?",
-  "I need to get to a different floor. Where are the stairs?",
-  "I need to get outside as fast as possible. What is the closest exit?",
-  "My class uses Apple computers. Where is that room?",
-  "I need to get to a room for my foreign language class. Where would that be?",
-  "I have a game design lab session. Where do I go?",
-  "I am a part-time staff member. Where is my office?",
-  "Where can I find a conference room on the 3rd floor?",
-  "I need to find a computer lab on the 2nd floor.",
-  "Take me to Room 1212 first and then to Room 2119 after.",
-  "Can you navigate me from the West Entrance on the 1st floor to Room 1031?",
-  "Take me to the Men's Restroom on the 1st floor and then to Room 2041.",
-  "First bring me to Room 3117 and then to the elevator on the 3rd floor.",
-  "I need to go to Room 1126 and then Room 1129.",
-  "Navigate me to the Women's Restroom on the 3rd floor and then to Room 3332.",
-  "Take me to Room 2031 first and then to the stairwell on the 2nd floor.",
-  "Can you bring me to Room 1216 and then Room 2225?",
-  "I want to go to Room 3229 first then Room 3223.",
-  "Take me to the East Entrance on the 1st floor and then to Room 1050.",
-  "Navigate me to Room 2112 and then to Room 2120.",
-  "Bring me to Room 3411 and then to the Men's Restroom on the 3rd floor.",
-  "Take me to Room 2213 and then to Room 2217.",
-  "First take me to Room 1113 and then to the stairwell on the 1st floor.",
-  "Navigate me to Room 3131 and then to Room 3237.",
-  "I need to use the restroom and then find a research room on the 3rd floor.",
-  "I need to stop by a professor's office on the 3rd floor and then find a large lecture room on the 1st floor that holds at least 70 students.",
-  "I need to check in at the reception area near the 2122 rooms and then get to an open computer lab.",
-  "Take me to the break room first and then to a classroom that fits about 35 students on the 2nd floor.",
-  "I need to visit someone in the part-time staff office and then get to the biggest classroom on the 1st floor.",
-  "First I need to drop by the foreign language lab then head to a classroom that seats at least 36 students.",
-  "I need to go to the computer research lab on the 3rd floor then stop by the men's restroom on that same floor.",
-  "I have to meet someone in a conference room on the 3rd floor and then head down to a computer classroom on the 1st floor.",
-  "Take me to the DWMA lab and then to the foreign language lab both on the 2nd floor.",
-  "I need to visit a research lab on the 3rd floor and then find the open lab nearby.",
-  "I want to stop by the tutoring center and then get to a classroom for 50 students.",
-  "Can you take me somewhere I can get tutoring help and then to my lab class that focuses on game design?",
-  "I need to store something and then use the restroom on the 1st floor.",
-  "Take me to a storage room on the 3rd floor first and then to the nearest exit.",
-  "I want to find the MAC computer classroom and then head to the humanities English lab.",
-  "Can you take me to the campus bookstore?",
-  "Where is Room 1500?",
-  "Navigate me to the 4th floor study lounge.",
-  "Take me to the swimming pool on the 1st floor.",
-  "Take me to the fitness center.",
-  "Where is the printing kiosk near Room 2050?",
-  "Can you direct me to Room 4210?",
-  "Where is the student advising office on the 2nd floor?",
-  "Navigate me to the library on the 3rd floor.",
-  "Where is the financial aid office?",
-  "Take me to the rooftop terrace.",
-  "How do I get to the student lounge on the 1st floor?",
-  "Where is the nursing suite on the 2nd floor?",
-  "Can you take me to Room B100 in the basement?",
-  "I heard there is a meditation room somewhere on the 2nd floor. Can you take me there?"
+  [
+    "Can you take me to Room 2224?",
+    "Explicit one-step"
+  ],
+  [
+    "Navigate me to Room 1031.",
+    "Explicit one-step"
+  ],
+  [
+    "Take me to Room 2041.",
+    "Explicit one-step"
+  ],
+  [
+    "Navigate me to Room 1122.",
+    "Explicit one-step"
+  ],
+  [
+    "Where is Room 2229?",
+    "Explicit one-step"
+  ],
+  [
+    "Can you show me how to get to Room 1216?",
+    "Explicit one-step"
+  ],
+  [
+    "Navigate me to Room 2119.",
+    "Explicit one-step"
+  ],
+  [
+    "How do I get to Room 3117?",
+    "Explicit one-step"
+  ],
+  [
+    "Take me to Room 3332.",
+    "Explicit one-step"
+  ],
+  [
+    "Where is Room 1212?",
+    "Explicit one-step"
+  ],
+  [
+    "Can you direct me to Room 2050?",
+    "Explicit one-step"
+  ],
+  [
+    "Take me to Room 1227.",
+    "Explicit one-step"
+  ],
+  [
+    "How do I get to Room 3223?",
+    "Explicit one-step"
+  ],
+  [
+    "Navigate me to Room 2225.",
+    "Explicit one-step"
+  ],
+  [
+    "Where is Room 1050?",
+    "Explicit one-step"
+  ],
+  [
+    "How do I get to the Women's Restroom on the 2nd floor?",
+    "Implicit one-step"
+  ],
+  [
+    "Where is the Men's Restroom on the 3rd floor?",
+    "Implicit one-step"
+  ],
+  [
+    "Can you direct me to the West Entrance on the 1st floor?",
+    "Implicit one-step"
+  ],
+  [
+    "How do I get to the elevator on the 2nd floor?",
+    "Implicit one-step"
+  ],
+  [
+    "Take me to the stairwell on the 3rd floor.",
+    "Implicit one-step"
+  ],
+  [
+    "Take me to the South Entrance on the 1st floor.",
+    "Implicit one-step"
+  ],
+  [
+    "I need to use the bathroom. Where is the nearest one?",
+    "Implicit one-step"
+  ],
+  [
+    "I need to get to a different floor. Where are the stairs?",
+    "Implicit one-step"
+  ],
+  [
+    "I need to get outside as fast as possible. What is the closest exit?",
+    "Implicit one-step"
+  ],
+  [
+    "My class uses Apple computers. Where is that room?",
+    "Implicit one-step"
+  ],
+  [
+    "I need to get to a room for my foreign language class. Where would that be?",
+    "Implicit one-step"
+  ],
+  [
+    "I have a game design lab session. Where do I go?",
+    "Implicit one-step"
+  ],
+  [
+    "I am a part-time staff member. Where is my office?",
+    "Implicit one-step"
+  ],
+  [
+    "Where can I find a conference room on the 3rd floor?",
+    "Implicit one-step"
+  ],
+  [
+    "I need to find a computer lab on the 2nd floor.",
+    "Implicit one-step"
+  ],
+  [
+    "Take me to Room 1212 first and then to Room 2119 after.",
+    "Explicit multi-step"
+  ],
+  [
+    "Can you navigate me from the West Entrance on the 1st floor to Room 1031?",
+    "Explicit multi-step"
+  ],
+  [
+    "Take me to the Men's Restroom on the 1st floor and then to Room 2041.",
+    "Explicit multi-step"
+  ],
+  [
+    "First bring me to Room 3117 and then to the elevator on the 3rd floor.",
+    "Explicit multi-step"
+  ],
+  [
+    "I need to go to Room 1126 and then Room 1129.",
+    "Explicit multi-step"
+  ],
+  [
+    "Navigate me to the Women's Restroom on the 3rd floor and then to Room 3332.",
+    "Explicit multi-step"
+  ],
+  [
+    "Take me to Room 2031 first and then to the stairwell on the 2nd floor.",
+    "Explicit multi-step"
+  ],
+  [
+    "Can you bring me to Room 1216 and then Room 2225?",
+    "Explicit multi-step"
+  ],
+  [
+    "I want to go to Room 3229 first then Room 3223.",
+    "Explicit multi-step"
+  ],
+  [
+    "Take me to the East Entrance on the 1st floor and then to Room 1050.",
+    "Explicit multi-step"
+  ],
+  [
+    "Navigate me to Room 2112 and then to Room 2120.",
+    "Explicit multi-step"
+  ],
+  [
+    "Bring me to Room 3411 and then to the Men's Restroom on the 3rd floor.",
+    "Explicit multi-step"
+  ],
+  [
+    "Take me to Room 2213 and then to Room 2217.",
+    "Explicit multi-step"
+  ],
+  [
+    "First take me to Room 1113 and then to the stairwell on the 1st floor.",
+    "Explicit multi-step"
+  ],
+  [
+    "Navigate me to Room 3131 and then to Room 3237.",
+    "Explicit multi-step"
+  ],
+  [
+    "I need to use the restroom and then find a research room on the 3rd floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "I need to stop by a professor's office on the 3rd floor and then find a large lecture room on the 1st floor that holds at least 70 students.",
+    "Implicit multi-step"
+  ],
+  [
+    "I need to check in at the reception area near the 2122 rooms and then get to an open computer lab.",
+    "Implicit multi-step"
+  ],
+  [
+    "Take me to the break room first and then to a classroom that fits about 35 students on the 2nd floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "I need to visit someone in the part-time staff office and then get to the biggest classroom on the 1st floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "First I need to drop by the foreign language lab then head to a classroom that seats at least 36 students.",
+    "Implicit multi-step"
+  ],
+  [
+    "I need to go to the computer research lab on the 3rd floor then stop by the men's restroom on that same floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "I have to meet someone in a conference room on the 3rd floor and then head down to a computer classroom on the 1st floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "Take me to the DWMA lab and then to the foreign language lab both on the 2nd floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "I need to visit a research lab on the 3rd floor and then find the open lab nearby.",
+    "Implicit multi-step"
+  ],
+  [
+    "I want to stop by the tutoring center and then get to a classroom for 50 students.",
+    "Implicit multi-step"
+  ],
+  [
+    "Can you take me somewhere I can get tutoring help and then to my lab class that focuses on game design?",
+    "Implicit multi-step"
+  ],
+  [
+    "I need to store something and then use the restroom on the 1st floor.",
+    "Implicit multi-step"
+  ],
+  [
+    "Take me to a storage room on the 3rd floor first and then to the nearest exit.",
+    "Implicit multi-step"
+  ],
+  [
+    "I want to find the MAC computer classroom and then head to the humanities English lab.",
+    "Implicit multi-step"
+  ],
+  [
+    "Can you take me to the campus bookstore?",
+    "Erroneous prompts"
+  ],
+  [
+    "Where is Room 1500?",
+    "Erroneous prompts"
+  ],
+  [
+    "Navigate me to the 4th floor study lounge.",
+    "Erroneous prompts"
+  ],
+  [
+    "Take me to the swimming pool on the 1st floor.",
+    "Erroneous prompts"
+  ],
+  [
+    "Take me to the fitness center.",
+    "Erroneous prompts"
+  ],
+  [
+    "Where is the printing kiosk near Room 2050?",
+    "Erroneous prompts"
+  ],
+  [
+    "Can you direct me to Room 4210?",
+    "Erroneous prompts"
+  ],
+  [
+    "Where is the student advising office on the 2nd floor?",
+    "Erroneous prompts"
+  ],
+  [
+    "Navigate me to the library on the 3rd floor.",
+    "Erroneous prompts"
+  ],
+  [
+    "Where is the financial aid office?",
+    "Erroneous prompts"
+  ],
+  [
+    "Take me to the rooftop terrace.",
+    "Erroneous prompts"
+  ],
+  [
+    "How do I get to the student lounge on the 1st floor?",
+    "Erroneous prompts"
+  ],
+  [
+    "Where is the nursing suite on the 2nd floor?",
+    "Erroneous prompts"
+  ],
+  [
+    "Can you take me to Room B100 in the basement?",
+    "Erroneous prompts"
+  ],
+  [
+    "I heard there is a meditation room somewhere on the 2nd floor. Can you take me there?",
+    "Erroneous prompts"
+  ]
 ]

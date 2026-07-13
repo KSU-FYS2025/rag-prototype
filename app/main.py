@@ -7,14 +7,14 @@ import time
 from app.poi import api as poiapi
 from app.AI import api as aiapi
 from app.websockets import api as wsapi
-from app.mcp import api as mcp
 
 import logging
 from contextlib import asynccontextmanager
-from app.poi.models import get_poi_schema, get_index_params, POI, POIDecoder
+from app.poi.models import get_poi_schema, get_index_params, POIDecoder
 from app.database.db import create_collection, get_db_gen, embedding_fn
 
 load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,13 +43,11 @@ async def lifespan(app: FastAPI):
             )
 
         if not os.path.exists(poi_json_path):
-            raise FileNotFoundError(
-                f"POI JSON file not found at: {poi_json_path}"
-            )
+            raise FileNotFoundError(f"POI JSON file not found at: {poi_json_path}")
 
         logging.info(f"Loading POI data from: {poi_json_path}")
         json_data = None
-        
+
         with open(poi_json_path, "r") as db_file:
             json_data = json.load(db_file, cls=POIDecoder)
 
@@ -58,10 +56,14 @@ async def lifespan(app: FastAPI):
         with get_db_gen() as db:
             if not db.has_collection("poi"):
                 logging.info("Collection 'poi' not found. Creating...")
-                create_collection({
-                    "collection_name": "poi",
-                    "index_params": get_index_params(),
-                }, db, get_poi_schema())
+                create_collection(
+                    {
+                        "collection_name": "poi",
+                        "index_params": get_index_params(),
+                    },
+                    db,
+                    get_poi_schema(),
+                )
                 logging.info("Collection 'poi' created successfully.")
                 logging.info("Inserting POIs from file...")
                 db.insert(
@@ -90,7 +92,9 @@ async def lifespan(app: FastAPI):
         raise
     yield
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 @app.middleware("http")
 async def add_process_time(request: Request, call_next):
@@ -100,10 +104,11 @@ async def add_process_time(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
+
 app.include_router(poiapi.router)
 app.include_router(aiapi.router)
 app.include_router(wsapi.router)
-app.include_router(mcp.router)
+
 
 @app.get("/ping")
 async def pong():

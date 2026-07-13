@@ -1,12 +1,16 @@
 library(rjson)
 
+safe_chr <- function(x) {
+  if (is.null(x) || length(x) == 0) NA_character_ else as.character(x)
+}
+
 # ---------------------------------------------------------------------------
 # FILE PATHS — update these to match your actual file locations
 # ---------------------------------------------------------------------------
 
-eval_set_path  <- "results/full_agent_full_agent_eval_set_large_6_1782221741.784494.json"
-poi_path       <- "UpdatedFloorsAndFireinteraction_POIs.json"
-output_path    <- "eval_results_with_pois-6-23-2026.csv"
+eval_set_path <- "results/evalset_results/full_agent_full_agent_eval_set_large_12_disabled_1783532216.7194827.json"
+poi_path <- "UpdatedFloorsAndFireinteraction_POIs.json"
+output_path <- "eval_results_with_pois_disabled.csv"
 
 # ---------------------------------------------------------------------------
 # Sanity-check paths before doing any work
@@ -76,15 +80,24 @@ rows <- list()
 for (eval_case in eval_set$evalCaseResults) {
 
   # Final response is a JSON string embedded as plain text — must be parsed
-  final_response_raw <- tryCatch(
-    eval_case$evalMetricResultPerInvocation[[1]]$actualInvocation$finalResponse$parts[[1]]$text,
+  final_response_raw <- safe_chr(tryCatch({
+    parts_list <- eval_case$evalMetricResultPerInvocation[[1]]$
+      actualInvocation$
+      finalResponse$
+      parts
+    json_part <- Filter(function(p) grepl("[{]", p$text), parts_list)
+    json_part[[1]]$text
+  },
     error = function(e) NA_character_
-  )
+  ))
 
-  user_query <- tryCatch(
-    eval_case$evalMetricResultPerInvocation[[1]]$actualInvocation$userContent$parts[[1]]$text,
+  user_query <- safe_chr(tryCatch(
+    eval_case$evalMetricResultPerInvocation[[1]]$
+      actualInvocation$
+      userContent$
+      parts[[1]]$text,
     error = function(e) NA_character_
-  )
+  ))
 
   parsed_response <- tryCatch(
     fromJSON(json_str = final_response_raw),
@@ -97,36 +110,50 @@ for (eval_case in eval_set$evalCaseResults) {
   # If the response couldn't be parsed, still write the raw text with NA POI columns
   if (is.null(parsed_response)) {
     rows[[length(rows) + 1]] <- data.frame(
-      user_query      = user_query,
+      user_query = user_query,
       system_response = final_response_raw,
-      poi_ids         = NA_character_,
-      poi_names       = NA_character_,
+      poi_ids = NA_character_,
+      poi_names = NA_character_,
       stringsAsFactors = FALSE
     )
     next
   }
 
-  system_response_text <- parsed_response$response
-  actions  <- if (!is.null(parsed_response$actions)) parsed_response$actions else list()
-  poi_ids  <- extract_ids_from_actions(actions)
+  system_response_text <- safe_chr(
+    if (length(actions) > 0) {
+      paste(
+        sapply(actions, function(a) {
+          if (!is.null(a$prompt)) a$prompt
+          else if (!is.null(a$reason)) a$reason
+          else if (!is.null(a$cmd)) a$cmd
+          else NA_character_
+        }),
+        collapse = " | "
+      )
+    } else {
+      NA_character_
+    }
+  )
+  actions <- if (!is.null(parsed_response$actions)) parsed_response$actions else list()
+  poi_ids <- extract_ids_from_actions(actions)
 
   if (length(poi_ids) > 0) {
-    poi_names     <- sapply(as.character(poi_ids), function(id) {
+    poi_names <- sapply(as.character(poi_ids), function(id) {
       name <- poi_lookup[id]
       if (is.na(name)) paste0("Unknown (id=", id, ")") else name
     })
-    poi_ids_str   <- paste(poi_ids,   collapse = "; ")
+    poi_ids_str <- paste(poi_ids, collapse = "; ")
     poi_names_str <- paste(poi_names, collapse = "; ")
   } else {
-    poi_ids_str   <- NA_character_
+    poi_ids_str <- NA_character_
     poi_names_str <- NA_character_
   }
 
   rows[[length(rows) + 1]] <- data.frame(
-    user_query      = user_query,
+    user_query = user_query,
     system_response = system_response_text,
-    poi_ids         = poi_ids_str,
-    poi_names       = poi_names_str,
+    poi_ids = poi_ids_str,
+    poi_names = poi_names_str,
     stringsAsFactors = FALSE
   )
 

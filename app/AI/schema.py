@@ -1,14 +1,15 @@
-from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationError
-from google.adk.agents import BaseAgent
-from google.adk.agents.invocation_context import InvocationContext
-from google.adk.events import Event, EventActions
+from pydantic import BaseModel, Field
 from enum import Enum
-import json
+
 
 class BaseResponse(BaseModel):
-    user_query: str = Field(description="The user's original query. MUST match the user's query exactly.")
+    user_query: str = Field(
+        description="The user's original query. MUST match the user's query exactly. Precision is important. Do NOT "
+                    "paraphrase or modify the original query in any way whatsoever. The user's query will either be in "
+                    "the users's last event or in the user_query field of your input. Take whichever one is shorter."
+    )
+
 
 class NavigationIntent(str, Enum):
     """
@@ -18,10 +19,12 @@ class NavigationIntent(str, Enum):
     CONVERSATIONAL/ conversational - User converses with the AI Agent, no navigation or additional information is needed
     CLARIFICATION/ clarification - AI Agent requires clarification from the user
     """
+
     NAV_QUERY = "navigation_query"
     NAV_GUIDE = "navigation_guidance"
     CONVERSATIONAL = "conversational"
     CLARIFICATION = "clarification"
+
 
 class TargetType(str, Enum):
     """
@@ -29,6 +32,6 @@ class TargetType(str, Enum):
     IMPLICIT/ implicit - User does not directly name the room but wishes to be guided there
     EXPLICIT/ explicit - User directly mentions the name/ number of the room they wish to be guided to
     """
+
     IMPLICIT = "implicit"
     EXPLICIT = "explicit"
-
