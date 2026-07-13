@@ -145,7 +145,7 @@ def resolve_nearest(
             filter=f"identification in [{','.join(map(str, poi_ids))}]",
         )
 
-    pois = [POI(**hit["entity"]) for x in res for hit in x if hit]
+    pois = [POI(**hit) for hit in res]
     poi_distances = [(get_distance(poi.position, start_position), poi) for poi in pois]
     distances_sorted = sorted(poi_distances, key=lambda x: x[0])
     return NavigationAction(
