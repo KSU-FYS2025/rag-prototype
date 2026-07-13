@@ -12,7 +12,10 @@ from functools import lru_cache
 @lru_cache(maxsize=None)
 def load_instructions(agent_name: str) -> str:
     with open(f"app/AI/full_agent/instructions/{agent_name}.md") as f:
-        return f.read()
+        base = f.read()
+    with open("app/AI/full_agent/instructions/post_prompt.md") as f:
+        post = f.read()
+    return base + "\n" + post
 
 
 def shared_instruction_provider(context: ReadonlyContext) -> str:
