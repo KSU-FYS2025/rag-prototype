@@ -1,3 +1,4 @@
+from app.AI.full_agent.search_agent.schema import Validation
 import asyncio
 import logging
 import re
@@ -8,7 +9,6 @@ from pymilvus import MilvusException
 
 from app.AI.full_agent.agent_builder import AgentBuilder
 from app.AI.full_agent.search_agent.schema import (
-    SearchOutput,
     POIAndSemanticDistance,
     ParallelOutput,
 )
@@ -68,50 +68,9 @@ async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
     return Event(output=collect, partial=True)
 
 
-def make_base_workflow(i: int) -> Workflow:
-    return Workflow(
-        name=f"BaseWorkflow_{i}",
-        edges=[
-            ("START", search_poi_node, validate_pois),
-        ],
-    )
-
-
-@node(name="router", rerun_on_resume=True)
-async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
-    node_input = TriageAgentOutput.model_validate(node_input.model_dump(mode="json"))
-    logging.info(f"parallel_router called with {node_input}")
-    workflows = [make_base_workflow(item.order) for item in node_input.targets]
-
-    tasks = [ctx.run_node(wf, item) for wf, item in zip(workflows, node_input.targets)]
-
-    results = await asyncio.gather(*tasks, return_exceptions=False)
-
-    failures = [r for r in results if isinstance(r, Exception)]
-    if failures:
-        raise RuntimeError(f"One or more sub-workflows failed: {failures}")
-
-    if not isinstance(results[0], list):
-        results = [results]
-
-    results_obj = ParallelOutput(
-        user_query=node_input.user_query,
-        POIs=results,
-    )
-
-    return Event(output=results_obj, partial=True)
-
-
 synthesis_agent = AgentBuilder(
     name="synthesis_agent",
     description="Agent that takes in all the vector search information and creates a path",
     input_schema=ParallelOutput,
-    output_schema=SearchOutput,
-)
-
-search_workflow = Workflow(
-    name="SearchWorkflow",
-    edges=[
-        ("START", parallel_router, synthesis_agent),
-    ],
+    output_schema=Validation,
 )

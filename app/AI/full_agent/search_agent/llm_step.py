@@ -1,8 +1,8 @@
+from app.AI.full_agent.search_agent.schema import Validation
 import warnings
 
 from google.adk.agents.llm_agent import Agent
 
-from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import QueryClassifier
 
 warnings.warn(
@@ -44,5 +44,5 @@ llm_step = Agent(
     }
     """,
     input_schema=QueryClassifier,
-    output_schema=SearchOutput,
+    output_schema=Validation,
 )

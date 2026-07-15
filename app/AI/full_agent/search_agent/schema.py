@@ -7,16 +7,10 @@ from app.poi.models import POI
 
 class Validation(BaseModel):
     order: int = Field(
-        description="The order of the POIs returned by the input. This MUST match your input."
+        description="The order of which sub-query this belonged to. This MUST match your input."
     )
     selected_pois: List[POI] = Field(description="List of POIs chosen by the LLM.")
     method: str = Field(default="LLM", description="MUST always be LLM")
-
-
-class SearchOutput(BaseResponse):
-    validations: List[Validation] = Field(
-        description="List of validations that you are returning."
-    )
 
 
 class POIAndSemanticDistance(BaseModel):
@@ -28,7 +22,7 @@ class POIAndSemanticDistance(BaseModel):
 
 
 class ParallelOutput(BaseResponse):
-    POIs: list[list[POIAndSemanticDistance]] = Field(
+    POIs: list[POIAndSemanticDistance] = Field(
         description="List of POIs returned by the vector search as well as "
         "their semantic distance from the semantic for this "
         "query."
