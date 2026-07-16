@@ -31,7 +31,10 @@ def make_base_workflow(i: int) -> Workflow:
     return Workflow(
         name=f"BaseWorkflow_{i}",
         edges=[
-            ("START", search_poi_node, validate_pois, synthesis_agent, actions_agent),
+            ("START", search_poi_node),
+            (search_poi_node, validate_pois),
+            (validate_pois, synthesis_agent),
+            (synthesis_agent, actions_agent),
         ],
     )
 
@@ -60,15 +63,14 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
 
 navigation_workflow = Workflow(
     name="navigation_workflow",
-    edges=[
-        ("START", triage_agent, parallel_router),
-    ],
+    edges=[("START", triage_agent), (triage_agent, parallel_router)],
 )
 
 full_workflow = Workflow(
     name="full_workflow",
     edges=[
-        ("START", intent_agent, navigation_router),
+        ("START", intent_agent),
+        (intent_agent, navigation_router),
         (
             navigation_router,
             {"conversational": conversation_agent, "navigation": navigation_workflow},
