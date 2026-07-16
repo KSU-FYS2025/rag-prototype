@@ -67,12 +67,12 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
         # )
         results = search_poi(query, top_n, fields)
 
-    return Event(output=(results, node_input.user_query), partial=True)
+    return Event(output=results, partial=True)
 
 
 @node(name="validate_pois", rerun_on_resume=True)
-async def validate_pois(node_input: tuple[list[tuple[dict, float]], str]) -> Event:
-    pois, user_query = node_input
+async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
+    pois = node_input
     # logging.info(f"validate_pois called with {node_input}")
     collect: list[POIAndSemanticDistance] = []
     for item, distance in pois:
@@ -84,9 +84,7 @@ async def validate_pois(node_input: tuple[list[tuple[dict, float]], str]) -> Eve
         except TypeError as e:
             raise TypeError(f"Unable to validate POI: {item}!\n{e}")
 
-    return Event(
-        output=ParallelOutput(POIs=collect, user_query=user_query), partial=True
-    )
+    return Event(output=ParallelOutput(POIs=collect), partial=True)
 
 
 synthesis_agent = AgentBuilder(

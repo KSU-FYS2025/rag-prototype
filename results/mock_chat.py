@@ -4,7 +4,7 @@ import requests
 adk_data = {
     "app_name": "full_agent",
     "user_id": "user",
-    "evalset_name": "full_agent_eval_set_large_15_test",
+    "evalset_name": "full_agent_eval_set_large_15_test2",
 }
 
 adk_url = "http://10.96.50.180:8080"
@@ -41,7 +41,7 @@ print(res.json())
 
 # Load queries from ExcelQueries.json
 json_data = ""
-with open("results\\ExcelQueries.json", "r") as file:
+with open("ExcelQueries.json", "r") as file:
     json_data = json.load(file)
 
 # Send chat request for all queries in ExcelQueries.json

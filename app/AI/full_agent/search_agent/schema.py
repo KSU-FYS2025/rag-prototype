@@ -21,7 +21,7 @@ class POIAndSemanticDistance(BaseModel):
     )
 
 
-class ParallelOutput(BaseResponse):
+class ParallelOutput(BaseModel):
     POIs: list[POIAndSemanticDistance] = Field(
         description="List of POIs returned by the vector search as well as "
         "their semantic distance from the semantic for this "

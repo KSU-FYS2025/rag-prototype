@@ -4,7 +4,7 @@ from app.AI.schema import TargetType, NavigationIntent, BaseResponse
 from typing import List
 
 
-class QueryClassifier(BaseResponse):
+class QueryClassifier(BaseModel):
     order: int = Field(
         ge=0,
         description="The index of this item in the targets list. Start indexing at 0.",
