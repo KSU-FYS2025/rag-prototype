@@ -20,11 +20,18 @@ logging.basicConfig(level=logging.INFO)
 
 
 def sanitize_filter(filter_expr: str) -> str:
+    if not filter_expr:
+        return filter_expr
+
     # Replace single-quoted strings with double-quoted equivalents
     def swap_quotes(match):
         inner = match.group(1).replace("''", "'")  # unescape doubled single quotes
+        # In Milvus, if enclosed by double quotes, a double quote within must be \"
+        # and a single quote can be ' or \'
+        inner = inner.replace('"', '\\"')
         return f'"{inner}"'
 
+    # Pattern matches text between single quotes, allowing for escaped single quotes ''
     return re.sub(r"'((?:[^']|'')*)'", swap_quotes, filter_expr)
 
 
@@ -37,19 +44,29 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
         None,
         node_input.filter,
     )
+    results = None
     try:
-        results = search_poi(query, top_n, fields, filter_expression)
-    except MilvusException:
-        # logging.info(
-        #     f"Filter failed: {filter_expression}\nTrying again with sanitized filter"
-        # )
-        results = search_poi(query, top_n, fields, sanitize_filter(filter_expression))
+        if filter_expression:
+            try:
+                # logging.info(f"Trying search with original filter: {filter_expression}")
+                results = search_poi(query, top_n, fields, filter_expression)
+            except MilvusException as e:
+                sanitized = sanitize_filter(filter_expression)
+                # logging.warning(
+                #     f"Filter failed, trying sanitized filter: {sanitized}. Error: {e}"
+                # )
+                results = search_poi(query, top_n, fields, sanitized)
+    except Exception as e:
+        # logging.error(f"Search with filter failed completely: {e}")
+        results = None
 
     if not results:
+        # if filter_expression:
         # logging.info(
-        #     f"search_poi failed with filter: {node_input.filter}\nTrying again without filter"
+        #     f"Search failed or returned no results with filter. Trying without filter."
         # )
         results = search_poi(query, top_n, fields)
+
     return Event(output=(results, node_input.user_query), partial=True)
 
 

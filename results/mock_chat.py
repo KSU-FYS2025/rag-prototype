@@ -4,7 +4,7 @@ import requests
 adk_data = {
     "app_name": "full_agent",
     "user_id": "user",
-    "evalset_name": "full_agent_eval_set_large_14_parallel",
+    "evalset_name": "full_agent_eval_set_large_15_test",
 }
 
 adk_url = "http://10.96.50.180:8080"
@@ -13,6 +13,16 @@ run_url = f"{adk_url}/run"
 eval_set_url = (
     f"{adk_url}/dev/apps/{adk_data['app_name']}/eval_sets/{adk_data['evalset_name']}"
 )
+
+print(f"Target ADK URL: {adk_url}")
+print(f"Target Run URL: {run_url}")
+
+# Check if ADK is reachable
+try:
+    ping_res = requests.get(adk_url, timeout=5)
+    print(f"ADK Ping Status: {ping_res.status_code}")
+except Exception as e:
+    print(f"ADK Ping FAILED: {e}")
 
 # Create evalset (new endpoint)
 res = requests.post(
@@ -31,7 +41,7 @@ print(res.json())
 
 # Load queries from ExcelQueries.json
 json_data = ""
-with open("ExcelQueries.json", "r") as file:
+with open("results\\ExcelQueries.json", "r") as file:
     json_data = json.load(file)
 
 # Send chat request for all queries in ExcelQueries.json

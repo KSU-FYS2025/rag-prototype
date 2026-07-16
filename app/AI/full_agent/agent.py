@@ -67,12 +67,20 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
     valid_actions = []
     for i, r in enumerate(extracted_results):
         if r is None:
-            logging.warning(f"Sub-workflow {i} returned None")
+            logging.warning(
+                f"Sub-workflow {i} returned None. This usually means actions_agent failed to produce a Command."
+            )
             continue
-        # Check if r is a valid Command (or dict that can be converted to Command)
-        # If it's a dict, Pydantic will try to validate it.
-        # If it's something else (like an empty string or malformed object), it might cause the ValidationError.
+
+        # Log the type and value for debugging
+        logging.info(f"Action {i} type: {type(r)}, value: {r}")
         valid_actions.append(r)
+
+    if not valid_actions and node_input.targets:
+        error_msg = f"All {len(node_input.targets)} sub-workflows failed to return an action. Query: {node_input.user_query}"
+        logging.error(error_msg)
+        # We might want to raise an error here to prevent empty actions if that's not allowed
+        # But let's see what ActionsAgentOutput says. It allows List[Command].
 
     if len(valid_actions) < len(extracted_results):
         logging.warning(
