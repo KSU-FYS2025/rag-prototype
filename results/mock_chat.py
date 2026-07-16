@@ -4,7 +4,7 @@ import requests
 adk_data = {
     "app_name": "full_agent",
     "user_id": "user",
-    "evalset_name": "full_agent_eval_set_large_12_disabled",
+    "evalset_name": "full_agent_eval_set_large_14_parallel",
 }
 
 adk_url = "http://10.96.50.180:8080"
@@ -54,9 +54,25 @@ for i, data in enumerate(json_data):
         "new_message": {"parts": [{"text": query}], "role": "user"},
     }
 
+    # Print debugging info
+    print(f"[{i}] Query: {query}")
+
     # Post data, print response
-    res = requests.post(run_url, json=data)
-    print(res.json())
+    try:
+        res = requests.post(run_url, json=data)
+        res.raise_for_status()
+        print(f"Query {i}: {query} - SUCCESS")
+        print(res.json())
+    except Exception as e:
+        print(f"Query {i}: {query} - FAILED")
+        print(f"Error: {e}")
+        if hasattr(e, "response") and e.response is not None:
+            try:
+                print(f"Response content: {e.response.json()}")
+            except:
+                print(f"Response content: {e.response.text}")
+        # Stop on first failure to investigate
+        # break
 
     # Add session (data we just posted) to evalset
     res = requests.post(
