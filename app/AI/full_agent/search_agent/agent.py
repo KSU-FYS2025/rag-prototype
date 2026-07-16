@@ -44,19 +44,21 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
             f"Filter failed: {filter_expression}\nTrying again with sanitized filter"
         )
         results = search_poi(query, top_n, fields, sanitize_filter(filter_expression))
+
     if not results:
         logging.info(
             f"search_poi failed with filter: {node_input.filter}\nTrying again without filter"
         )
         results = search_poi(query, top_n, fields)
-    return Event(output=results, partial=True)
+    return Event(output=(results, node_input.user_query), partial=True)
 
 
 @node(name="validate_pois", rerun_on_resume=True)
-async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
+async def validate_pois(node_input: tuple[list[tuple[dict, float]], str]) -> Event:
+    pois, user_query = node_input
     logging.info(f"validate_pois called with {node_input}")
     collect: list[POIAndSemanticDistance] = []
-    for item, distance in node_input:
+    for item, distance in pois:
         try:
             logging.info(f"validating poi: {item}")
             collect.append(
@@ -65,7 +67,9 @@ async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
         except TypeError as e:
             raise TypeError(f"Unable to validate POI: {item}!\n{e}")
 
-    return Event(output=collect, partial=True)
+    return Event(
+        output=ParallelOutput(POIs=collect, user_query=user_query), partial=True
+    )
 
 
 synthesis_agent = AgentBuilder(
