@@ -50,15 +50,28 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
     results = await asyncio.gather(*tasks, return_exceptions=False)
 
     # Extract the output from each event
-    results = [r.output if hasattr(r, "output") else r for r in results]
+    extracted_results = []
+    for i, r in enumerate(results):
+        if hasattr(r, "output"):
+            extracted_results.append(r.output)
+        else:
+            extracted_results.append(r)
 
-    failures = [r for r in results if isinstance(r, Exception)]
+    logging.info(f"Extracted results from tasks: {extracted_results}")
+
+    failures = [r for r in extracted_results if isinstance(r, Exception)]
     if failures:
         raise RuntimeError(f"One or more sub-workflows failed: {failures}")
 
+    # Filter out None values and ensure they are valid Commands
+    valid_actions = [r for r in extracted_results if r is not None]
+
+    if len(valid_actions) < len(extracted_results):
+        logging.warning(f"Some sub-workflows returned None: {extracted_results}")
+
     results_obj = ActionsAgentOutput(
         user_query=node_input.user_query,
-        actions=results,
+        actions=valid_actions,
     )
 
     return Event(output=results_obj, partial=True)
