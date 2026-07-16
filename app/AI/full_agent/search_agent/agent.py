@@ -30,7 +30,7 @@ def sanitize_filter(filter_expr: str) -> str:
 
 @node(name="search_poi", rerun_on_resume=True)
 async def search_poi_node(node_input: QueryClassifier) -> Event:
-    logging.info(f"search_poi called with {node_input}")
+    # logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = (
         node_input.semantics,
         5,
@@ -40,15 +40,15 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
     try:
         results = search_poi(query, top_n, fields, filter_expression)
     except MilvusException:
-        logging.info(
-            f"Filter failed: {filter_expression}\nTrying again with sanitized filter"
-        )
+        # logging.info(
+        #     f"Filter failed: {filter_expression}\nTrying again with sanitized filter"
+        # )
         results = search_poi(query, top_n, fields, sanitize_filter(filter_expression))
 
     if not results:
-        logging.info(
-            f"search_poi failed with filter: {node_input.filter}\nTrying again without filter"
-        )
+        # logging.info(
+        #     f"search_poi failed with filter: {node_input.filter}\nTrying again without filter"
+        # )
         results = search_poi(query, top_n, fields)
     return Event(output=(results, node_input.user_query), partial=True)
 
@@ -56,11 +56,11 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
 @node(name="validate_pois", rerun_on_resume=True)
 async def validate_pois(node_input: tuple[list[tuple[dict, float]], str]) -> Event:
     pois, user_query = node_input
-    logging.info(f"validate_pois called with {node_input}")
+    # logging.info(f"validate_pois called with {node_input}")
     collect: list[POIAndSemanticDistance] = []
     for item, distance in pois:
         try:
-            logging.info(f"validating poi: {item}")
+            # logging.info(f"validating poi: {item}")
             collect.append(
                 POIAndSemanticDistance(poi=POI(**item), semantic_distance=distance)
             )
