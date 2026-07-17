@@ -185,16 +185,6 @@ async def graph_workflow_triage(user_query: str):
     return await run_adk_workflow(user_query, triage_agent_adk)
 
 
-@router.post("/ai/graph-workflow/search", dependencies=[NeedsOllama])
-async def graph_workflow_search(triage_output: TriageAgentOutput):
-    return await run_adk_workflow(triage_output, search_workflow, "synthesis_agent")
-
-
-@router.post("/ai/graph-workflow/response", dependencies=[NeedsOllama])
-async def graph_workflow_response(triage_output: SearchOutput):
-    return await run_adk_workflow(triage_output, actions_agent, "actions_agent")
-
-
 # @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
 # async def user_query_step_1(poi_query: str) -> StreamingResponse:
 #     retrieved_knowledge = search_poi(
