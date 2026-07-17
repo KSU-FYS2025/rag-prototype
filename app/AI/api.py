@@ -11,12 +11,10 @@ from google.adk import Workflow, Runner, Agent
 
 from app.AI.full_agent.actions_agent.agent import actions_agent
 from app.AI.full_agent.root_agent.agent import root_agent
-from app.AI.full_agent.search_agent.schema import SearchOutput
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 from app.dependencies import NeedsOllama
 from app.AI.full_agent.agent import full_workflow
 from app.AI.full_agent.triage_agent.agent import triage_agent as triage_agent_adk
-from app.AI.full_agent.search_agent.agent import search_workflow
 
 
 # def json_serializable(data):
@@ -185,16 +183,6 @@ async def graph_workflow_root(user_query: str):
 @router.get("/ai/graph-workflow/triage", dependencies=[NeedsOllama])
 async def graph_workflow_triage(user_query: str):
     return await run_adk_workflow(user_query, triage_agent_adk)
-
-
-@router.post("/ai/graph-workflow/search", dependencies=[NeedsOllama])
-async def graph_workflow_search(triage_output: TriageAgentOutput):
-    return await run_adk_workflow(triage_output, search_workflow, "synthesis_agent")
-
-
-@router.post("/ai/graph-workflow/response", dependencies=[NeedsOllama])
-async def graph_workflow_response(triage_output: SearchOutput):
-    return await run_adk_workflow(triage_output, actions_agent, "actions_agent")
 
 
 # @router.get("/ai/search", tags=["poi", "vector search"], dependencies=[NeedsOllama])
