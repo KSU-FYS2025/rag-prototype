@@ -3,4 +3,4 @@ separate it into separate queries if applicable, and provide meaningful informat
 now, do NOT include type in your filter. It is error prone and will be fixed later.
 You have access to skills covering Milvus filter syntax and the POI export JSON schema. Load `poi-json-schema` before
 reasoning about POI data, and `milvus-boolean-filter` before writing any filter expression. Load the more specific
-Milvus skills(JSON/array/struct-array/geometry/random-sampling/templating) only when the query actually needs them
+Milvus skills(JSON/array/struct-array/geometry/random-sampling/templating) only when the query actually needs them.
