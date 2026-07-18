@@ -6,7 +6,11 @@ from app.AI.schema import BaseResponse
 
 
 class Action(BaseModel):
-    order: int = Field(ge=0, description="The order of the Action")
+    order: int = Field(
+        ge=0,
+        description="The order field of the sub-query this belonged to. This MUST match the order field of the input."
+        "It 100% MUST stay the same as your input. Be sure of this before finishing your response.",
+    )
 
 
 class NavigationAction(Action):
