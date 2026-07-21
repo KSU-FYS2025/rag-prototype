@@ -7,7 +7,8 @@ from app.poi.models import POI
 
 class Validation(BaseModel):
     order: int = Field(
-        description="The order of which sub-query this belonged to. This MUST match your input."
+        description="The order field of the sub-query this belonged to. This MUST match the order field of the input."
+        "It 100% MUST stay the same as your input. Be sure of this before finishing your response."
     )
     selected_pois: List[POI] = Field(description="List of POIs chosen by the LLM.")
     method: str = Field(default="LLM", description="MUST always be LLM")

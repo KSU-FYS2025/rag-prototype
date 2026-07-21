@@ -238,9 +238,9 @@ def create_db_connection() -> MilvusClient:
         # Minimal check: Attempt a basic command that requires connectivity (like listing collections).
         # We still attempt this, as it's the best way to confirm local readiness.
         list_collections_result = client.list_collections()
-        print(
-            "Connection test successful: Successfully connected and listed collections."
-        )
+        # print(
+        #     "Connection test successful: Successfully connected and listed collections."
+        # )
         return client
 
     except Exception as e:

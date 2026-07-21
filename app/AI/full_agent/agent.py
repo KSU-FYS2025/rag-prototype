@@ -73,7 +73,7 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
             continue
 
         # Log the type and value for debugging
-        logging.info(f"Action {i} type: {type(r)}, value: {r}")
+        # logging.info(f"Action {i} type: {type(r)}, value: {r}")
         valid_actions.append(r)
 
     if not valid_actions and node_input.targets:
