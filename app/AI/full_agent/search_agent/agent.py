@@ -47,25 +47,25 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
     results = None
     try:
         if filter_expression:
-            try:
-                # logging.info(f"Trying search with original filter: {filter_expression}")
-                results = search_poi(query, top_n, fields, filter_expression)
-            except MilvusException as e:
-                sanitized = sanitize_filter(filter_expression)
-                # logging.warning(
-                #     f"Filter failed, trying sanitized filter: {sanitized}. Error: {e}"
-                # )
-                results = search_poi(query, top_n, fields, sanitized)
-    except Exception as e:
-        # logging.error(f"Search with filter failed completely: {e}")
-        results = None
+            # logging.info(f"Trying search with original filter: {filter_expression}")
+            results = search_poi(query, top_n, fields, filter_expression)
+    except MilvusException:
+        sanitized = sanitize_filter(filter_expression)
+        logging.warning(
+            f"Filter failed, trying sanitized filter: {sanitized}."
+        )
+        results = search_poi(query, top_n, fields, sanitized)
+    except Exception:
+        logging.error("Search with filter failed completely.")
+        results = []
 
     if not results:
         # if filter_expression:
-        # logging.info(
-        #     f"Search failed or returned no results with filter. Trying without filter."
-        # )
-        results = search_poi(query, top_n, fields)
+        logging.info(
+            f"Search failed or returned no results with filter {filter_expression}."
+        )
+        # results = search_poi(query, top_n, fields)
+        results = []
 
     return Event(output=results, partial=True)
 
