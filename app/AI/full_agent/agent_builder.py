@@ -1,3 +1,7 @@
+from google.adk.agents.base_agent import BeforeAgentCallback, AfterAgentCallback
+from google.adk.agents.llm_agent import AfterModelCallback
+from google.adk.agents.llm_agent import BeforeModelCallback
+from typing import Optional
 from google.adk.agents.llm_agent import InstructionProvider, ToolUnion
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.planners import BuiltInPlanner
@@ -53,6 +57,10 @@ class AgentConfig(BaseModel):
     tools: list[ToolUnion] = Field(
         default_factory=list, description="The tools available to the agent"
     )
+    before_model_callback: Optional[BeforeModelCallback] = None
+    after_model_callback: Optional[AfterModelCallback] = None
+    before_agent_callback: Optional[BeforeAgentCallback] = None
+    after_agent_callback: Optional[AfterAgentCallback] = None
 
 
 class AgentConfigDict(TypedDict):
@@ -64,6 +72,10 @@ class AgentConfigDict(TypedDict):
     input_schema: NotRequired[type[BaseModel] | None]
     output_schema: NotRequired[types.SchemaUnion | None]
     tools: NotRequired[list[ToolUnion]]
+    before_model_callback: NotRequired[Optional[BeforeModelCallback]]
+    after_model_callback: NotRequired[Optional[AfterModelCallback]]
+    before_agent_callback: NotRequired[Optional[BeforeAgentCallback]]
+    after_agent_callback: NotRequired[Optional[AfterAgentCallback]]
 
 
 class AgentBuilder:
@@ -85,6 +97,10 @@ class AgentBuilder:
             input_schema=config.input_schema,
             output_schema=config.output_schema,
             tools=config.tools,
+            before_model_callback=config.before_model_callback,
+            after_model_callback=config.after_model_callback,
+            before_agent_callback=config.before_agent_callback,
+            after_agent_callback=config.after_agent_callback,
         )
 
     def __new__(
