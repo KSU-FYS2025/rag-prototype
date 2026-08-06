@@ -19,7 +19,7 @@ def take_out_fence(text: str) -> str:
 
 
 def strip_json_fences(
-    _: CallbackContext, llm_response: LlmResponse
+    callback_context: CallbackContext, llm_response: LlmResponse
 ) -> LlmResponse | None:
     if llm_response.content and llm_response.content.parts:
         for part in llm_response.content.parts:
