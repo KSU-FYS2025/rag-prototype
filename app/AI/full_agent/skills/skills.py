@@ -17,14 +17,17 @@ skill_names = [
 
 skills_dir = pathlib.Path(__file__).parent
 
+
 @lru_cache(maxsize=None)
-def load(skills: list[str] | None = None) -> SkillToolset:
+def load(*, skills: list[str] | None = None) -> SkillToolset:
     if not skills:
         loaded_names = skill_names
     else:
         for skill in skills:
             if skill not in skill_names:
-                raise Exception(f"skill {skill} is not found in skill_names inside skills/skills.py!")
+                raise Exception(
+                    f"skill {skill} is not found in skill_names inside skills/skills.py!"
+                )
         loaded_names = skills
 
     return SkillToolset(
