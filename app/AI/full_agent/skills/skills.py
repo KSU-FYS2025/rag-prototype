@@ -19,7 +19,7 @@ skills_dir = pathlib.Path(__file__).parent
 
 
 @lru_cache(maxsize=None)
-def load(*, skills: list[str] | None = None) -> SkillToolset:
+def load(skills: tuple[str, ...] | None = None) -> SkillToolset:
     if not skills:
         loaded_names = skill_names
     else:

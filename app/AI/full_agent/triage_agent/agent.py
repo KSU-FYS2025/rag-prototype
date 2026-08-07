@@ -35,6 +35,16 @@ triage_agent = AgentBuilder(
     input_schema=RootOutput,
     output_schema=TriageAgentOutput,
     after_model_callback=strip_json_fences,
-    # Blank load function loads all skills within the skills folder.
-    tools=[load()],
+    tools=[
+        load(
+            (
+                "milvus-json-operators",
+                "milvus-array-operators",
+                "milvus-struct-array-operators",
+                "milvus-geometry-operators",
+                "milvus-random-sampling",
+                "milvus-filter-templating",
+            )
+        )
+    ],
 )
