@@ -5,18 +5,29 @@ description: Use whenever constructing a Milvus boolean filter expression (the `
 
 # Milvus Filter Expression: Core Syntax
 
-A filter expression is a string that evaluates to TRUE or FALSE per entity. Milvus scans entities and keeps the ones where the expression is TRUE.
+> **Note:** Field names in these examples (`status`, `age`, `price`, `quantity`,
+> `category_id`, `product`, etc.) are generic placeholders for syntax
+> illustration only — they are not fields in any particular collection.
+> Always cross-reference actual field names against the schema doc for the
+> collection you're querying (e.g. `poi-json-schema.md`) before building a
+> real filter. This collection has no nested JSON/struct fields — do not use
+> `field["key"]` or `field.key` syntax against it.
+
+A filter expression is a string that evaluates to TRUE or FALSE per entity. Milvus scans entities and keeps the ones
+where the expression is TRUE.
 
 ## Comparison operators
+
 `==` `!=` `>` `<` `>=` `<=`
 
 ```python
 filter = 'status == "active"'
 filter = 'age > 30'
-filter = '0 < age < 60'          # chained comparisons are valid
+filter = '0 < age < 60'  # chained comparisons are valid
 ```
 
 ## Logical operators
+
 `&&` / `and`, `||` / `or`, `not` (unary)
 
 ```python
@@ -25,29 +36,33 @@ filter = 'not (status == "banned")'
 ```
 
 ## Arithmetic operators
+
 `+` `-` `*` `/` `%` `**` — usable inside comparisons.
 
 ```python
 filter = 'price ** 2 > 1000'
-filter = 'id % 2 == 0'
+filter = 'category_id % 2 == 0'
 ```
 
 ## Range / membership: IN
+
 ```python
 filter = 'color in ["red", "green", "blue"]'
-filter = 'id not in [1, 2, 3]'
+filter = 'category_id not in [1, 2, 3]'
 ```
 
 ## Pattern matching: LIKE
+
 `%` is the wildcard. Prefix match is fastest; infix/suffix are slower.
 
 ```python
-filter = 'name LIKE "Prod%"'      # prefix (fast)
-filter = 'name LIKE "%XYZ"'       # suffix
-filter = 'name LIKE "%Pro%"'      # infix (slowest)
+filter = 'name LIKE "Prod%"'  # prefix (fast)
+filter = 'name LIKE "%XYZ"'  # suffix
+filter = 'name LIKE "%Pro%"'  # infix (slowest)
 ```
 
 ## NULL checks
+
 Case-insensitive. `""` is NOT null for VARCHAR.
 
 ```python
@@ -56,12 +71,14 @@ filter = 'description IS NOT NULL AND price > 10'
 ```
 
 ## Referencing JSON/ARRAY element keys directly
+
 ```python
-filter = 'product["price"] > 1000'      # JSON key
-filter = 'history_temperatures[0] > 30' # array index
+filter = 'product["price"] > 1000'  # JSON key
+filter = 'history_temperatures[0] > 30'  # array index
 ```
 
 ## Operator precedence (highest to lowest)
+
 1. unary `+` `-`
 2. `not`
 3. `**`
@@ -80,6 +97,7 @@ filter = 'history_temperatures[0] > 30' # array index
 Same-precedence operators evaluate left to right. Use parentheses to force order, e.g. `30 / (2 + 8)`.
 
 ## When to load other skills
+
 - Filtering on JSON field contents (not just a key lookup) → load `milvus-json-operators`
 - Filtering on ARRAY contents/length beyond a simple index → load `milvus-array-operators`
 - Filtering on a StructArray (array of structs) sub-field → load `milvus-struct-array-operators`
