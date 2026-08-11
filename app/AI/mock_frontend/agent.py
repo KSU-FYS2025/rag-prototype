@@ -129,6 +129,7 @@ def resolve_nearest(
     if previous_action and isinstance(previous_action, NavigationAction):
         prev_id = previous_action.id
         with get_db_gen() as db:
+            db.load_collection("poi")
             res = db.search(
                 collection_name="poi",
                 limit=1,
@@ -140,6 +141,7 @@ def resolve_nearest(
     # Now that we have start_position, we have to get the positions for each POI
     poi_ids = action.candidate_ids
     with get_db_gen() as db:
+        db.load_collection("poi")
         res = db.query(
             collection_name="poi",
             filter=f"identification in [{','.join(map(str, poi_ids))}]",
