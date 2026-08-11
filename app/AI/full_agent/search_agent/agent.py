@@ -40,7 +40,7 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
     # logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = (
         node_input.semantics,
-        5,
+        9,
         None,
         node_input.filter,
     )
