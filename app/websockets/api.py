@@ -15,6 +15,7 @@ from app.AI.full_agent.clarify_agent.schema import ClarifyInput
 from app.AI.full_agent.actions_agent.schema import Command
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
 from app.websockets.session import create_runner
+from websocket_route import websocket_route
 
 
 class NavigationWebsocketHandler:
@@ -68,7 +69,9 @@ class NavigationWebsocketHandler:
         clarify_input = ClarifyInput.model_validate(message)
         return await self.process_clarify(clarify_input)
 
-    async def process_navigation(self, message: str) -> ActionsAgentOutput | ConversationOutput | None:
+    async def process_navigation(
+        self, message: str
+    ) -> ActionsAgentOutput | ConversationOutput | None:
         assert self.full_workflow_runner is not None
         response: ActionsAgentOutput | ConversationOutput | None = None
 
@@ -94,9 +97,11 @@ class NavigationWebsocketHandler:
         response: Command | None = None
 
         async for event in self.resolve_clarify_runner.run_async(
-            new_message=types.Content(role="user", parts=[types.Part(text=message.model_dump_json())]),
+            new_message=types.Content(
+                role="user", parts=[types.Part(text=message.model_dump_json())]
+            ),
             session_id=self.session_id,
-            user_id=self.user_id
+            user_id=self.user_id,
         ):
             if event.is_final_response() and event.author == "":
                 response = event.output
@@ -107,60 +112,63 @@ class NavigationWebsocketHandler:
         return response
 
 
+# Super simple audio streaming POC
+class AudioSocketHandler:
+    def __init__(self, websocket: WebSocket):
+        self.websocket = websocket
+        self.chunk_count = 0
+
+    async def handle(self):
+        await self.websocket.accept()
+        await self.on_connect()
+
+        try:
+            while True:
+                message = await self.websocket.receive()
+
+                if message.get("bytes") is not None:
+                    await self.on_audio_chunk(message["bytes"])
+                elif message.get("text") is not None:
+                    await self.on_text_message(message["text"])
+        except WebSocketDisconnect:
+            await self.on_disconnect()
+
+    async def on_connect(self):
+        await self.websocket.send_json({"event": "connected"})
+
+    async def on_audio_chunk(self, data: bytes):
+        self.chunk_count += 1
+        await self.websocket.send_json(
+            {"event": "chunk", "seq": self.chunk_count, "bytes": len(data)}
+        )
+
+        await self.websocket.send_bytes(data)
+
+    async def on_text_message(self, data: str):
+        try:
+            payload = json.loads(data)
+        except json.JSONDecodeError:
+            payload = {"raw": data}
+
+        if payload.get("event") == "stop":
+            await self.websocket.send_json(
+                {"event": "stopped", "total_chunks": self.chunk_count}
+            )
+
+    async def on_disconnect(self):
+        pass
+
+
 router = APIRouter(routes=None)
 
 STATIC_DIR = Path(__file__).parent / "static"
 
-@router.websocket("/ws/AI")
-async def ai_websocket(
-    websocket: WebSocket,
-    user_id: Annotated[
-        str, Query(description="The user identifier for the Unity client runner.")
-    ],
-    session_id: Annotated[
-        str, Query(description="The session identifier for the Unity client runner.")
-    ],
-):
-    handler = NavigationWebsocketHandler(websocket, user_id, session_id)
-    await handler.handle_loop()
 
 @router.get("/audio/test")
 async def index():
     html = (STATIC_DIR / "index.html").read_text()
     return HTMLResponse(html)
 
-# Super simple audio streaming POC
-@router.websocket("/ws/audio")
-async def ws_audio_test(websocket: WebSocket):
-    await websocket.accept()
 
-    chunk_count = 0
-
-    await websocket.send_json({"event":"connected"})
-    try:
-        while True:
-            message = await websocket.receive()
-
-            if message.get("bytes") is not None:
-                data = message["bytes"]
-                chunk_count += 1
-
-                await websocket.send_json(
-                    {"event": "chunk", "seq": chunk_count, "bytes": len(data)}
-                )
-
-                await websocket.send_bytes(data)
-
-            elif message.get("text") is not None:
-                try:
-                    payload = json.loads(message["text"])
-                except json.JSONDecodeError:
-                    payload = {"raw": message["text"]}
-
-                if payload.get("event") == "stop":
-                    await websocket.send_json(
-                        {"event": "stopped", "total_chunks": chunk_count}
-                    )
-
-    except WebSocketDisconnect:
-        pass
+router.add_api_websocket_route("/ws/AI", websocket_route(NavigationWebsocketHandler))
+router.add_api_websocket_route("/ws/audio", websocket_route(AudioSocketHandler))
