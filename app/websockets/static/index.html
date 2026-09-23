@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>WS Audio + JSON POC</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 640px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 12px 24px;
+            cursor: pointer;
+        }
+
+        #log {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            background: #111;
+            color: #0f0;
+            padding: 12px;
+            height: 220px;
+            overflow-y: auto;
+            border-radius: 6px;
+        }
+
+        #status {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1>Mic &rarr; WebSocket &rarr; Echo Playback</h1>
+<p>Click record and speak. You should hear yourself played back live, while the log below
+    shows the JSON frames arriving over the <em>same</em> socket as the audio.</p>
+<button id="toggle">Start Recording</button>
+<div id="status">Idle</div>
+<div id="log"></div>
+
+<script>
+    const toggleBtn = document.getElementById("toggle");
+    const statusEl = document.getElementById("status");
+    const logEl = document.getElementById("log");
+
+    let ws = null;
+    let audioCtx = null;
+    let processor = null;
+    let source = null;
+    let stream = null;
+    let recording = false;
+    let nextPlayTime = 0;
+
+    function log(msg) {
+        logEl.textContent += msg + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function floatTo16BitPCM(float32Array) {
+        const out = new Int16Array(float32Array.length);
+        for (let i = 0; i < float32Array.length; i++) {
+            const s = Math.max(-1, Math.min(1, float32Array[i]));
+            out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+        }
+        return out;
+    }
+
+    function int16ToFloat32(int16Array) {
+        const out = new Float32Array(int16Array.length);
+        for (let i = 0; i < int16Array.length; i++) {
+            const v = int16Array[i];
+            out[i] = v / (v < 0 ? 0x8000 : 0x7fff);
+        }
+        return out;
+    }
+
+    function playPCMChunk(arrayBuffer) {
+        const int16 = new Int16Array(arrayBuffer);
+        const float32 = int16ToFloat32(int16);
+
+        const buffer = audioCtx.createBuffer(1, float32.length, audioCtx.sampleRate);
+        buffer.copyToChannel(float32, 0);
+
+        const src = audioCtx.createBufferSource();
+        src.buffer = buffer;
+        src.connect(audioCtx.destination);
+
+        // Schedule chunks back-to-back so playback stays gapless
+        const now = audioCtx.currentTime;
+        if (nextPlayTime < now) nextPlayTime = now;
+        src.start(nextPlayTime);
+        nextPlayTime += buffer.duration;
+    }
+
+    async function startRecording() {
+        audioCtx = new AudioContext();
+        nextPlayTime = 0;
+
+        ws = new WebSocket(`ws://${location.host}/ws/audio`);
+        ws.binaryType = "arraybuffer";
+
+        ws.onopen = () => log("[ws] connected");
+        ws.onclose = () => log("[ws] closed");
+        ws.onerror = () => log("[ws] error");
+
+        ws.onmessage = (event) => {
+            if (typeof event.data === "string") {
+                // Text frame -> JSON metadata
+                log("[json] " + event.data);
+            } else {
+                // Binary frame -> raw PCM audio, play it back
+                playPCMChunk(event.data);
+            }
+        };
+
+        stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        source = audioCtx.createMediaStreamSource(stream);
+
+        // ScriptProcessorNode is deprecated but keeps this POC dependency-free
+        // (no separate AudioWorklet module to load). Swap for an AudioWorkletNode
+        // in anything real.
+        processor = audioCtx.createScriptProcessor(4096, 1, 1);
+        source.connect(processor);
+
+        // Route through a silent gain node: onaudioprocess needs the node
+        // connected to the destination to fire reliably in every browser, but we
+        // don't want the raw mic signal itself feeding straight into the speakers.
+        const silentGain = audioCtx.createGain();
+        silentGain.gain.value = 0;
+        processor.connect(silentGain);
+        silentGain.connect(audioCtx.destination);
+
+        processor.onaudioprocess = (e) => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            const input = e.inputBuffer.getChannelData(0);
+            const pcm16 = floatTo16BitPCM(input);
+            ws.send(pcm16.buffer);
+        };
+
+        recording = true;
+        toggleBtn.textContent = "Stop Recording";
+        statusEl.textContent = "Recording... speak now";
+    }
+
+    function stopRecording() {
+        recording = false;
+        toggleBtn.textContent = "Start Recording";
+        statusEl.textContent = "Idle";
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({event: "stop"}));
+            ws.close();
+        }
+        if (processor) processor.disconnect();
+        if (source) source.disconnect();
+        if (stream) stream.getTracks().forEach((t) => t.stop());
+        if (audioCtx) audioCtx.close();
+    }
+
+    toggleBtn.addEventListener("click", () => {
+        if (!recording) startRecording();
+        else stopRecording();
+    });
+</script>
+</body>
+</html>

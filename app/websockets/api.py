@@ -3,6 +3,10 @@ from typing import Annotated
 from google.adk import Runner
 from google.genai import types
 import logging
+from pathlib import Path
+import json
+
+from starlette.responses import HTMLResponse
 
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
 from app.AI.full_agent.agent import full_workflow
@@ -105,6 +109,7 @@ class NavigationWebsocketHandler:
 
 router = APIRouter(routes=None)
 
+STATIC_DIR = Path(__file__).parent / "static"
 
 @router.websocket("/ws/AI")
 async def ai_websocket(
@@ -118,3 +123,44 @@ async def ai_websocket(
 ):
     handler = NavigationWebsocketHandler(websocket, user_id, session_id)
     await handler.handle_loop()
+
+@router.get("/audio/test")
+async def index():
+    html = (STATIC_DIR / "index.html").read_text()
+    return HTMLResponse(html)
+
+# Super simple audio streaming POC
+@router.websocket("/ws/audio")
+async def ws_audio_test(websocket: WebSocket):
+    await websocket.accept()
+
+    chunk_count = 0
+
+    await websocket.send_json({"event":"connected"})
+    try:
+        while True:
+            message = await websocket.receive()
+
+            if message.get("bytes") is not None:
+                data = message["bytes"]
+                chunk_count += 1
+
+                await websocket.send_json(
+                    {"event": "chunk", "seq": chunk_count, "bytes": len(data)}
+                )
+
+                await websocket.send_bytes(data)
+
+            elif message.get("text") is not None:
+                try:
+                    payload = json.loads(message["text"])
+                except json.JSONDecodeError:
+                    payload = {"raw": message["text"]}
+
+                if payload.get("event") == "stop":
+                    await websocket.send_json(
+                        {"event": "stopped", "total_chunks": chunk_count}
+                    )
+
+    except WebSocketDisconnect:
+        pass
