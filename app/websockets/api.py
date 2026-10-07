@@ -1,6 +1,13 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
-from typing import Annotated
+import asyncio
+
+from google.adk.agents import RunConfig, LiveRequestQueue
+from google.adk.sessions import InMemorySessionService
+
+from app.AI import audio_relay
+from google.adk import Agent
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from google.adk import Runner
+from google.adk.runners import InMemoryRunner
 from google.genai import types
 import logging
 from pathlib import Path
@@ -15,7 +22,6 @@ from app.AI.full_agent.clarify_agent.schema import ClarifyInput
 from app.AI.full_agent.actions_agent.schema import Command
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
 from app.websockets.session import create_runner
-from websocket_route import websocket_route
 
 
 class NavigationWebsocketHandler:
@@ -159,7 +165,127 @@ class AudioSocketHandler:
         pass
 
 
-router = APIRouter(routes=None)
+# Super simple audio streaming POC
+class SampleAIAudioHandler:
+    app_name = "RagPrototype"
+
+    agent = audio_relay.agent.root_agent
+
+    runner = Runner(
+        app_name=app_name,
+        agent=agent,
+        session_service=InMemorySessionService(),
+    )
+
+    test_credentials = {
+        "app_name": app_name,
+        "user_id": "test_u_2",
+        "session_id": "test_s_2",
+    }
+
+    def __init__(self, websocket: WebSocket):
+        self.websocket = websocket
+        self.chunk_count = 0
+
+    async def get_session(self):
+        session = await self.runner.session_service.get_session(**self.test_credentials)
+
+        if not session:
+            await self.runner.session_service.create_session(**self.test_credentials)
+
+        self.run_config = RunConfig(
+            response_modalities=["AUDIO"],
+            session_resumption=types.SessionResumptionConfig(),
+        )
+
+        self.queue = LiveRequestQueue()
+
+    async def handle(self):
+        await self.websocket.accept()
+        await self.get_session()
+
+        tasks = [
+            asyncio.create_task(self.client_stream()),
+            asyncio.create_task(self.adk_stream()),
+        ]
+
+        try:
+            done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+        finally:
+            self.queue.close()
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        for task in done:
+            if not task.cancelled():
+                task.result()
+
+    async def client_stream(self):
+        try:
+            while True:
+                message = await self.websocket.receive()
+
+                if message["type"] == "websocket.disconnect":
+                    return
+
+                if message.get("bytes") is not None:
+                    self.queue.send_realtime(
+                        types.Blob(
+                            data=message["bytes"], mime_type="audio/pcm;rate=16000"
+                        )
+                    )
+                elif message.get("text") is not None:
+                    payload = json.loads(message["text"])
+                    if payload.get("event") == "stop":
+                        self.queue.send_audio_stream_end()
+                    elif payload.get("event") == "text":
+                        self.queue.send_content(
+                            types.Content(
+                                role="user", parts=[types.Part(text=payload["text"])]
+                            )
+                        )
+        except WebSocketDisconnect:
+            return
+
+    async def adk_stream(self):
+        async for event in self.runner.run_live(
+            user_id=self.test_credentials["user_id"],
+            session_id=self.test_credentials["session_id"],
+            live_request_queue=self.queue,
+            run_config=self.run_config,
+        ):
+            if event.interrupted:
+                await self.websocket.send_json({"event": "interrupted"})
+
+            if event.input_transcription and event.input_transcription.text:
+                await self.websocket.send_json(
+                    {
+                        "event": "user_transcript",
+                        "text": event.input_transcription.text,
+                    }
+                )
+
+            if event.output_transcription and event.output_transcription.text:
+                await self.websocket.send_json(
+                    {
+                        "event": "agent_transcript",
+                        "text": event.output_transcription.text,
+                    }
+                )
+
+            if event.content and event.content.parts:
+                for part in event.content.parts:
+                    if part.inline_data and part.inline_data.data:
+                        await self.websocket.send_bytes(part.inline_data.data)
+            if event.turn_complete:
+                await self.websocket.send_json({"event": "turn_complete"})
+
+    async def on_disconnect(self):
+        pass
+
+
+router = APIRouter()
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -170,5 +296,23 @@ async def index():
     return HTMLResponse(html)
 
 
-router.add_api_websocket_route("/ws/AI", websocket_route(NavigationWebsocketHandler))
-router.add_api_websocket_route("/ws/audio", websocket_route(AudioSocketHandler))
+@router.websocket("/ws/AI")
+async def ai_websocket(websocket: WebSocket, user_id: str, session_id: str):
+    handler = NavigationWebsocketHandler(websocket, user_id, session_id)
+    await handler.handle_loop()
+
+
+@router.websocket("/ws/audio")
+async def audio_loopback_websocket(websocket: WebSocket):
+    handler = AudioSocketHandler(websocket)
+    await handler.handle()
+
+
+@router.websocket("/ws/AI/live")
+async def live_ai_websocket(websocket: WebSocket):
+    handler = SampleAIAudioHandler(websocket)
+    await handler.handle()
+
+
+# router.add_api_websocket_route("/ws/AI", websocket_route(NavigationWebsocketHandler))
+# router.add_api_websocket_route("/ws/audio", websocket_route(AudioSocketHandler))
