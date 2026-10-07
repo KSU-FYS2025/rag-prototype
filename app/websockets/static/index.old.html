@@ -4,32 +4,257 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Voice agent test</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #f6f7f9;
+            --panel: #ffffff;
+            --ink: #1d2433;
+            --muted: #5d6677;
+            --line: #d9dde5;
+            --accent: #0f766e;
+            --accent-ink: #ffffff;
+            --danger: #b42318;
+            --ok: #15803d;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #12161d;
+                --panel: #1a202a;
+                --ink: #e7eaf0;
+                --muted: #97a0b0;
+                --line: #2c3441;
+                --accent: #2dd4bf;
+                --accent-ink: #06201d;
+                --danger: #f97066;
+                --ok: #4ade80;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 32px 16px 48px;
+        }
+
+        h1 {
+            font-size: 1.35rem;
+            margin: 0 0 4px;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 0 0 24px;
+            max-width: 60ch;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            font: inherit;
+            color: var(--ink);
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        input:focus-visible, button:focus-visible, summary:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        button {
+            font: inherit;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--ink);
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        button.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--accent-ink);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--line);
+            flex: none;
+        }
+
+        .dot.busy {
+            background: #d97706;
+        }
+
+        .dot.live {
+            background: var(--ok);
+        }
+
+        .dot.error {
+            background: var(--danger);
+        }
+
+        .status.error {
+            color: var(--danger);
+        }
+
+        #transcript {
+            min-height: 220px;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        #transcript:empty::before {
+            content: "Start the session and speak. The conversation appears here.";
+            color: var(--muted);
+        }
+
+        .line {
+            margin: 0 0 10px;
+        }
+
+        .line strong {
+            margin-right: 4px;
+        }
+
+        .line.agent strong {
+            color: var(--accent);
+        }
+
+        .typed {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .typed input {
+            flex: 1;
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        #log {
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font: 0.8125rem/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            color: var(--muted);
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
-<h1>Voice agent test</h1>
-<p>Streams your microphone to the websocket and plays the agent's spoken replies. Use headphones, or the agent will hear
-    itself and interrupt.</p>
+<main>
+    <h1>Voice agent test</h1>
+    <p class="sub">Streams your microphone to the websocket and plays the agent's spoken replies. Use headphones, or the
+        agent will hear itself and interrupt.</p>
 
-<p>
-    <label for="path">Websocket path</label>
-    <input id="path" type="text" value="/ws/audio" autocomplete="off">
-</p>
+    <section class="panel">
+        <div class="fields">
+            <div>
+                <label for="path">Websocket path</label>
+                <input id="path" type="text" value="/ws/audio" autocomplete="off">
+            </div>
+            <div>
+                <label for="user">User id</label>
+                <input id="user" type="text" value="test-user" autocomplete="off">
+            </div>
+            <div>
+                <label for="session">Session id</label>
+                <input id="session" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="controls">
+            <button id="start" class="primary">Start session</button>
+            <button id="stop" disabled>Stop session</button>
+            <div id="statusWrap" class="status"><span id="dot" class="dot"></span><span id="status">Not connected</span>
+            </div>
+        </div>
+    </section>
 
-<p>
-    <button id="start">Start session</button>
-    <button id="stop" disabled>Stop session</button>
-</p>
-<p>Status: <span id="status">Not connected</span></p>
+    <section class="panel">
+        <div id="transcript" aria-live="polite"></div>
+        <div class="typed">
+            <input id="text" type="text" placeholder="Type a message to the agent" autocomplete="off" disabled>
+            <button id="send" disabled>Send message</button>
+        </div>
+    </section>
 
-<h2>Conversation</h2>
-<div id="transcript" aria-live="polite"></div>
-<p>
-    <input id="text" type="text" placeholder="Type a message to the agent" autocomplete="off" disabled>
-    <button id="send" disabled>Send message</button>
-</p>
-
-<h2>Event log</h2>
-<pre id="log"></pre>
+    <section class="panel">
+        <details open>
+            <summary>Event log</summary>
+            <div id="log"></div>
+        </details>
+    </section>
+</main>
 
 <script>
     const SEND_RATE = 16000;    // the Live API expects 16 kHz mono PCM16 going in...
@@ -64,10 +289,13 @@ registerProcessor("pcm-capture", PcmCapture);
 
     const $ = (id) => document.getElementById(id);
     const el = {
-        path: $("path"),
-        start: $("start"), stop: $("stop"), status: $("status"),
+        path: $("path"), user: $("user"), session: $("session"),
+        start: $("start"), stop: $("stop"),
+        statusWrap: $("statusWrap"), dot: $("dot"), status: $("status"),
         transcript: $("transcript"), text: $("text"), send: $("send"), log: $("log"),
     };
+
+    el.session.value = "session-" + Math.random().toString(36).slice(2, 8);
 
     let ws = null, ctx = null, node = null, stream = null;
     let running = false, opened = false;
@@ -79,6 +307,8 @@ registerProcessor("pcm-capture", PcmCapture);
 
     function setUi(state, text) {
         el.status.textContent = text;
+        el.dot.className = "dot " + (state === "idle" ? "" : state);
+        el.statusWrap.className = "status" + (state === "error" ? " error" : "");
         const inactive = state === "idle" || state === "error";
         el.start.disabled = !inactive;
         el.stop.disabled = inactive;
@@ -90,6 +320,7 @@ registerProcessor("pcm-capture", PcmCapture);
         line.textContent = new Date().toLocaleTimeString() + "  " + msg;
         el.log.append(line);
         while (el.log.childElementCount > 300) el.log.firstChild.remove();
+        el.log.scrollTop = el.log.scrollHeight;
     }
 
     // Transcripts arrive in small pieces: keep appending to the speaker's current line.
@@ -98,14 +329,16 @@ registerProcessor("pcm-capture", PcmCapture);
         current[other] = null;
         if (!current[who]) {
             const row = document.createElement("p");
+            row.className = "line " + who;
             const name = document.createElement("strong");
-            name.textContent = who === "user" ? "You: " : "Agent: ";
+            name.textContent = who === "user" ? "You" : "Agent";
             const body = document.createElement("span");
             row.append(name, body);
             el.transcript.append(row);
             current[who] = body;
         }
         current[who].textContent += text;
+        el.transcript.scrollTop = el.transcript.scrollHeight;
     }
 
     // ---------- playback ----------
@@ -189,9 +422,11 @@ registerProcessor("pcm-capture", PcmCapture);
     async function start() {
         if (running) return;
 
+        const user = el.user.value.trim();
+        const session = el.session.value.trim();
         let path = el.path.value.trim();
-        if (!path) {
-            setUi("error", "Enter a websocket path");
+        if (!user || !session || !path) {
+            setUi("error", "Enter a path, user id and session id");
             return;
         }
         if (!path.startsWith("/")) path = "/" + path;
@@ -240,9 +475,10 @@ registerProcessor("pcm-capture", PcmCapture);
             return;
         }
 
-        // 3. Websocket, using the same scheme as the page.
+        // 3. Websocket, with the same scheme as the page and the ids as query params.
         const proto = location.protocol === "https:" ? "wss:" : "ws:";
-        const url = proto + "//" + location.host + path;
+        const query = new URLSearchParams({user_id: user, session_id: session});
+        const url = proto + "//" + location.host + path + "?" + query;
         log("Connecting to " + url);
         setUi("busy", "Connecting");
 
@@ -259,7 +495,7 @@ registerProcessor("pcm-capture", PcmCapture);
         sock.onclose = (e) => {
             log("Connection closed (code " + e.code + ")");
             if (opened) teardown("idle", "Session ended");
-            else teardown("error", "Could not connect. Check the websocket path.");
+            else teardown("error", "Could not connect. Check the path, user id and session id.");
         };
     }
 
