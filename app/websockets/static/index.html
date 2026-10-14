@@ -92,8 +92,10 @@ registerProcessor("pcm-capture", PcmCapture);
         while (el.log.childElementCount > 300) el.log.firstChild.remove();
     }
 
-    // Transcripts arrive in small pieces: keep appending to the speaker's current line.
-    function appendTranscript(who, text) {
+    // Transcripts arrive as small chunks (finished = false), followed by one final event
+    // (finished = true) that repeats the whole utterance. Append chunks for live captions,
+    // then replace the line with the final text instead of appending it a second time.
+    function showTranscript(who, text, finished) {
         const other = who === "user" ? "agent" : "user";
         current[other] = null;
         if (!current[who]) {
@@ -105,7 +107,12 @@ registerProcessor("pcm-capture", PcmCapture);
             el.transcript.append(row);
             current[who] = body;
         }
-        current[who].textContent += text;
+        if (finished) {
+            current[who].textContent = text;
+            current[who] = null;
+        } else {
+            current[who].textContent += text;
+        }
     }
 
     // ---------- playback ----------
@@ -165,10 +172,10 @@ registerProcessor("pcm-capture", PcmCapture);
         }
         switch (msg.event) {
             case "user_transcript":
-                appendTranscript("user", msg.text);
+                showTranscript("user", msg.text, msg.finished);
                 break;
             case "agent_transcript":
-                appendTranscript("agent", msg.text);
+                showTranscript("agent", msg.text, msg.finished);
                 break;
             case "interrupted":
                 flushPlayback();
@@ -301,8 +308,7 @@ registerProcessor("pcm-capture", PcmCapture);
         const text = el.text.value.trim();
         if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
         ws.send(JSON.stringify({event: "text", text}));
-        appendTranscript("user", text);
-        current.user = null;
+        showTranscript("user", text, true);
         el.text.value = "";
     }
 
