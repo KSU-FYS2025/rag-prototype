@@ -4,10 +4,8 @@ from google.adk.agents import RunConfig, LiveRequestQueue
 from google.adk.sessions import InMemorySessionService
 
 from app.AI import audio_relay
-from google.adk import Agent
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from google.adk import Runner
-from google.adk.runners import InMemoryRunner
 from google.genai import types
 import logging
 from pathlib import Path
