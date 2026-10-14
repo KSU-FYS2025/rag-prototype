@@ -261,6 +261,7 @@ class SampleAIAudioHandler:
                     {
                         "event": "user_transcript",
                         "text": event.input_transcription.text,
+                        "finished": bool(event.input_transcription.finished),
                     }
                 )
 
@@ -269,6 +270,7 @@ class SampleAIAudioHandler:
                     {
                         "event": "agent_transcript",
                         "text": event.output_transcription.text,
+                        "finished": bool(event.output_transcription.finished),
                     }
                 )
 
