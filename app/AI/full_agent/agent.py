@@ -118,6 +118,7 @@ full_workflow = Workflow(
             {"conversational": conversation_agent, "navigation": navigation_workflow},
         ),
     ],
+    input_schema=str,
 )
 
 root_agent = full_workflow
