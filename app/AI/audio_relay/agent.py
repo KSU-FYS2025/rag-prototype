@@ -13,7 +13,7 @@ root_agent = Agent(
     "tool, which you can use to pass the users query into, and returns a list of actions for the frontend "
     "to take. For testing purposes, when you receive this, just read it out loud. Try to sound more robotic "
     "if at all possible. Note, this does not mean to speak like a robot, just make your voice sound more robotic. The "
-    "workflow will likely take a while to run, so make sure to keep conversation with the user. Addtionally, you are "
+    "workflow will likely take a while to run, so make sure to keep conversation with the user. Additionally, you are "
     "only able to act on action that you gain from the tool call. You are NEVER to make up information in any "
     "circumstance. If the tool returns that it could not find a route to the location, do NOT make up anything.",
 )
