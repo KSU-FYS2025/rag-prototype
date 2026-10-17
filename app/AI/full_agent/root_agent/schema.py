@@ -1,9 +1,9 @@
-from pydantic import Field
+from pydantic import Field, BaseModel
 
-from app.AI.schema import NavigationIntent, BaseResponse
+from app.AI.schema import NavigationIntent
 
 
-class RootOutput(BaseResponse):
+class RootOutput(BaseModel):
     intent: NavigationIntent = Field(
         description="What the user's query is classified as.\n"
         "NAV_GUIDE or navigation_guidance is when the user asks, either"

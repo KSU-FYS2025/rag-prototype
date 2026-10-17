@@ -1,3 +1,5 @@
+from typing import Any
+
 from google.adk.workflow import node, JoinNode
 from google.adk import Context, Workflow, Event
 
@@ -17,6 +19,7 @@ from app.AI.full_agent.root_agent.agent import root_agent as intent_agent
 from app.AI.full_agent.root_agent.schema import RootOutput
 from app.AI.full_agent.triage_agent.agent import triage_agent
 from app.AI.schema import NavigationIntent
+from google.genai import types
 
 
 @node(name="navigation_router", rerun_on_resume=True)
@@ -107,6 +110,20 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
     return Event(output=results_obj, partial=True)
 
 
+@node(name="capture_query", rerun_on_resume=True)
+async def capture_query(ctx: Context, node_input: Any):
+    if isinstance(node_input, types.Content):
+        text = "".join(p.text or "" for p in node_input.parts or [])
+    elif isinstance(node_input, dict):
+        text = str(node_input.get("request", ""))
+    else:
+        text = str(node_input or "")
+
+    text = text.strip()
+    ctx.state["user_query"] = text
+    return Event(output=text)
+
+
 navigation_workflow = Workflow(
     name="navigation_workflow",
     edges=[("START", triage_agent), (triage_agent, parallel_router)],
@@ -115,8 +132,7 @@ navigation_workflow = Workflow(
 full_workflow = Workflow(
     name="full_workflow",
     edges=[
-        ("START", intent_agent),
-        (intent_agent, navigation_router),
+        ("START", capture_query, intent_agent, navigation_router),
         (
             navigation_router,
             {"conversational": conversation_agent, "navigation": navigation_workflow},

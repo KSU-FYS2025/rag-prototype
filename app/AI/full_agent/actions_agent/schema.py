@@ -2,8 +2,6 @@ from typing import List, Literal
 
 from pydantic import BaseModel, Field
 
-from app.AI.schema import BaseResponse
-
 
 class Action(BaseModel):
     order: int = Field(
@@ -94,7 +92,7 @@ class ClarifyAction(Action):
 Command = NavigationAction | ResolveNearestAction | AnswerAction | ClarifyAction
 
 
-class ActionsAgentOutput(BaseResponse):
+class ActionsAgentOutput(BaseModel):
     actions: List[Command] = Field(
         description="The list of actions the Unity runner will take. This should be in the "
         "order the Unity runner takes them."

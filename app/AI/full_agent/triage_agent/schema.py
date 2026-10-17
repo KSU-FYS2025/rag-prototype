@@ -25,7 +25,7 @@ class QueryClassifier(BaseModel):
     source: str = Field(default="LLM", description="MUST always be LLM")
 
 
-class TriageAgentOutput(BaseResponse):
+class TriageAgentOutput(BaseModel):
     targets: List[QueryClassifier] = Field(
         description="A list of query classifiers that can be used to run a vector search "
     )

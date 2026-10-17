@@ -4,12 +4,13 @@ from google.adk.agents.llm_agent import BeforeModelCallback
 from typing import Optional
 from google.adk.agents.llm_agent import InstructionProvider, ToolUnion
 from google.adk.agents.readonly_context import ReadonlyContext
+from google.adk.flows.llm_flows.prompt import inject_session_state
 from google.adk.planners import BuiltInPlanner
 from google.genai import types
 from google.adk import Agent
 from pydantic import BaseModel, Field, ConfigDict
 
-from typing import overload, TypedDict, NotRequired, Unpack
+from typing import TypedDict, NotRequired, Unpack
 from functools import lru_cache
 
 
@@ -22,9 +23,9 @@ def load_instructions(agent_name: str) -> str:
     return base + "\n" + post
 
 
-def shared_instruction_provider(context: ReadonlyContext) -> str:
-    agent_name = context.agent_name
-    return load_instructions(agent_name)
+async def shared_instruction_provider(context: ReadonlyContext) -> str:
+    template = load_instructions(context.agent_name)
+    return await inject_session_state(template, context)
 
 
 planner_defaults = BuiltInPlanner(

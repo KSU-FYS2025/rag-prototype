@@ -1,7 +1,5 @@
-from pydantic import Field
-
-from app.AI.schema import BaseResponse
+from pydantic import Field, BaseModel
 
 
-class ConversationOutput(BaseResponse):
+class ConversationOutput(BaseModel):
     response: str = Field(description="What your response is.")
