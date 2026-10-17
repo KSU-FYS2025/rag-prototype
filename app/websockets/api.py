@@ -1,6 +1,10 @@
 import asyncio
+import uuid
+from datetime import datetime
 
 from google.adk.agents import RunConfig, LiveRequestQueue
+from google.adk.events import Event
+from google.genai.errors import APIError
 from google.adk.sessions import InMemorySessionService
 
 from app.AI import audio_relay
@@ -175,15 +179,16 @@ class SampleAIAudioHandler:
         session_service=InMemorySessionService(),
     )
 
-    test_credentials = {
-        "app_name": app_name,
-        "user_id": "test_u_2",
-        "session_id": "test_s_2",
-    }
-
     def __init__(self, websocket: WebSocket):
         self.websocket = websocket
         self.chunk_count = 0
+        # Fresh session per connection so stale history (e.g. unanswered
+        # function calls) from a previous connection is never replayed.
+        self.test_credentials = {
+            "app_name": self.app_name,
+            "user_id": "test_u_2",
+            "session_id": f"test_s_{uuid.uuid4().hex}",
+        }
 
     async def get_session(self):
         session = await self.runner.session_service.get_session(**self.test_credentials)
@@ -193,7 +198,8 @@ class SampleAIAudioHandler:
 
         self.run_config = RunConfig(
             response_modalities=["AUDIO"],
-            session_resumption=types.SessionResumptionConfig(),
+            input_audio_transcription=types.AudioTranscriptionConfig(),
+            output_audio_transcription=types.AudioTranscriptionConfig(),
         )
 
         self.queue = LiveRequestQueue()
@@ -246,40 +252,88 @@ class SampleAIAudioHandler:
         except WebSocketDisconnect:
             return
 
+    @staticmethod
+    def _log_event(event: Event):
+        ts = datetime.now().isoformat(timespec="milliseconds")
+
+        for fc in event.get_function_calls():
+            logging.info(
+                f"[{ts}] FUNCTION_CALL id={fc.id} name={fc.name} args={fc.args} "
+                f"author={event.author} branch={event.branch} invocation={event.invocation_id}"
+            )
+
+        for fr in event.get_function_responses():
+            logging.info(
+                f"[{ts}] FUNCTION_RESPONSE id={fr.id} name={fr.name} response={fr.response} "
+                f"author={event.author} branch={event.branch}"
+            )
+
+        if event.interrupted:
+            logging.info(f"[{ts}] INTERRUPTED")
+
+        if event.input_transcription and event.input_transcription.text:
+            logging.info(
+                f"[{ts}] USER_TRANSCRIPT finished={bool(event.input_transcription.finished)} "
+                f"text={event.input_transcription.text!r}"
+            )
+
+        if event.output_transcription and event.output_transcription.text:
+            logging.info(
+                f"[{ts}] AGENT_TRANSCRIPT finished={bool(event.output_transcription.finished)} "
+                f"text={event.output_transcription.text!r}"
+            )
+
+        if event.turn_complete:
+            logging.info(f"[{ts}] TURN_COMPLETE")
+
     async def adk_stream(self):
-        async for event in self.runner.run_live(
-            user_id=self.test_credentials["user_id"],
-            session_id=self.test_credentials["session_id"],
-            live_request_queue=self.queue,
-            run_config=self.run_config,
-        ):
-            if event.interrupted:
-                await self.websocket.send_json({"event": "interrupted"})
+        try:
+            async for event in self.runner.run_live(
+                user_id=self.test_credentials["user_id"],
+                session_id=self.test_credentials["session_id"],
+                live_request_queue=self.queue,
+                run_config=self.run_config,
+            ):
+                self._log_event(event)
 
-            if event.input_transcription and event.input_transcription.text:
+                if event.interrupted:
+                    await self.websocket.send_json({"event": "interrupted"})
+
+                if event.input_transcription and event.input_transcription.text:
+                    await self.websocket.send_json(
+                        {
+                            "event": "user_transcript",
+                            "text": event.input_transcription.text,
+                            "finished": bool(event.input_transcription.finished),
+                        }
+                    )
+
+                if event.output_transcription and event.output_transcription.text:
+                    await self.websocket.send_json(
+                        {
+                            "event": "agent_transcript",
+                            "text": event.output_transcription.text,
+                            "finished": bool(event.output_transcription.finished),
+                        }
+                    )
+
+                if event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if part.inline_data and part.inline_data.data:
+                            await self.websocket.send_bytes(part.inline_data.data)
+                if event.turn_complete:
+                    await self.websocket.send_json({"event": "turn_complete"})
+        except APIError as e:
+            logging.error(
+                f"[{datetime.now().isoformat(timespec='milliseconds')}] live session APIError "
+                f"code={e.code} status={e.status} message={e.message}"
+            )
+            try:
                 await self.websocket.send_json(
-                    {
-                        "event": "user_transcript",
-                        "text": event.input_transcription.text,
-                        "finished": bool(event.input_transcription.finished),
-                    }
+                    {"event": "error", "code": e.code, "message": e.message}
                 )
-
-            if event.output_transcription and event.output_transcription.text:
-                await self.websocket.send_json(
-                    {
-                        "event": "agent_transcript",
-                        "text": event.output_transcription.text,
-                        "finished": bool(event.output_transcription.finished),
-                    }
-                )
-
-            if event.content and event.content.parts:
-                for part in event.content.parts:
-                    if part.inline_data and part.inline_data.data:
-                        await self.websocket.send_bytes(part.inline_data.data)
-            if event.turn_complete:
-                await self.websocket.send_json({"event": "turn_complete"})
+            except Exception:
+                pass
 
     async def on_disconnect(self):
         pass
