@@ -34,10 +34,7 @@ def make_base_workflow(i: int) -> Workflow:
             (
                 "START",
                 search_poi_node,
-                search_poi_node,
                 validate_pois,
-                validate_pois,
-                synthesis_agent,
                 synthesis_agent,
                 actions_agent,
             ),
