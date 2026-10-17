@@ -37,7 +37,7 @@ def sanitize_filter(filter_expr: str) -> str:
 
 @node(name="search_poi", rerun_on_resume=True)
 async def search_poi_node(node_input: QueryClassifier) -> Event:
-    # logging.info(f"search_poi called with {node_input}")
+    logging.info(f"search_poi called with {node_input}")
     query, top_n, fields, filter_expression = (
         node_input.semantics,
         9,
@@ -47,7 +47,7 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
     results = None
     try:
         if filter_expression:
-            # logging.info(f"Trying search with original filter: {filter_expression}")
+            logging.info(f"Trying search with original filter: {filter_expression}")
             results = search_poi(query, top_n, fields, filter_expression)
     except MilvusException:
         sanitized = sanitize_filter(filter_expression)
@@ -71,11 +71,11 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
 @node(name="validate_pois", rerun_on_resume=True)
 async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
     pois = node_input
-    # logging.info(f"validate_pois called with {node_input}")
+    logging.info(f"validate_pois called with {node_input}")
     collect: list[POIAndSemanticDistance] = []
     for item, distance in pois:
         try:
-            # logging.info(f"validating poi: {item}")
+            logging.info(f"validating poi: {item}")
             collect.append(
                 POIAndSemanticDistance(poi=POI(**item), semantic_distance=distance)
             )
