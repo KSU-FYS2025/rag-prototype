@@ -31,10 +31,16 @@ def make_base_workflow(i: int) -> Workflow:
     return Workflow(
         name=f"BaseWorkflow_{i}",
         edges=[
-            ("START", search_poi_node),
-            (search_poi_node, validate_pois),
-            (validate_pois, synthesis_agent),
-            (synthesis_agent, actions_agent),
+            (
+                "START",
+                search_poi_node,
+                search_poi_node,
+                validate_pois,
+                validate_pois,
+                synthesis_agent,
+                synthesis_agent,
+                actions_agent,
+            ),
         ],
     )
 
@@ -42,6 +48,7 @@ def make_base_workflow(i: int) -> Workflow:
 @node(name="router", rerun_on_resume=True)
 async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
     node_input = TriageAgentOutput.model_validate(node_input.model_dump(mode="json"))
+
     logging.info(f"parallel_router called with {node_input}")
     workflows = [make_base_workflow(item.order) for item in node_input.targets]
 
