@@ -26,11 +26,16 @@ from app.AI.full_agent.actions_agent.schema import Command
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
 from app.websockets.session import create_runner
 
+class _DropLiveBlobLogs(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.getMessage() != "Sending LLM Blob."
+
+
 # Shows when ADK receives and releases buffered live tool calls
-# ("Returning aggregated tool_call_parts").
-logging.getLogger("google_adk.google.adk.models.gemini_llm_connection").setLevel(
-    logging.DEBUG
-)
+# ("Received tool call", "Returning aggregated tool_call_parts").
+_live_logger = logging.getLogger("google_adk.google.adk.models.gemini_llm_connection")
+_live_logger.setLevel(logging.DEBUG)
+_live_logger.addFilter(_DropLiveBlobLogs())
 
 
 class NavigationWebsocketHandler:
