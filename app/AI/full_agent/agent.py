@@ -84,7 +84,7 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
         valid_actions.append(r)
 
     if not valid_actions and node_input.targets:
-        error_msg = f"All {len(node_input.targets)} sub-workflows failed to return an action. Query: {node_input.user_query}"
+        error_msg = f"All {len(node_input.targets)} sub-workflows failed to return an action. Query: {ctx.state['user_query']}"
         logging.error(error_msg)
         # We might want to raise an error here to prevent empty actions if that's not allowed
         # But let's see what ActionsAgentOutput says. It allows List[Command].
@@ -96,12 +96,11 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
 
     try:
         results_obj = ActionsAgentOutput(
-            user_query=node_input.user_query,
             actions=valid_actions,
         )
     except Exception as e:
         logging.error(
-            f"Failed to create ActionsAgentOutput. Query: {node_input.user_query}, Actions: {valid_actions}"
+            f"Failed to create ActionsAgentOutput. Query: {ctx.state['user_query']}, Actions: {valid_actions}"
         )
         # If we have no valid actions due to filtering but expected some,
         # or if valid_actions still has something Pydantic does not like.
