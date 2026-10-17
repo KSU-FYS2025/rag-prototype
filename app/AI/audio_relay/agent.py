@@ -86,7 +86,7 @@ async def navigate(query: str) -> dict:
 
 
 root_agent = Agent(
-    model="gemini-2.5-flash-native-audio-latest",
+    model="gemini-3.8-live",
     name="root_agent",
     tools=[navigate],
     description="A helpful assistant for navigating the user.",

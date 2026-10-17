@@ -5,6 +5,7 @@ from datetime import datetime
 from google.adk.agents import RunConfig, LiveRequestQueue
 from google.adk.events import Event
 from google.genai.errors import APIError
+from websockets.exceptions import ConnectionClosed
 from google.adk.sessions import InMemorySessionService
 
 from app.AI import audio_relay
@@ -24,6 +25,12 @@ from app.AI.full_agent.clarify_agent.schema import ClarifyInput
 from app.AI.full_agent.actions_agent.schema import Command
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
 from app.websockets.session import create_runner
+
+# Shows when ADK receives and releases buffered live tool calls
+# ("Returning aggregated tool_call_parts").
+logging.getLogger("google_adk.google.adk.models.gemini_llm_connection").setLevel(
+    logging.DEBUG
+)
 
 
 class NavigationWebsocketHandler:
@@ -331,6 +338,19 @@ class SampleAIAudioHandler:
             try:
                 await self.websocket.send_json(
                     {"event": "error", "code": e.code, "message": e.message}
+                )
+            except Exception:
+                pass
+        except ConnectionClosed as e:
+            code = e.rcvd.code if e.rcvd else None
+            reason = e.rcvd.reason if e.rcvd else str(e)
+            logging.error(
+                f"[{datetime.now().isoformat(timespec='milliseconds')}] live connection closed "
+                f"code={code} reason={reason}"
+            )
+            try:
+                await self.websocket.send_json(
+                    {"event": "error", "code": code, "message": reason}
                 )
             except Exception:
                 pass
