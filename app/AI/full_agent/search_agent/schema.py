@@ -14,17 +14,14 @@ class Validation(BaseModel):
     method: str = Field(default="LLM", description="MUST always be LLM")
 
 
-class POIAndSemanticDistance(BaseModel):
+class POIAndSemanticSimilarity(BaseModel):
     poi: POI = Field(description="The POI object that this object is associated with")
-    semantic_distance: float = Field(
-        description="The semantic distance between this POI and the semantic for this "
-        "query."
+    semantic_similarity: float = Field(
+        description="The semantic similarity between this POI and the semantic for this query."
     )
 
 
 class ParallelOutput(BaseModel):
-    POIs: list[POIAndSemanticDistance] = Field(
-        description="List of POIs returned by the vector search as well as "
-        "their semantic distance from the semantic for this "
-        "query."
+    POIs: list[POIAndSemanticSimilarity] = Field(
+        description="List of POIs returned by the vector search as well as their semantic similarity for this query."
     )

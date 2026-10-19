@@ -9,7 +9,7 @@ from pymilvus import MilvusException
 
 from app.AI.full_agent.agent_builder import AgentBuilder
 from app.AI.full_agent.search_agent.schema import (
-    POIAndSemanticDistance,
+    POIAndSemanticSimilarity,
     ParallelOutput,
 )
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput, QueryClassifier
@@ -72,12 +72,14 @@ async def search_poi_node(node_input: QueryClassifier) -> Event:
 async def validate_pois(node_input: list[tuple[dict, float]]) -> Event:
     pois = node_input
     logging.info(f"validate_pois called with {node_input}")
-    collect: list[POIAndSemanticDistance] = []
-    for item, distance in pois:
+    collect: list[POIAndSemanticSimilarity] = []
+    for item, similarity in pois:
         try:
             logging.info(f"validating poi: {item}")
             collect.append(
-                POIAndSemanticDistance(poi=POI(**item), semantic_distance=distance)
+                POIAndSemanticSimilarity(
+                    poi=POI(**item), semantic_similarity=similarity
+                )
             )
         except TypeError as e:
             raise TypeError(f"Unable to validate POI: {item}!\n{e}")
