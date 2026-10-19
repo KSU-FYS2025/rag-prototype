@@ -1,5 +1,5 @@
 from app.AI.full_agent.actions_agent.schema import Command
-from app.AI.full_agent.agent_builder import AgentBuilder
+from app.AI.full_agent.agent_builder import AgentBuilder, create_planner
 from app.AI.full_agent.search_agent.schema import Validation
 
 actions_agent = AgentBuilder(
@@ -7,5 +7,6 @@ actions_agent = AgentBuilder(
     description="Agent that generates the final response",
     input_schema=Validation,
     output_schema=Command,
+    planner=create_planner(256),
     # tools=[load_memory],
 )

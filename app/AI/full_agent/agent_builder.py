@@ -28,11 +28,18 @@ async def shared_instruction_provider(context: ReadonlyContext) -> str:
     return await inject_session_state(template, context)
 
 
-planner_defaults = BuiltInPlanner(
-    thinking_config=types.ThinkingConfig(
-        include_thoughts=False,
+@lru_cache(maxsize=None)
+def create_planner(thinking_budget: int) -> BuiltInPlanner:
+    return BuiltInPlanner(
+        thinking_config=types.ThinkingConfig(
+            include_thoughts=False, thinking_budget=thinking_budget
+        )
     )
-)
+
+
+planner_defaults = create_planner(512)
+
+generate_content_config = types.GenerateContentConfig(temperature=0, seed=3)
 
 
 class AgentConfig(BaseModel):
@@ -48,6 +55,9 @@ class AgentConfig(BaseModel):
     )
     planner: BuiltInPlanner = Field(
         default=planner_defaults, description="The planner for the agent"
+    )
+    generate_content_config: types.GenerateContentConfig = Field(
+        default=generate_content_config, description="Sampling settings for the agent"
     )
     input_schema: type[BaseModel] | None = Field(
         default=None, description="The input schema for the agent"
@@ -70,6 +80,7 @@ class AgentConfigDict(TypedDict):
     description: str
     instruction: NotRequired[str | InstructionProvider]
     planner: NotRequired[BuiltInPlanner]
+    generate_content_config: NotRequired[types.GenerateContentConfig]
     input_schema: NotRequired[type[BaseModel] | None]
     output_schema: NotRequired[types.SchemaUnion | None]
     tools: NotRequired[list[ToolUnion]]
@@ -98,6 +109,7 @@ class AgentBuilder:
             input_schema=config.input_schema,
             output_schema=config.output_schema,
             tools=config.tools,
+            generate_content_config=config.generate_content_config,
             before_model_callback=config.before_model_callback,
             after_model_callback=config.after_model_callback,
             before_agent_callback=config.before_agent_callback,
