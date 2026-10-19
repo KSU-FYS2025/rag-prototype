@@ -4,7 +4,7 @@ import requests
 adk_data = {
     "app_name": "full_agent",
     "user_id": "user",
-    "evalset_name": "full_agent_eval_set_large_16",
+    "evalset_name": "planned_budget_eval_set_0",
 }
 
 adk_url = "http://10.96.50.180:8080"
@@ -22,7 +22,7 @@ try:
     ping_res = requests.get(adk_url, timeout=5)
     print(f"ADK Ping Status: {ping_res.status_code}")
 except Exception as e:
-    print(f"ADK Ping FAILED: {e}")
+    raise Exception(f"ADK Ping FAILED: {e}")
 
 # Create evalset (new endpoint)
 res = requests.post(
