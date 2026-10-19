@@ -1,6 +1,12 @@
+from warnings import deprecated
+
 from app.database.db import search_poi
 
 
+@deprecated(
+    "Function is unused in current development version and is scheduled for deletion. This may change if it becomes "
+    "useful in the future."
+)
 def search_poi_tool(
     query: str,
     top_n: int = 5,
