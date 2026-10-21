@@ -98,6 +98,50 @@ def _text(content: Optional[types.Content]) -> str:
     return texts[-1] if texts else ""
 
 
+def _as_command(value: object) -> Optional[dict]:
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            return None
+    if isinstance(value, dict) and "cmd" in value:
+        return value
+    return None
+
+
+def _commands_in(content: Optional[types.Content]) -> list[dict]:
+    commands = []
+    for part in (content.parts if content and content.parts else []):
+        if part.thought:
+            continue
+        if part.text and (cmd := _as_command(part.text)):
+            commands.append(cmd)
+        if part.function_call and part.function_call.name == "set_model_response":
+            if cmd := _as_command(dict(part.function_call.args or {})):
+                commands.append(cmd)
+    return commands
+
+
+def collect_actions(inv: Invocation) -> list[dict]:
+    """Rebuilds the workflow's action list for one invocation.
+
+    The router's ActionsAgentOutput is emitted without content, so the eval only
+    records each sub-workflow's actions_agent output (a single Command). The
+    last of those becomes the final response; the rest are intermediate events.
+    """
+    found: list[dict] = []
+    events = getattr(inv.intermediate_data, "invocation_events", None) or []
+    for event in events:
+        if event.author == "actions_agent":
+            found.extend(_commands_in(event.content))
+    found.extend(_commands_in(inv.final_response))
+
+    by_order: dict[int, dict] = {}
+    for i, cmd in enumerate(found):
+        by_order[cmd.get("order", i)] = cmd  # later output for the same order wins
+    return [by_order[k] for k in sorted(by_order)]
+
+
 def _referenced_ids(action: dict) -> list[int]:
     cmd = action.get("cmd")
     if cmd == "navigation":
@@ -146,7 +190,9 @@ def _transcript(invocations: list[Invocation]) -> str:
     lines = []
     for i, inv in enumerate(invocations):
         lines.append(f"Turn {i + 1} user: {_text(inv.user_content)}")
-        lines.append(f"Turn {i + 1} assistant: {_text(inv.final_response)}")
+        actions = collect_actions(inv)
+        reply = json.dumps({"actions": actions}) if actions else _text(inv.final_response)
+        lines.append(f"Turn {i + 1} assistant: {reply}")
     return "\n".join(lines)
 
 
@@ -228,14 +274,13 @@ async def subquery_correctness(
     ]
 
     final_inv = actual_invocations[-1]
-    final_output = _text(final_inv.final_response)
+    actions = collect_actions(final_inv)
+    if actions:
+        final_output = json.dumps({"actions": actions})
+    else:
+        final_output = _text(final_inv.final_response)  # e.g. a conversational reply
     rubric_scores: list[RubricScore] = []
     flags: list[bool] = []
-
-    try:
-        actions = json.loads(final_output).get("actions") or []
-    except (json.JSONDecodeError, AttributeError):
-        actions = []
 
     if not final_output:
         flags.append(False)
