@@ -1,0 +1,18 @@
+{
+  "criteria": {
+    "subquery_correctness": 1.0
+  },
+  "custom_metrics": {
+    "subquery_correctness": {
+      "code_config": {
+        "name": "app.AI.full_agent.evals.judge.subquery_correctness"
+      },
+      "description": "1.0 = all sub-queries correct, 0.5 = some correct, 0.0 = none correct"
+    }
+  },
+  "user_simulator_config": {
+    "type": "llm_backed",
+    "model": "gemini-2.5-flash",
+    "max_allowed_invocations": 3
+  }
+}
