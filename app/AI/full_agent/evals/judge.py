@@ -19,8 +19,22 @@ from typing import Optional
 
 from google import genai
 from google.adk.evaluation.eval_case import ConversationScenario, Invocation
-from google.adk.evaluation.eval_metrics import EvalMetric, EvalStatus, RubricScore
-from google.adk.evaluation.evaluator import EvaluationResult, PerInvocationResult
+from google.adk.evaluation.eval_metrics import (
+    EvalMetric,
+    EvalStatus,
+    Interval,
+    MetricInfo,
+    MetricValueInfo,
+    RubricScore,
+)
+from google.adk.evaluation.evaluator import (
+    EvaluationResult,
+    Evaluator,
+    PerInvocationResult,
+)
+from google.adk.evaluation.metric_evaluator_registry import (
+    DEFAULT_METRIC_EVALUATOR_REGISTRY,
+)
 from google.genai import types
 from pydantic import BaseModel
 
@@ -332,3 +346,39 @@ async def subquery_correctness(
         per_invocation_results=results,
         overall_rubric_scores=rubric_scores,
     )
+
+
+class SubqueryCorrectnessEvaluator(Evaluator):
+    """Evaluator wrapper so adk web, which never reads test_config.json, can run the
+    judge from ADK's default metric registry."""
+
+    def __init__(self, eval_metric: EvalMetric):
+        self._eval_metric = eval_metric
+
+    async def evaluate_invocations(
+        self,
+        actual_invocations: list[Invocation],
+        expected_invocations: Optional[list[Invocation]] = None,
+        conversation_scenario: Optional[ConversationScenario] = None,
+    ) -> EvaluationResult:
+        return await subquery_correctness(
+            self._eval_metric,
+            actual_invocations,
+            expected_invocations,
+            conversation_scenario,
+        )
+
+
+DEFAULT_METRIC_EVALUATOR_REGISTRY.register_evaluator(
+    MetricInfo(
+        metric_name="subquery_correctness",
+        description=(
+            "Judges navigation actions against the POI database. "
+            "1.0 = all sub-queries correct, 0.5 = some correct, 0.0 = none correct."
+        ),
+        metric_value_info=MetricValueInfo(
+            interval=Interval(min_value=0.0, max_value=1.0)
+        ),
+    ),
+    SubqueryCorrectnessEvaluator,
+)
