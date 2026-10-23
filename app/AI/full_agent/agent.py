@@ -6,6 +6,8 @@ from google.adk import Context, Workflow, Event
 import logging
 import asyncio
 
+from pydantic import BaseModel
+
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
 from app.AI.full_agent.search_agent.agent import (
     validate_pois,
@@ -79,8 +81,14 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
             )
             continue
 
-        # Log the type and value for debugging
-        # logging.info(f"Action {i} type: {type(r)}, value: {r}")
+        # actions_agent doesn't know which target it handled, so take the order
+        # from the target itself rather than trusting the LLM's value.
+        target_order = node_input.targets[i].order
+        if isinstance(r, dict):
+            r = {**r, "order": target_order}
+        elif isinstance(r, BaseModel):
+            r = r.model_copy(update={"order": target_order})
+
         valid_actions.append(r)
 
     if not valid_actions and node_input.targets:
@@ -106,7 +114,15 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
         # or if valid_actions still has something Pydantic does not like.
         raise e
 
-    return Event(output=results_obj, partial=True)
+    # Content makes the combined action list visible to adk eval, which only
+    # records events that have content.
+    return Event(
+        output=results_obj,
+        content=types.Content(
+            role="model", parts=[types.Part(text=results_obj.model_dump_json())]
+        ),
+        partial=True,
+    )
 
 
 @node(name="capture_query", rerun_on_resume=True)

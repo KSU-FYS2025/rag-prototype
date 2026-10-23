@@ -2,7 +2,7 @@
 
 Registered in ``app/AI/full_agent/test_config.json`` as ``subquery_correctness``.
 
-Score encoding per eval case (taken from the conversation's final invocation):
+Score encoding per eval case (taken from the last invocation that produced actions):
     1.0 -> every sub-query correct   (PASSED)
     0.5 -> some sub-queries correct  (FAILED)
     0.0 -> no sub-queries correct    (FAILED)
@@ -136,24 +136,45 @@ def _commands_in(content: Optional[types.Content]) -> list[dict]:
     return commands
 
 
-def collect_actions(inv: Invocation) -> list[dict]:
-    """Rebuilds the workflow's action list for one invocation.
+def _router_actions(content: Optional[types.Content]) -> Optional[list[dict]]:
+    """Returns the action list from the router's ActionsAgentOutput, if present."""
+    for part in reversed(content.parts if content and content.parts else []):
+        if not part.text or part.thought:
+            continue
+        try:
+            data = json.loads(part.text)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(data, dict) and isinstance(data.get("actions"), list):
+            return [a for a in data["actions"] if isinstance(a, dict)]
+    return None
 
-    The router's ActionsAgentOutput is emitted without content, so the eval only
-    records each sub-workflow's actions_agent output (a single Command). The
-    last of those becomes the final response; the rest are intermediate events.
+
+def collect_actions(inv: Invocation) -> list[dict]:
+    """Returns the workflow's action list for one invocation.
+
+    Prefers the router's combined ActionsAgentOutput, whose order fields come
+    from the targets. Falls back to each sub-workflow's actions_agent output
+    (one Command each) for runs recorded before the router emitted content.
     """
-    found: list[dict] = []
     events = getattr(inv.intermediate_data, "invocation_events", None) or []
+    for content in [inv.final_response, *(e.content for e in reversed(events) if e.author == "router")]:
+        if (actions := _router_actions(content)) is not None:
+            return actions
+
+    found: list[dict] = []
     for event in events:
         if event.author == "actions_agent":
             found.extend(_commands_in(event.content))
     found.extend(_commands_in(inv.final_response))
 
-    by_order: dict[int, dict] = {}
-    for i, cmd in enumerate(found):
-        by_order[cmd.get("order", i)] = cmd  # later output for the same order wins
-    return [by_order[k] for k in sorted(by_order)]
+    # actions_agent often repeats the same order for every target, so only drop
+    # exact duplicates and keep event order among equal orders.
+    unique: list[dict] = []
+    for cmd in found:
+        if cmd not in unique:
+            unique.append(cmd)
+    return sorted(unique, key=lambda cmd: cmd.get("order", 0))
 
 
 def _referenced_ids(action: dict) -> list[int]:
@@ -281,13 +302,21 @@ async def subquery_correctness(
     ).strip()
     category = load_categories().get(original_request, "Unknown")
 
-    # Earlier turns (e.g. a clarifying question) aren't graded on their own.
+    # Grade the last turn that produced actions, so a closing "thanks" from the
+    # simulated user doesn't hide the answer. Other turns aren't graded.
+    graded = len(actual_invocations) - 1
+    for i in range(len(actual_invocations) - 1, -1, -1):
+        if collect_actions(actual_invocations[i]):
+            graded = i
+            break
+
     results = [
         PerInvocationResult(actual_invocation=inv, eval_status=EvalStatus.NOT_EVALUATED)
-        for inv in actual_invocations[:-1]
+        for i, inv in enumerate(actual_invocations)
+        if i != graded
     ]
 
-    final_inv = actual_invocations[-1]
+    final_inv = actual_invocations[graded]
     actions = collect_actions(final_inv)
     if actions:
         final_output = json.dumps({"actions": actions})
@@ -305,7 +334,7 @@ async def subquery_correctness(
         ))
     else:
         client = genai.Client()
-        transcript = _transcript(actual_invocations)
+        transcript = _transcript(actual_invocations[: graded + 1])
         samples = [
             await llm_verdict(client, original_request, category, transcript, final_output)
             for _ in range(JUDGE_SAMPLES)
@@ -333,7 +362,7 @@ async def subquery_correctness(
 
     score, status = encode(flags)
     print(f"[subquery_correctness] {original_request!r} ({category}): {score}")
-    results.append(PerInvocationResult(
+    results.insert(graded, PerInvocationResult(
         actual_invocation=final_inv,
         score=score,
         eval_status=status,
