@@ -301,6 +301,9 @@ async def subquery_correctness(
         else _text(actual_invocations[0].user_content)
     ).strip()
     category = load_categories().get(original_request, "Unknown")
+    if category == "Unknown":
+        # Without its category an erroneous prompt would be judged like a real place.
+        print(f"[subquery_correctness] no category in ExcelQueries.json for {original_request!r}")
 
     # Grade the last turn that produced actions, so a closing "thanks" from the
     # simulated user doesn't hide the answer. Other turns aren't graded.
@@ -325,7 +328,25 @@ async def subquery_correctness(
     rubric_scores: list[RubricScore] = []
     flags: list[bool] = []
 
-    if not final_output:
+    if category == "Erroneous prompts":
+        # The place doesn't exist, so code decides: every action must be a
+        # clarify. No LLM split, so "X near Room 2050" can't become two
+        # sub-queries and fail on a missing second action.
+        wrong = [a.get("cmd") for a in actions if a.get("cmd") != "clarify"]
+        ok = bool(actions) and not wrong
+        if not actions:
+            reason = "Place doesn't exist, but no clarify action was produced."
+        elif wrong:
+            reason = f"Place doesn't exist, but the system returned {wrong}."
+        else:
+            reason = "Place doesn't exist and the system asked for clarification."
+        flags.append(ok)
+        rubric_scores.append(RubricScore(
+            rubric_id="subquery_0",
+            score=1.0 if ok else 0.0,
+            rationale=f"{original_request!r}: {reason}",
+        ))
+    elif not final_output:
         flags.append(False)
         rubric_scores.append(RubricScore(
             rubric_id="final_response",
