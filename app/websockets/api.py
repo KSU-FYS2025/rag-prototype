@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import APIRouter, WebSocket
 from starlette.responses import HTMLResponse
 
-from app.websockets.routes.proto_AI_socket import SampleAIAudioHandler
+from app.websockets.routes.AI_voice_socket import SampleAIAudioHandler
 from app.websockets.routes.audio_socket import AudioSocketHandler
 from app.websockets.routes.navigation_websocket import (
     NavigationWebsocketHandler,
