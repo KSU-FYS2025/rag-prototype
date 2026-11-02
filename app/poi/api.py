@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Body, HTTPException
 from typing import Annotated, Optional, cast
 
+from fastapi import APIRouter, Body, HTTPException
+
+from app.dependencies import NeedsDb
 from app.poi.models import (
     POI,
     POIOptional,
     dump_and_trim_none,
 )
-from app.dependencies import NeedsDb
 
 router = APIRouter()
 

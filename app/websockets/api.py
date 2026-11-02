@@ -1,13 +1,14 @@
+import logging
+from pathlib import Path
+
+from fastapi import APIRouter, WebSocket
+from starlette.responses import HTMLResponse
+
 from app.websockets.routes.AI_audio_socket_handler import SampleAIAudioHandler
 from app.websockets.routes.audio_socket_handler import AudioSocketHandler
 from app.websockets.routes.navigation_websocket_handler import (
     NavigationWebsocketHandler,
 )
-from fastapi import APIRouter, WebSocket
-import logging
-from pathlib import Path
-
-from starlette.responses import HTMLResponse
 
 
 class _DropLiveBlobLogs(logging.Filter):

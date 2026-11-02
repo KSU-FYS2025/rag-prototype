@@ -1,11 +1,10 @@
 import os
 from typing import Annotated
 
+import ollama
+import requests
 from fastapi import Depends, HTTPException
 from pymilvus import MilvusClient
-
-import requests
-import ollama
 
 from app.database.db import get_db_dep
 

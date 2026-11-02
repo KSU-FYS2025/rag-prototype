@@ -1,9 +1,9 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Optional, Any, Type, Tuple
+from typing import Any, Optional, Tuple, Type
 
-from pydantic import BaseModel, create_model, Field, model_validator
+from pydantic import BaseModel, Field, create_model, model_validator
 from pydantic.fields import FieldInfo
 from pymilvus import DataType, MilvusClient
 

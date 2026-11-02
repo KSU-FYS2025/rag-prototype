@@ -1,4 +1,3 @@
-from app.AI.full_agent.search_agent.schema import Validation
 import logging
 import re
 
@@ -8,10 +7,11 @@ from pymilvus import MilvusException
 
 from app.AI.full_agent.agent_builder import AgentBuilder
 from app.AI.full_agent.search_agent.schema import (
-    POIAndSemanticSimilarity,
     ParallelOutput,
+    POIAndSemanticSimilarity,
+    Validation,
 )
-from app.AI.full_agent.triage_agent.schema import TriageAgentOutput, QueryClassifier
+from app.AI.full_agent.triage_agent.schema import QueryClassifier, TriageAgentOutput
 from app.database.db import search_poi
 from app.poi.models import POI
 

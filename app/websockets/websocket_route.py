@@ -1,17 +1,14 @@
-import inspect
-
-from fastapi.params import Query
-from starlette.websockets import WebSocket
 from typing import (
-    Annotated,
     Any,
     Callable,
-    Protocol,
-    ParamSpec,
     Concatenate,
     Coroutine,
+    ParamSpec,
+    Protocol,
     runtime_checkable,
 )
+
+from starlette.websockets import WebSocket
 
 P = ParamSpec("P")
 

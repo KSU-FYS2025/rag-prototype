@@ -1,17 +1,17 @@
-from fastapi import FastAPI, Request
 import json
-import os
-from dotenv import load_dotenv
-import time
-
-from app.poi import api as poiapi
-from app.AI import api as aiapi
-from app.websockets import api as wsapi
-
 import logging
+import os
+import time
 from contextlib import asynccontextmanager
-from app.poi.models import get_poi_schema, get_index_params, POIDecoder
-from app.database.db import create_collection, get_db_gen, embedding_fn
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+
+from app.AI import api as aiapi
+from app.database.db import create_collection, embedding_fn, get_db_gen
+from app.poi import api as poiapi
+from app.poi.models import POIDecoder, get_index_params, get_poi_schema
+from app.websockets import api as wsapi
 
 load_dotenv()
 

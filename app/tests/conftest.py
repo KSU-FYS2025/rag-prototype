@@ -5,15 +5,16 @@ This file sets up the test environment with proper environment variables
 and ensures the database is initialized for all tests.
 """
 
-from ..main import app
-from ..database.db import embedding_fn, get_db_gen
-from ..poi.models import get_poi_schema, get_index_params
-from ..database.db import create_collection
 import json
 import os
-import pytest
 from pathlib import Path
+
+import pytest
 from fastapi.testclient import TestClient
+
+from ..database.db import create_collection, embedding_fn, get_db_gen
+from ..main import app
+from ..poi.models import get_index_params, get_poi_schema
 
 # Ensure environment variables are set BEFORE importing FastAPI app
 project_root = Path(__file__).parent.parent.parent

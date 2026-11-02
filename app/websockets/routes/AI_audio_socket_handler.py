@@ -1,19 +1,19 @@
 import asyncio
+import json
+import logging
 import uuid
 from datetime import datetime
 
-from google.adk.agents import RunConfig, LiveRequestQueue
-from google.adk.events import Event
-from google.genai.errors import APIError
-from websockets.exceptions import ConnectionClosed
-from google.adk.sessions import InMemorySessionService
-
-from app.AI import audio_relay
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from google.adk import Runner
+from google.adk.agents import LiveRequestQueue, RunConfig
+from google.adk.events import Event
+from google.adk.sessions import InMemorySessionService
 from google.genai import types
-import logging
-import json
+from google.genai.errors import APIError
+from websockets.exceptions import ConnectionClosed
+
+from app.AI import audio_relay
 
 
 class SampleAIAudioHandler:

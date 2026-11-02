@@ -1,6 +1,6 @@
-from fastapi import WebSocket, WebSocketDisconnect
-
 import json
+
+from fastapi import WebSocket, WebSocketDisconnect
 
 
 # Super simple audio streaming POC

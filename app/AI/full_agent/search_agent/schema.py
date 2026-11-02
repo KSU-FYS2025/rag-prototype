@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
 
 from app.AI.schema import BaseResponse
 from app.poi.models import POI

@@ -1,12 +1,12 @@
-from fastapi import HTTPException
-import pytest
+import os
 
+import pytest
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
 
 from ..dependencies import needs_ollama
-from fastapi.testclient import TestClient
-import os
 
 
 def test_env(client: TestClient):

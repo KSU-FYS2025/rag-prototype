@@ -1,13 +1,13 @@
-from contextlib import contextmanager
-from typing import Dict, Optional, List, Any
-import os
-from pymilvus import MilvusClient, CollectionSchema
-from sentence_transformers import SentenceTransformer
 import json
-import re
 import logging
+import os
+import re
 import time
+from contextlib import contextmanager
+from typing import Any, Dict, List, Optional
 
+from pymilvus import CollectionSchema, MilvusClient
+from sentence_transformers import SentenceTransformer
 from torch import Tensor
 
 logger = logging.getLogger(__name__)

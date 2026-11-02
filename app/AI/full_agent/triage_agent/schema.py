@@ -1,7 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel, Field
 
-from app.AI.schema import TargetType, NavigationIntent, BaseResponse
-from typing import List
+from app.AI.schema import BaseResponse, NavigationIntent, TargetType
 
 
 class QueryClassifier(BaseModel):
