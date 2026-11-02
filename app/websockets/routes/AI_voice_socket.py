@@ -147,6 +147,12 @@ class SampleAIAudioHandler:
                 if event.interrupted:
                     await self.websocket.send_json({"event": "interrupted"})
 
+                for fr in event.get_function_responses():
+                    if fr.response:
+                        await self.websocket.send_json(
+                            {"event": "function_call", "return": {**fr.response}}
+                        )
+
                 if event.input_transcription and event.input_transcription.text:
                     await self.websocket.send_json(
                         {
