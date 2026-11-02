@@ -50,7 +50,3 @@ async def audio_loopback_websocket(websocket: WebSocket):
 async def live_ai_websocket(websocket: WebSocket):
     handler = SampleAIAudioHandler(websocket)
     await handler.handle()
-
-
-# router.add_api_websocket_route("/ws/AI", websocket_route(NavigationWebsocketHandler))
-# router.add_api_websocket_route("/ws/audio", websocket_route(AudioSocketHandler))
