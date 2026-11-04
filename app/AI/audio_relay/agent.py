@@ -1,24 +1,20 @@
 from google.adk.agents.llm_agent import Agent
+from google.adk.agents.readonly_context import ReadonlyContext
 
 from app.AI.audio_relay.tools import navigate, resolve_clarification
+
+
+def get_from_file(context: ReadonlyContext) -> str:
+    instruction = ""
+    with open("instruction.md", "r") as file:
+        instruction = "\n".join(file.readlines())
+    return instruction
+
 
 root_agent = Agent(
     model="gemini-3.8-live",
     name="root_agent",
     tools=[navigate, resolve_clarification],
     description="A helpful assistant for navigating the user.",
-    instruction="You are a helpful agent that guides users around a building. You have two tools, navigate and "
-    "resolve_clarification. Pass anything new the user asks into navigate verbatim. Call a tool exactly once per thing the user "
-    "says and wait for its result; never call it again until the user says something new. If navigate returns a "
-    "`response`, read it out loud. If a tool returns `actions` or an `action`, do not describe them; briefly "
-    "acknowledge and wait. If a tool returns an `error`, read the error out loud, unless it "
-    "tells you to call navigate, in which case do that instead. Messages starting with `[navigation update]` come from "
-    "the navigation system, not the user. Read the text after the tag out loud exactly as written, and do not call "
-    "any tools in response to them. If an update asks the user a question and they answer it, pass their answer to "
-    "resolve_clarification verbatim; if they ask for something else instead, pass that to navigate. Try to sound more robotic "
-    "if at all possible. Note, this does not mean to speak like a robot, just make your voice sound more robotic. The "
-    "tools will likely take a while to run, so make sure to keep conversation with the user. Additionally, you are "
-    "only able to act on information you gain from the tool calls and navigation updates. You are NEVER to make up "
-    "information in any circumstance. If you are told a location or route could not be found, do NOT make up "
-    "anything.",
+    instruction=get_from_file,
 )
