@@ -150,7 +150,11 @@ class SampleAIAudioHandler:
                 for fr in event.get_function_responses():
                     if fr.response:
                         await self.websocket.send_json(
-                            {"event": "function_call", "return": {**fr.response}}
+                            {
+                                "event": "function_call",
+                                "function_name": fr.name,
+                                "return": {**fr.response},
+                            }
                         )
 
                 if event.input_transcription and event.input_transcription.text:
