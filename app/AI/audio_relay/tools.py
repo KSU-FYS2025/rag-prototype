@@ -8,7 +8,7 @@ from google.genai import types
 from pydantic import BaseModel
 
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput, ClarifyAction
-from app.AI.full_agent.agent import full_nav_workflow
+from app.AI.full_agent.full_nav_workflow.agent import full_nav_workflow
 from app.AI.full_agent.clarify_agent.agent import clarify_agent
 from app.AI.full_agent.clarify_agent.schema import ClarifyInput, ClarifyOutput
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
