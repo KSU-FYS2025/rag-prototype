@@ -8,7 +8,7 @@ from google.genai import types
 from pydantic import BaseModel
 
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput, ClarifyAction
-from app.AI.full_agent.agent import full_workflow
+from app.AI.full_agent.agent import full_nav_workflow
 from app.AI.full_agent.clarify_agent.agent import clarify_agent
 from app.AI.full_agent.clarify_agent.schema import ClarifyInput, ClarifyOutput
 from app.AI.full_agent.conversation_agent.schema import ConversationOutput
@@ -26,7 +26,7 @@ pending_clarifications: dict[str, ClarifyAction] = {}
 session_service = InMemorySessionService()
 navigate_runner = Runner(
     app_name="RagPrototypeNavigateTool",
-    node=full_workflow,
+    node=full_nav_workflow,
     session_service=session_service,
 )
 clarify_runner = Runner(

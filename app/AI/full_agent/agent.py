@@ -154,5 +154,9 @@ full_workflow = Workflow(
     input_schema=str,
 )
 
+full_nav_workflow = Workflow(
+    name="full_nav_workflow", edges=[("START", capture_query, navigation_workflow)]
+)
+
 root_agent = full_workflow
 agent = full_workflow
