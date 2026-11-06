@@ -6,7 +6,7 @@ from app.AI.audio_relay.tools import navigate, resolve_clarification
 
 def get_from_file(context: ReadonlyContext) -> str:
     instruction = ""
-    with open("instruction.md", "r") as file:
+    with open("app/AI/audio_relay/instruction.md", "r") as file:
         instruction = "\n".join(file.readlines())
     return instruction
 
