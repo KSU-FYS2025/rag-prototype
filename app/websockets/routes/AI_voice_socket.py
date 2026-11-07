@@ -38,8 +38,6 @@ class SampleAIAudioHandler:
         session_service=InMemorySessionService(),
     )
 
-    next_plan_id = "p0"
-
     def __init__(self, websocket: WebSocket):
         self.websocket = websocket
         self.chunk_count = 0
@@ -53,12 +51,15 @@ class SampleAIAudioHandler:
 
         self.plan: ActionsAgentOutput | None = None
         self.plan_id = ""
+        self.plan_count = 0
         # True while a clarify question is waiting on the user's answer
         self.awaiting_answer = False
         # Order of the resolve_nearest sent to Unity that hasn't come back yet
         self.nearest_in_flight: int | None = None
         # Unity asked for the next action while it was still a resolve_nearest
         self.next_requested = False
+        # False while the model or the user is talking
+        self.model_idle = True
 
     async def get_session(self):
         session = await self.runner.session_service.get_session(**self.test_credentials)
@@ -111,7 +112,11 @@ class SampleAIAudioHandler:
                         )
                     )
                 elif message.get("text") is not None:
-                    payload = json.loads(message["text"])
+                    try:
+                        payload = json.loads(message["text"])
+                    except json.JSONDecodeError:
+                        logging.warning(f"Message is not valid JSON: {message['text']!r}")
+                        continue
                     await self.resolve_client_event(payload)
 
         except WebSocketDisconnect:
@@ -219,16 +224,18 @@ class SampleAIAudioHandler:
                                         {"event": "cancel", "plan_id": self.plan_id}
                                     )
 
-                                current_int = int(self.next_plan_id[1:])
-                                next_int = current_int + 1
-                                self.plan_id = self.next_plan_id
-                                self.next_plan_id = f"p{next_int}"
+                                self.plan_id = f"p{self.plan_count}"
+                                self.plan_count += 1
 
                                 self.plan = validated
                                 self.plan.actions.sort(key=lambda a: a.order)
                                 self.awaiting_answer = False
                                 self.nearest_in_flight = None
                                 self.next_requested = False
+
+                                await self.websocket.send_json(
+                                    {"event": "plan_started", "plan_id": self.plan_id}
+                                )
 
                                 self.update_pending_clarification()
                                 await self.send_resolve_nearest()
@@ -264,6 +271,7 @@ class SampleAIAudioHandler:
                                 )
 
                 if event.input_transcription and event.input_transcription.text:
+                    self.model_idle = False
                     await self.websocket.send_json(
                         {
                             "event": "user_transcript",
@@ -273,6 +281,7 @@ class SampleAIAudioHandler:
                     )
 
                 if event.output_transcription and event.output_transcription.text:
+                    self.model_idle = False
                     await self.websocket.send_json(
                         {
                             "event": "agent_transcript",
@@ -284,9 +293,17 @@ class SampleAIAudioHandler:
                 if event.content and event.content.parts:
                     for part in event.content.parts:
                         if part.inline_data and part.inline_data.data:
+                            self.model_idle = False
                             await self.websocket.send_bytes(part.inline_data.data)
                 if event.turn_complete:
                     await self.websocket.send_json({"event": "turn_complete"})
+
+                    # IN_PROGRESS means the model has more to say for this prompt
+                    if event.interaction_status != types.InteractionStatus.IN_PROGRESS:
+                        self.model_idle = True
+                        if self.next_requested:
+                            self.next_requested = False
+                            await self.resolve_next_action()
         except APIError as e:
             logging.error(
                 f"[{datetime.now().isoformat(timespec='milliseconds')}] live session APIError "
@@ -319,6 +336,10 @@ class SampleAIAudioHandler:
 
         result = resolution_helper(self.plan)
         if isinstance(result, Event):
+            await self.websocket.send_json(
+                {"event": "plan_finished", "plan_id": self.plan_id}
+            )
+            self.plan = None
             return
 
         index, _ = result
@@ -347,6 +368,7 @@ class SampleAIAudioHandler:
                         "target_label": action.target_label,
                     }
                 )
+                self.notify(f"[navigation update] [answer] {action.response}")
 
     async def send_resolve_nearest(self):
         """Sends the first resolve_nearest, as long as no clarify or other resolve_nearest comes before it."""
@@ -377,7 +399,8 @@ class SampleAIAudioHandler:
 
     async def apply_nearest_result(self, order: int, poi_id: int):
         """Handles Unity's resolve_nearest_result."""
-        if self.plan is None:
+        # A late or repeated result for a request that isn't out anymore
+        if self.plan is None or order != self.nearest_in_flight:
             return
 
         for index, action in enumerate(self.plan.actions):
@@ -393,7 +416,8 @@ class SampleAIAudioHandler:
         self.nearest_in_flight = None
         await self.send_resolve_nearest()
 
-        if self.next_requested:
+        # If the model is talking, adk_stream sends it once the model is done
+        if self.next_requested and self.model_idle:
             self.next_requested = False
             await self.resolve_next_action()
 
