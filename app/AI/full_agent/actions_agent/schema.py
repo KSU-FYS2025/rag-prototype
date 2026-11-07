@@ -93,7 +93,7 @@ Command = NavigationAction | ResolveNearestAction | AnswerAction | ClarifyAction
 
 
 class ActionsAgentOutput(BaseModel):
-    actions: List[Command] = Field(
+    actions: list[Command] = Field(
         description="The list of actions the Unity runner will take. This should be in the "
         "order the Unity runner takes them."
     )

@@ -1,3 +1,4 @@
+from app.AI.full_agent.actions_agent.schema import AnswerAction
 import asyncio
 import json
 import logging
@@ -11,9 +12,19 @@ from google.adk.events import Event
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from google.genai.errors import APIError
+from pydantic import ValidationError
 from websockets.exceptions import ConnectionClosed
 
 from app.AI import audio_relay
+from app.AI.full_agent.actions_agent.schema import (
+    ActionsAgentOutput,
+    ClarifyAction,
+    ResolveNearestAction,
+    NavigationAction,
+)
+from app.AI.full_agent.clarify_agent.schema import ClarifyOutput
+from app.AI.audio_relay.tools import pending_clarifications
+from app.AI.mock_frontend.agent import resolution_helper
 
 
 class SampleAIAudioHandler:
@@ -27,6 +38,8 @@ class SampleAIAudioHandler:
         session_service=InMemorySessionService(),
     )
 
+    next_plan_id = "p0"
+
     def __init__(self, websocket: WebSocket):
         self.websocket = websocket
         self.chunk_count = 0
@@ -37,6 +50,9 @@ class SampleAIAudioHandler:
             "user_id": "test_u_2",
             "session_id": f"test_s_{uuid.uuid4().hex}",
         }
+
+        self.plan: ActionsAgentOutput | None = None
+        self.plan_id = ""
 
     async def get_session(self):
         session = await self.runner.session_service.get_session(**self.test_credentials)
@@ -65,6 +81,7 @@ class SampleAIAudioHandler:
             done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
         finally:
             self.queue.close()
+            pending_clarifications.pop(self.test_credentials["session_id"], None)
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -157,6 +174,78 @@ class SampleAIAudioHandler:
                             }
                         )
 
+                        if fr.name == "navigate":
+                            try:
+                                validated = ActionsAgentOutput.model_validate(
+                                    fr.response
+                                )
+                                # If self.plan is not None, that means that there's already a plan running, and we need
+                                # to make sure that the frontend knows that it's been canceled
+                                if self.plan is not None:
+                                    await self.websocket.send_json(
+                                        {"event": "cancel", "plan_id": self.plan_id}
+                                    )
+
+                                current_int = int(self.next_plan_id[1:])
+                                next_int = current_int + 1
+                                self.plan_id = self.next_plan_id
+                                self.next_plan_id = f"p{next_int}"
+
+                                self.plan = validated
+                                self.plan.actions.sort(key=lambda a: a.order)
+
+                                # The old plan's question (if any) no longer applies.
+                                pending_clarifications.pop(
+                                    self.test_credentials["session_id"], None
+                                )
+                                for action in self.plan.actions:
+                                    if isinstance(action, ClarifyAction):
+                                        pending_clarifications[
+                                            self.test_credentials["session_id"]
+                                        ] = action
+                                        break
+
+                            except ValidationError as e:
+                                logging.warning(
+                                    f"Response could not be validated!\n{fr.response}\n{e}"
+                                )
+                        # An {"error": ...} response means nothing changed, so
+                        # only {"action": ...} responses update the plan.
+                        if (
+                            fr.name == "resolve_clarification"
+                            and "action" in fr.response
+                        ):
+                            try:
+                                validated = ClarifyOutput.model_validate(
+                                    {"action": fr.response["action"]}
+                                ).action
+
+                                if self.plan is not None:
+                                    # Replace the action with the same order, rather
+                                    # than assuming order matches the list position.
+                                    for index, action in enumerate(self.plan.actions):
+                                        if action.order == validated.order:
+                                            self.plan.actions[index] = validated
+                                            break
+
+                                    # Point the pending question at the next clarify
+                                    # still in the plan (the resolved one is gone, but
+                                    # it may have been replaced by another clarify).
+                                    pending_clarifications.pop(
+                                        self.test_credentials["session_id"], None
+                                    )
+                                    for action in self.plan.actions:
+                                        if isinstance(action, ClarifyAction):
+                                            pending_clarifications[
+                                                self.test_credentials["session_id"]
+                                            ] = action
+                                            break
+
+                            except ValidationError as e:
+                                logging.warning(
+                                    f"Response could not be validated!\n{fr.response}\n{e}"
+                                )
+
                 if event.input_transcription and event.input_transcription.text:
                     await self.websocket.send_json(
                         {
@@ -205,6 +294,64 @@ class SampleAIAudioHandler:
                 )
             except Exception:
                 pass
+
+    async def resolve_next_action(self):
+        if self.plan is None:
+            return
+
+        next_action = resolution_helper(self.plan)
+
+        if isinstance(next_action, Event):
+            return
+
+        index, _ = next_action
+        next_action = self.plan.actions[index]
+
+        match next_action:
+            case ResolveNearestAction() as action:
+                actions_before = [
+                    a for a in self.plan.actions if a.order < action.order
+                ]
+                first_navigate: list[NavigationAction] = [
+                    a for a in actions_before if isinstance(a, NavigationAction)
+                ]
+
+                await self.websocket.send_json(
+                    {
+                        "event": "resolve_nearest",
+                        "plan_id": self.plan_id,
+                        "request_id": action.order,
+                        "candidate_ids": action.candidate_ids,
+                        # Because of how resolution_helped is written, it should never return a ResolveNearestAction with
+                        # more than one NavigationAction before it. So, this code should be safe
+                        "from_id": None
+                        if len(first_navigate) > 0
+                        else first_navigate[0],
+                        "target_label": action.target_label,
+                    }
+                )
+
+            case AnswerAction() as action:
+                self.notify(f"[navigation update] [answer] {action.text}")
+
+            case ClarifyAction() as action:
+                self.notify(f"[navigation update] [question] {action.prompt}")
+
+            case NavigationAction() as action:
+                await self.websocket.send_json(
+                    {
+                        "event": "navigation",
+                        "plan_id": self.plan_id,
+                        "request_id": action.order,
+                        "id": action.id,
+                        "target_label": action.target_label,
+                    }
+                )
+
+    def notify(self, text: str):
+        self.queue.send_content(
+            types.Content(role="user", parts=[types.Part(text=text)])
+        )
 
     async def on_disconnect(self):
         pass
