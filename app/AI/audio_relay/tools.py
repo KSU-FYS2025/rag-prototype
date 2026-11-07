@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 
@@ -77,14 +78,16 @@ async def resolve_clarification(answer: str, tool_context: ToolContext) -> dict:
             clarify_runner, clarify_input.model_dump_json()
         )
 
-        output = None
+        # Run on its own (not inside a workflow), an agent's structured output
+        # only comes back as the JSON text of its final response.
+        text = None
         for event in events:
-            if event.output is not None:
-                output = event.output
-        if isinstance(output, BaseModel):
-            output = output.model_dump(mode="json")
+            if event.is_final_response() and event.content and event.content.parts:
+                text = "".join(
+                    p.text for p in event.content.parts if p.text and not p.thought
+                )
 
-        resolved = ClarifyOutput.model_validate({"action": output}).action
+        resolved = ClarifyOutput.model_validate({"action": json.loads(text)}).action
     except Exception:
         logging.exception("resolve_clarification tool failed")
 
