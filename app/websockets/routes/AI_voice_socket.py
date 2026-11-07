@@ -125,6 +125,11 @@ class SampleAIAudioHandler:
                 self.queue.send_content(
                     types.Content(role="user", parts=[types.Part(text=text)])
                 )
+
+            case {"event": "next_action", "plan_id": plan_id}:
+                if plan_id == self.plan_id:
+                    await self.resolve_next_action()
+
             case {
                 "event": "resolve_nearest_result",
                 "plan_id": plan_id,
