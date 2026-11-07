@@ -54,6 +54,8 @@ class SampleAIAudioHandler:
         self.plan_count = 0
         # True while a clarify question is waiting on the user's answer
         self.awaiting_answer = False
+        # True while Unity is navigating and hasn't sent action_done yet
+        self.navigating = False
         # Order of the resolve_nearest sent to Unity that hasn't come back yet
         self.nearest_in_flight: int | None = None
         # Unity asked for the next action while it was still a resolve_nearest
@@ -230,6 +232,7 @@ class SampleAIAudioHandler:
                                 self.plan = validated
                                 self.plan.actions.sort(key=lambda a: a.order)
                                 self.awaiting_answer = False
+                                self.navigating = False
                                 self.nearest_in_flight = None
                                 self.next_requested = False
 
@@ -336,7 +339,7 @@ class SampleAIAudioHandler:
 
     async def resolve_next_action(self):
         """Called when Unity asks for the next action."""
-        if self.plan is None or self.awaiting_answer:
+        if self.plan is None or self.awaiting_answer or self.navigating:
             return
 
         result = resolution_helper(self.plan)
@@ -364,6 +367,7 @@ class SampleAIAudioHandler:
                 self.notify(f"[navigation update] [question] {action.prompt}")
 
             case NavigationAction() as action:
+                self.navigating = True
                 await self.websocket.send_json(
                     {
                         "event": "navigation",
@@ -431,6 +435,7 @@ class SampleAIAudioHandler:
         if self.plan is None:
             return
         self.plan.actions = [a for a in self.plan.actions if a.order != order]
+        self.navigating = False
 
     def update_pending_clarification(self):
         """Points resolve_clarification at the plan's first clarify, if it has one."""

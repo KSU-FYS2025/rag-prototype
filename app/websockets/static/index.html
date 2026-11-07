@@ -308,7 +308,7 @@ registerProcessor("pcm-capture", PcmCapture);
                 break;
             case "turn_complete":
                 current.user = current.agent = null;
-                log("Turn complete");
+                log("Turn complete (idle: " + msg.idle + ")");
                 // idle is false when the agent has more to say (e.g. right after calling a tool)
                 if (msg.idle !== false) {
                     wantsNext = true;
