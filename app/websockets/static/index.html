@@ -28,6 +28,22 @@
     <button id="send" disabled>Send message</button>
 </p>
 
+<h2>Mock Unity frontend</h2>
+<p>Answers the navigation messages from <code>/ws/AI/live</code> the way the Unity app would, so plans can be tested
+    without it.</p>
+<p>
+    <input id="mock" type="checkbox">
+    <label for="mock">Act as the Unity frontend</label>
+</p>
+<p>
+    <input id="auto" type="checkbox">
+    <label for="auto">Resolve actions automatically after</label>
+    <input id="delay" type="number" value="3" min="0" step="1" size="3">
+    <label for="delay">seconds</label>
+</p>
+<p>Plan: <span id="plan">None</span></p>
+<div id="actions"></div>
+
 <h2>Event log</h2>
 <pre id="log"></pre>
 
@@ -67,6 +83,7 @@ registerProcessor("pcm-capture", PcmCapture);
         path: $("path"),
         start: $("start"), stop: $("stop"), status: $("status"),
         transcript: $("transcript"), text: $("text"), send: $("send"), log: $("log"),
+        mock: $("mock"), auto: $("auto"), delay: $("delay"), plan: $("plan"), actions: $("actions"),
     };
 
     let ws = null, ctx = null, node = null, stream = null;
@@ -74,6 +91,11 @@ registerProcessor("pcm-capture", PcmCapture);
     let nextPlayTime = 0;
     const playing = [];
     const current = {user: null, agent: null};
+
+    // Mock frontend state
+    let planId = null;
+    let wantsNext = false;  // ask for the next action once playback has finished
+    const timers = [];
 
     // ---------- UI helpers ----------
 
@@ -135,6 +157,7 @@ registerProcessor("pcm-capture", PcmCapture);
         src.onended = () => {
             const i = playing.indexOf(src);
             if (i !== -1) playing.splice(i, 1);
+            requestNextIfReady();
         };
 
         // Queue chunks back to back; a small lead-in avoids a click on the first chunk.
@@ -156,6 +179,106 @@ registerProcessor("pcm-capture", PcmCapture);
         nextPlayTime = 0;
     }
 
+    // ---------- mock Unity frontend ----------
+
+    function sendJson(msg) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify(msg));
+        log("Sent " + JSON.stringify(msg));
+    }
+
+    // Like Unity: once the agent has finished talking and its audio has played, ask for the next action.
+    function requestNextIfReady() {
+        if (!el.mock.checked || !planId || !wantsNext || playing.length > 0) return;
+        wantsNext = false;
+        sendJson({event: "next_action", plan_id: planId});
+    }
+
+    function clearActions() {
+        timers.splice(0).forEach(clearTimeout);
+        el.actions.replaceChildren();
+    }
+
+    // One row per action the backend hands over, with a button for each possible reply.
+    // Clicking any button (or the automatic timer) sends that reply once and disables the row.
+    function addActionRow(description, choices) {
+        const row = document.createElement("p");
+        row.append(description + " ");
+        const buttons = choices.map(([label, reply]) => {
+            const button = document.createElement("button");
+            button.textContent = label;
+            button.addEventListener("click", () => {
+                buttons.forEach((b) => b.disabled = true);
+                reply();
+            });
+            row.append(button, " ");
+            return button;
+        });
+        el.actions.append(row);
+
+        if (el.auto.checked) {
+            const seconds = Number(el.delay.value) || 0;
+            timers.push(setTimeout(() => {
+                if (!buttons[0].disabled) buttons[0].click();
+            }, seconds * 1000));
+        }
+    }
+
+    function onResolveNearest(msg) {
+        const from = msg.from_id === null ? "your position" : "POI " + msg.from_id;
+        addActionRow(
+            "Find the nearest " + msg.target_label + " to " + from + ":",
+            msg.candidate_ids.map((id) => ["POI " + id, () => sendJson({
+                event: "resolve_nearest_result", plan_id: msg.plan_id, request_id: msg.request_id, id,
+            })]),
+        );
+    }
+
+    function onNavigation(msg) {
+        const done = (status) => () => {
+            sendJson({event: "action_done", plan_id: msg.plan_id, request_id: msg.request_id, status});
+            // The agent says nothing when a navigation ends, so ask for the next action right away.
+            wantsNext = true;
+            requestNextIfReady();
+        };
+        addActionRow("Navigating to " + msg.target_label + " (POI " + msg.id + ")", [
+            ["Arrived", done("completed")],
+            ["Failed", done("failed")],
+            ["Cancel", done("cancelled")],
+        ]);
+    }
+
+    // Returns true if the message was a plan message the mock handled.
+    function onPlanMessage(msg) {
+        if (!el.mock.checked) return false;
+        switch (msg.event) {
+            case "plan_started":
+                clearActions();
+                planId = msg.plan_id;
+                el.plan.textContent = planId;
+                break;
+            case "cancel":
+                if (msg.plan_id === planId) clearActions();
+                break;
+            case "plan_finished":
+                if (msg.plan_id !== planId) break;
+                clearActions();
+                planId = null;
+                el.plan.textContent = "None (" + msg.plan_id + " finished)";
+                break;
+            case "resolve_nearest":
+                onResolveNearest(msg);
+                break;
+            case "navigation":
+                onNavigation(msg);
+                break;
+            default:
+                return false;
+        }
+        log("Received " + JSON.stringify(msg));
+        return true;
+    }
+
     // ---------- websocket messages ----------
 
     function onMessage(event) {
@@ -170,6 +293,7 @@ registerProcessor("pcm-capture", PcmCapture);
             log("Unreadable text frame: " + event.data);
             return;
         }
+        if (onPlanMessage(msg)) return;
         switch (msg.event) {
             case "user_transcript":
                 showTranscript("user", msg.text, msg.finished);
@@ -185,6 +309,11 @@ registerProcessor("pcm-capture", PcmCapture);
             case "turn_complete":
                 current.user = current.agent = null;
                 log("Turn complete");
+                // idle is false when the agent has more to say (e.g. right after calling a tool)
+                if (msg.idle !== false) {
+                    wantsNext = true;
+                    requestNextIfReady();
+                }
                 break;
             default:
                 log(JSON.stringify(msg));
@@ -301,6 +430,10 @@ registerProcessor("pcm-capture", PcmCapture);
             ctx = null;
         }
         running = false;
+        clearActions();
+        planId = null;
+        wantsNext = false;
+        el.plan.textContent = "None";
         setUi(state, text);
     }
 
