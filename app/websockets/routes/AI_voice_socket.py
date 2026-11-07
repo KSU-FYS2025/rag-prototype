@@ -112,16 +112,38 @@ class SampleAIAudioHandler:
                     )
                 elif message.get("text") is not None:
                     payload = json.loads(message["text"])
-                    if payload.get("event") == "stop":
-                        self.queue.send_audio_stream_end()
-                    elif payload.get("event") == "text":
-                        self.queue.send_content(
-                            types.Content(
-                                role="user", parts=[types.Part(text=payload["text"])]
-                            )
-                        )
+                    await self.resolve_client_event(payload)
+
         except WebSocketDisconnect:
             return
+
+    async def resolve_client_event(self, payload):
+        match payload:
+            case {"event": "stop"}:
+                self.queue.send_audio_stream_end()
+            case {"event": "text", "text": text}:
+                self.queue.send_content(
+                    types.Content(role="user", parts=[types.Part(text=text)])
+                )
+            case {
+                "event": "resolve_nearest_result",
+                "plan_id": plan_id,
+                "request_id": int(request_id),
+                "id": int(poi_id),
+            }:
+                if plan_id == self.plan_id:
+                    await self.apply_nearest_result(request_id, poi_id)
+
+            case {
+                "event": "action_done",
+                "plan_id": plan_id,
+                "request_id": int(request_id),
+            }:
+                if plan_id == self.plan_id:
+                    self.finish_action(request_id)
+
+            case _:
+                logging.warning(f"Unknown message: {payload}")
 
     @staticmethod
     def _log_event(event: Event):
