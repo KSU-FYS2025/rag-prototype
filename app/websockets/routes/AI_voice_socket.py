@@ -296,10 +296,15 @@ class SampleAIAudioHandler:
                             self.model_idle = False
                             await self.websocket.send_bytes(part.inline_data.data)
                 if event.turn_complete:
-                    await self.websocket.send_json({"event": "turn_complete"})
-
                     # IN_PROGRESS means the model has more to say for this prompt
-                    if event.interaction_status != types.InteractionStatus.IN_PROGRESS:
+                    idle = (
+                        event.interaction_status != types.InteractionStatus.IN_PROGRESS
+                    )
+                    await self.websocket.send_json(
+                        {"event": "turn_complete", "idle": idle}
+                    )
+
+                    if idle:
                         self.model_idle = True
                         if self.next_requested:
                             self.next_requested = False
