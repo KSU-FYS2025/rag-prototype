@@ -53,6 +53,12 @@ class SampleAIAudioHandler:
 
         self.plan: ActionsAgentOutput | None = None
         self.plan_id = ""
+        # True while a clarify question is waiting on the user's answer
+        self.awaiting_answer = False
+        # Order of the resolve_nearest sent to Unity that hasn't come back yet
+        self.nearest_in_flight: int | None = None
+        # Unity asked for the next action while it was still a resolve_nearest
+        self.next_requested = False
 
     async def get_session(self):
         session = await self.runner.session_service.get_session(**self.test_credentials)
@@ -193,24 +199,19 @@ class SampleAIAudioHandler:
 
                                 self.plan = validated
                                 self.plan.actions.sort(key=lambda a: a.order)
+                                self.awaiting_answer = False
+                                self.nearest_in_flight = None
+                                self.next_requested = False
 
-                                # The old plan's question (if any) no longer applies.
-                                pending_clarifications.pop(
-                                    self.test_credentials["session_id"], None
-                                )
-                                for action in self.plan.actions:
-                                    if isinstance(action, ClarifyAction):
-                                        pending_clarifications[
-                                            self.test_credentials["session_id"]
-                                        ] = action
-                                        break
+                                self.update_pending_clarification()
+                                await self.send_resolve_nearest()
 
                             except ValidationError as e:
                                 logging.warning(
                                     f"Response could not be validated!\n{fr.response}\n{e}"
                                 )
-                        # An {"error": ...} response means nothing changed, so
-                        # only {"action": ...} responses update the plan.
+
+                        # An error response leaves the plan unchanged
                         if (
                             fr.name == "resolve_clarification"
                             and "action" in fr.response
@@ -221,25 +222,14 @@ class SampleAIAudioHandler:
                                 ).action
 
                                 if self.plan is not None:
-                                    # Replace the action with the same order, rather
-                                    # than assuming order matches the list position.
                                     for index, action in enumerate(self.plan.actions):
                                         if action.order == validated.order:
                                             self.plan.actions[index] = validated
                                             break
 
-                                    # Point the pending question at the next clarify
-                                    # still in the plan (the resolved one is gone, but
-                                    # it may have been replaced by another clarify).
-                                    pending_clarifications.pop(
-                                        self.test_credentials["session_id"], None
-                                    )
-                                    for action in self.plan.actions:
-                                        if isinstance(action, ClarifyAction):
-                                            pending_clarifications[
-                                                self.test_credentials["session_id"]
-                                            ] = action
-                                            break
+                                    self.awaiting_answer = False
+                                    self.update_pending_clarification()
+                                    await self.send_resolve_nearest()
 
                             except ValidationError as e:
                                 logging.warning(
@@ -296,45 +286,28 @@ class SampleAIAudioHandler:
                 pass
 
     async def resolve_next_action(self):
-        if self.plan is None:
+        """Called when Unity asks for the next action."""
+        if self.plan is None or self.awaiting_answer:
             return
 
-        next_action = resolution_helper(self.plan)
-
-        if isinstance(next_action, Event):
+        result = resolution_helper(self.plan)
+        if isinstance(result, Event):
             return
 
-        index, _ = next_action
-        next_action = self.plan.actions[index]
-
-        match next_action:
-            case ResolveNearestAction() as action:
-                actions_before = [
-                    a for a in self.plan.actions if a.order < action.order
-                ]
-                first_navigate: list[NavigationAction] = [
-                    a for a in actions_before if isinstance(a, NavigationAction)
-                ]
-
-                await self.websocket.send_json(
-                    {
-                        "event": "resolve_nearest",
-                        "plan_id": self.plan_id,
-                        "request_id": action.order,
-                        "candidate_ids": action.candidate_ids,
-                        # Because of how resolution_helped is written, it should never return a ResolveNearestAction with
-                        # more than one NavigationAction before it. So, this code should be safe
-                        "from_id": None
-                        if len(first_navigate) > 0
-                        else first_navigate[0],
-                        "target_label": action.target_label,
-                    }
-                )
+        index, _ = result
+        match self.plan.actions[index]:
+            case ResolveNearestAction():
+                # It's already with Unity; apply_nearest_result sends the next
+                # action once the result comes back.
+                self.next_requested = True
+                await self.send_resolve_nearest()
 
             case AnswerAction() as action:
+                self.plan.actions.remove(action)
                 self.notify(f"[navigation update] [answer] {action.text}")
 
             case ClarifyAction() as action:
+                self.awaiting_answer = True
                 self.notify(f"[navigation update] [question] {action.prompt}")
 
             case NavigationAction() as action:
@@ -347,6 +320,73 @@ class SampleAIAudioHandler:
                         "target_label": action.target_label,
                     }
                 )
+
+    async def send_resolve_nearest(self):
+        """Sends the first resolve_nearest, as long as no clarify or other resolve_nearest comes before it."""
+        if self.plan is None:
+            return
+
+        # The POI the user will be coming from, or None for their current position
+        from_id = None
+        for action in self.plan.actions:
+            if isinstance(action, NavigationAction):
+                from_id = action.id
+            elif isinstance(action, ClarifyAction):
+                return
+            elif isinstance(action, ResolveNearestAction):
+                if self.nearest_in_flight != action.order:
+                    self.nearest_in_flight = action.order
+                    await self.websocket.send_json(
+                        {
+                            "event": "resolve_nearest",
+                            "plan_id": self.plan_id,
+                            "request_id": action.order,
+                            "candidate_ids": action.candidate_ids,
+                            "from_id": from_id,
+                            "target_label": action.target_label,
+                        }
+                    )
+                return
+
+    async def apply_nearest_result(self, order: int, poi_id: int):
+        """Handles Unity's resolve_nearest_result."""
+        if self.plan is None:
+            return
+
+        for index, action in enumerate(self.plan.actions):
+            if action.order == order and isinstance(action, ResolveNearestAction):
+                self.plan.actions[index] = NavigationAction(
+                    order=order,
+                    id=poi_id,
+                    target_label=action.target_label,
+                    response=f"Guiding you to the nearest {action.target_label}.",
+                )
+                break
+
+        self.nearest_in_flight = None
+        await self.send_resolve_nearest()
+
+        if self.next_requested:
+            self.next_requested = False
+            await self.resolve_next_action()
+
+    def finish_action(self, order: int):
+        """Handles Unity's action_done."""
+        if self.plan is None:
+            return
+        self.plan.actions = [a for a in self.plan.actions if a.order != order]
+
+    def update_pending_clarification(self):
+        """Points resolve_clarification at the plan's first clarify, if it has one."""
+        session_id = self.test_credentials["session_id"]
+        pending_clarifications.pop(session_id, None)
+
+        if self.plan is None:
+            return
+        for action in self.plan.actions:
+            if isinstance(action, ClarifyAction):
+                pending_clarifications[session_id] = action
+                return
 
     def notify(self, text: str):
         self.queue.send_content(
