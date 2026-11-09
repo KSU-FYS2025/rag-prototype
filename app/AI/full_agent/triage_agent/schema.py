@@ -13,15 +13,10 @@ class QueryClassifier(BaseModel):
     intent: NavigationIntent
     target_type: TargetType
     filter: str = Field(
-        description="A SQL-Like filter that is used to further refine the output of a vector search "
-        "inside pymilvus. DO NOT REFERENCE THE TYPE FIELD INSIDE THIS. NEVER PUT TYPE HERE. "
-        "This MUST be a string that uses double quotes on the outside."
+        description="Milvus filter expression using name, type or parentName, or an empty string."
     )
     semantics: str = Field(
-        description="Semantic information about the query that can be used to run a vector search. "
-        "Include things like what the Point of Interest is, and any helpful explicit "
-        "information.\n",
-        # examples="EX1: ROOM 2131\nEX2: bathroom, third floor",
+        description="A short noun phrase naming the place for the vector search, e.g. 'Room 3431' or 'restroom'."
     )
     source: str = Field(default="LLM", description="MUST always be LLM")
 
