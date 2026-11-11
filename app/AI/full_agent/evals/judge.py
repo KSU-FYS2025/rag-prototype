@@ -11,7 +11,6 @@ Per-sub-query verdicts and reasons are stored in ``rubric_scores``.
 """
 
 import json
-import re
 from collections import Counter
 from functools import lru_cache
 from pathlib import Path
@@ -38,6 +37,9 @@ from google.adk.evaluation.metric_evaluator_registry import (
 from google.genai import types
 from pydantic import BaseModel
 
+from app.AI.full_agent.shortcut_router import ROOM_RE
+
+
 # judge.py -> evals -> full_agent -> AI -> app -> project root
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 POI_PATH = PROJECT_ROOT / "UpdatedFloorsAndFireinteraction_POIs.json"
@@ -45,7 +47,6 @@ QUERIES_PATH = PROJECT_ROOT / "results" / "ExcelQueries.json"
 
 JUDGE_MODEL = "gemini-2.5-flash"
 JUDGE_SAMPLES = 3
-ROOM_RE = re.compile(r"\broom\s+([A-Z]?\d{3,4})\b", re.IGNORECASE)
 
 CATEGORY_RULES = {
     "Explicit one-step": (
@@ -125,7 +126,7 @@ def _as_command(value: object) -> Optional[dict]:
 
 def _commands_in(content: Optional[types.Content]) -> list[dict]:
     commands = []
-    for part in (content.parts if content and content.parts else []):
+    for part in content.parts if content and content.parts else []:
         if part.thought:
             continue
         if part.text and (cmd := _as_command(part.text)):
@@ -158,7 +159,10 @@ def collect_actions(inv: Invocation) -> list[dict]:
     (one Command each) for runs recorded before the router emitted content.
     """
     events = getattr(inv.intermediate_data, "invocation_events", None) or []
-    for content in [inv.final_response, *(e.content for e in reversed(events) if e.author == "router")]:
+    for content in [
+        inv.final_response,
+        *(e.content for e in reversed(events) if e.author == "router"),
+    ]:
         if (actions := _router_actions(content)) is not None:
             return actions
 
@@ -205,7 +209,10 @@ def deterministic_override(
     if category == "Erroneous prompts":
         if action.get("cmd") == "clarify":
             return True, "Place doesn't exist and the system asked for clarification."
-        return False, f"Place doesn't exist, but the system returned '{action.get('cmd')}'."
+        return (
+            False,
+            f"Place doesn't exist, but the system returned '{action.get('cmd')}'.",
+        )
 
     rooms = ROOM_RE.findall(sub_query)
     if len(rooms) == 1:
@@ -226,7 +233,9 @@ def _transcript(invocations: list[Invocation]) -> str:
     for i, inv in enumerate(invocations):
         lines.append(f"Turn {i + 1} user: {_text(inv.user_content)}")
         actions = collect_actions(inv)
-        reply = json.dumps({"actions": actions}) if actions else _text(inv.final_response)
+        reply = (
+            json.dumps({"actions": actions}) if actions else _text(inv.final_response)
+        )
         lines.append(f"Turn {i + 1} assistant: {reply}")
     return "\n".join(lines)
 
@@ -261,7 +270,7 @@ async def llm_verdict(
             response_schema=Verdict,
         ),
     )
-    if resp.parsed is not None:
+    if isinstance(resp.parsed, Verdict):
         return resp.parsed
     return Verdict.model_validate_json(resp.text or '{"sub_queries": []}')
 
@@ -303,7 +312,9 @@ async def subquery_correctness(
     category = load_categories().get(original_request, "Unknown")
     if category == "Unknown":
         # Without its category an erroneous prompt would be judged like a real place.
-        print(f"[subquery_correctness] no category in ExcelQueries.json for {original_request!r}")
+        print(
+            f"[subquery_correctness] no category in ExcelQueries.json for {original_request!r}"
+        )
 
     # Grade the last turn that produced actions, so a closing "thanks" from the
     # simulated user doesn't hide the answer. Other turns aren't graded.
@@ -341,23 +352,29 @@ async def subquery_correctness(
         else:
             reason = "Place doesn't exist and the system asked for clarification."
         flags.append(ok)
-        rubric_scores.append(RubricScore(
-            rubric_id="subquery_0",
-            score=1.0 if ok else 0.0,
-            rationale=f"{original_request!r}: {reason}",
-        ))
+        rubric_scores.append(
+            RubricScore(
+                rubric_id="subquery_0",
+                score=1.0 if ok else 0.0,
+                rationale=f"{original_request!r}: {reason}",
+            )
+        )
     elif not final_output:
         flags.append(False)
-        rubric_scores.append(RubricScore(
-            rubric_id="final_response",
-            score=0.0,
-            rationale="The workflow produced no final response.",
-        ))
+        rubric_scores.append(
+            RubricScore(
+                rubric_id="final_response",
+                score=0.0,
+                rationale="The workflow produced no final response.",
+            )
+        )
     else:
         client = genai.Client()
         transcript = _transcript(actual_invocations[: graded + 1])
         samples = [
-            await llm_verdict(client, original_request, category, transcript, final_output)
+            await llm_verdict(
+                client, original_request, category, transcript, final_output
+            )
             for _ in range(JUDGE_SAMPLES)
         ]
         sub_verdicts = majority(samples)
@@ -367,28 +384,35 @@ async def subquery_correctness(
             override = deterministic_override(sv.sub_query, action, category)
             correct, reason = override if override else (sv.correct, sv.reason)
             flags.append(correct)
-            rubric_scores.append(RubricScore(
-                rubric_id=f"subquery_{i}",
-                score=1.0 if correct else 0.0,
-                rationale=f"{sv.sub_query!r}: {reason}",
-            ))
+            rubric_scores.append(
+                RubricScore(
+                    rubric_id=f"subquery_{i}",
+                    score=1.0 if correct else 0.0,
+                    rationale=f"{sv.sub_query!r}: {reason}",
+                )
+            )
 
         if len(actions) > len(sub_verdicts):
             flags.append(False)
-            rubric_scores.append(RubricScore(
-                rubric_id="extra_actions",
-                score=0.0,
-                rationale=f"{len(actions) - len(sub_verdicts)} more action(s) than sub-queries.",
-            ))
+            rubric_scores.append(
+                RubricScore(
+                    rubric_id="extra_actions",
+                    score=0.0,
+                    rationale=f"{len(actions) - len(sub_verdicts)} more action(s) than sub-queries.",
+                )
+            )
 
     score, status = encode(flags)
     print(f"[subquery_correctness] {original_request!r} ({category}): {score}")
-    results.insert(graded, PerInvocationResult(
-        actual_invocation=final_inv,
-        score=score,
-        eval_status=status,
-        rubric_scores=rubric_scores,
-    ))
+    results.insert(
+        graded,
+        PerInvocationResult(
+            actual_invocation=final_inv,
+            score=score,
+            eval_status=status,
+            rubric_scores=rubric_scores,
+        ),
+    )
 
     return EvaluationResult(
         overall_score=score,
