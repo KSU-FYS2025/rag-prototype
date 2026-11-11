@@ -320,14 +320,19 @@ def _to_native(obj: Any) -> Any:
 
 
 def search_poi(
-    query: str,
+    query: str | None,
     top_n: int = 5,
     fields: Optional[list[str]] = None,
     filter_expression: str = "",
 ) -> list[tuple[dict, float]]:
-    query_vectors = embedding_fn.encode_queries([query])
-    if isinstance(query_vectors, Tensor):
-        query_vectors = query_vectors.tolist()
+    if query is not None:
+        query_vectors = embedding_fn.encode_queries([query])
+        if isinstance(query_vectors, Tensor):
+            query_vectors = query_vectors.tolist()
+
+    else:
+        query_vectors = None
+
     with get_db_gen() as db:
         db.load_collection("poi")
         res = db.search(

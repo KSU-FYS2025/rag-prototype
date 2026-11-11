@@ -7,6 +7,7 @@ from google.adk.workflow import JoinNode, node
 from google.genai import types
 from pydantic import BaseModel
 
+from app.AI.full_agent import shortcut_router
 from app.AI.full_agent.actions_agent.agent import actions_agent
 from app.AI.full_agent.actions_agent.schema import ActionsAgentOutput
 from app.AI.full_agent.conversation_agent.agent import conversation_agent
@@ -17,6 +18,7 @@ from app.AI.full_agent.search_agent.agent import (
     synthesis_agent,
     validate_pois,
 )
+from app.AI.full_agent.shortcut_router import room_shortcut
 from app.AI.full_agent.triage_agent.agent import triage_agent
 from app.AI.full_agent.triage_agent.schema import TriageAgentOutput
 from app.AI.schema import NavigationIntent
@@ -34,8 +36,9 @@ def make_base_workflow(i: int) -> Workflow:
     return Workflow(
         name=f"BaseWorkflow_{i}",
         edges=[
+            ("START", room_shortcut),
+            (room_shortcut, {"shortcut": actions_agent, "llm": search_poi_node}),
             (
-                "START",
                 search_poi_node,
                 validate_pois,
                 synthesis_agent,

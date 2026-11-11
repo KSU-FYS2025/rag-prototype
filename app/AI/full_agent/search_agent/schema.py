@@ -12,7 +12,10 @@ class Validation(BaseModel):
         "It 100% MUST stay the same as your input. Be sure of this before finishing your response."
     )
     selected_pois: List[POI] = Field(description="List of POIs chosen by the LLM.")
-    method: str = Field(default="LLM", description="MUST always be LLM")
+    method: str = Field(
+        default="LLM",
+        description="If created by the LLM must be LLM. Otherwise, it will be deterministic",
+    )
 
 
 class POIAndSemanticSimilarity(BaseModel):
