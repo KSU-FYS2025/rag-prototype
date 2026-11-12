@@ -14,6 +14,10 @@
     <label for="path">Websocket path</label>
     <input id="path" type="text" value="/ws/audio" autocomplete="off">
 </p>
+<p>
+    <label for="voice">Voice (optional, for /ws/AI/live)</label>
+    <input id="voice" type="text" placeholder="e.g. Kore" autocomplete="off">
+</p>
 
 <p>
     <button id="start">Start session</button>
@@ -80,7 +84,7 @@ registerProcessor("pcm-capture", PcmCapture);
 
     const $ = (id) => document.getElementById(id);
     const el = {
-        path: $("path"),
+        path: $("path"), voice: $("voice"),
         start: $("start"), stop: $("stop"), status: $("status"),
         transcript: $("transcript"), text: $("text"), send: $("send"), log: $("log"),
         mock: $("mock"), auto: $("auto"), delay: $("delay"), plan: $("plan"), actions: $("actions"),
@@ -378,7 +382,9 @@ registerProcessor("pcm-capture", PcmCapture);
 
         // 3. Websocket, using the same scheme as the page.
         const proto = location.protocol === "https:" ? "wss:" : "ws:";
-        const url = proto + "//" + location.host + path;
+        let url = proto + "//" + location.host + path;
+        const voice = el.voice.value.trim();
+        if (voice) url += (url.includes("?") ? "&" : "?") + "voice=" + encodeURIComponent(voice);
         log("Connecting to " + url);
         setUi("busy", "Connecting");
 

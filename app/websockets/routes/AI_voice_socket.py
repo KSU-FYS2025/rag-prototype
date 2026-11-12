@@ -38,8 +38,10 @@ class SampleAIAudioHandler:
         session_service=InMemorySessionService(),
     )
 
-    def __init__(self, websocket: WebSocket):
+    def __init__(self, websocket: WebSocket, voice: str | None = None):
         self.websocket = websocket
+        # Prebuilt Gemini voice name (e.g. "Kore"); None uses the model's default
+        self.voice = voice
         self.chunk_count = 0
         # Fresh session per connection so stale history (e.g. unanswered
         # function calls) from a previous connection is never replayed.
@@ -69,10 +71,21 @@ class SampleAIAudioHandler:
         if not session:
             await self.runner.session_service.create_session(**self.test_credentials)
 
+        speech_config = None
+        if self.voice:
+            speech_config = types.SpeechConfig(
+                voice_config=types.VoiceConfig(
+                    prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                        voice_name=self.voice
+                    )
+                )
+            )
+
         self.run_config = RunConfig(
             response_modalities=["AUDIO"],
             input_audio_transcription=types.AudioTranscriptionConfig(),
             output_audio_transcription=types.AudioTranscriptionConfig(),
+            speech_config=speech_config,
         )
 
         self.queue = LiveRequestQueue()
