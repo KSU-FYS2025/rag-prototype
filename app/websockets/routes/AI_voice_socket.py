@@ -117,7 +117,9 @@ class SampleAIAudioHandler:
                     try:
                         payload = json.loads(message["text"])
                     except json.JSONDecodeError:
-                        logging.warning(f"Message is not valid JSON: {message['text']!r}")
+                        logging.warning(
+                            f"Message is not valid JSON: {message['text']!r}"
+                        )
                         continue
                     await self.resolve_client_event(payload)
 
@@ -347,6 +349,7 @@ class SampleAIAudioHandler:
             await self.websocket.send_json(
                 {"event": "plan_finished", "plan_id": self.plan_id}
             )
+            self.notify("[navigation update] plan finished")
             self.plan = None
             return
 
