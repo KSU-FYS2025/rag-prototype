@@ -48,7 +48,7 @@ class AgentConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     model: str = Field(
-        default="gemini-2.5-flash", description="The model to use for the agent"
+        default="gemini-3.5-flash", description="The model to use for the agent"
     )
     name: str = Field(description="The name of the agent")
     description: str = Field(description="The description of the agent")
