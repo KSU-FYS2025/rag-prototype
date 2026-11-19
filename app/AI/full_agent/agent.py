@@ -116,13 +116,13 @@ async def parallel_router(ctx: Context, node_input: TriageAgentOutput):
         raise e
 
     # Content makes the combined action list visible to adk eval, which only
-    # records events that have content.
+    # records events that have content. It must not be partial: the session
+    # service drops partial events, so eval would never see it.
     return Event(
         output=results_obj,
         content=types.Content(
             role="model", parts=[types.Part(text=results_obj.model_dump_json())]
         ),
-        partial=True,
     )
 
 

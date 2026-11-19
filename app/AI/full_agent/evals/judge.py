@@ -156,13 +156,12 @@ def collect_actions(inv: Invocation) -> list[dict]:
 
     Prefers the router's combined ActionsAgentOutput, whose order fields come
     from the targets. Falls back to each sub-workflow's actions_agent output
-    (one Command each) for runs recorded before the router emitted content.
+    (one Command each) for runs recorded before the router's event was saved.
     """
     events = getattr(inv.intermediate_data, "invocation_events", None) or []
-    for content in [
-        inv.final_response,
-        *(e.content for e in reversed(events) if e.author == "router"),
-    ]:
+    # The router's event is attributed to its workflow, not "router", so check
+    # every event rather than filtering by author.
+    for content in [inv.final_response, *(e.content for e in reversed(events))]:
         if (actions := _router_actions(content)) is not None:
             return actions
 
@@ -178,6 +177,12 @@ def collect_actions(inv: Invocation) -> list[dict]:
     for cmd in found:
         if cmd not in unique:
             unique.append(cmd)
+    if len(unique) > 1:
+        # Without the router's list, the order of these actions is a guess.
+        print(
+            f"[subquery_correctness] no combined action list for "
+            f"{_text(inv.user_content)!r}; grading {len(unique)} actions in guessed order"
+        )
     return sorted(unique, key=lambda cmd: cmd.get("order", 0))
 
 
