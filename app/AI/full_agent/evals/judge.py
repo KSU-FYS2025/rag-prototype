@@ -198,7 +198,10 @@ def _referenced_ids(action: dict) -> list[int]:
 
 
 def deterministic_override(
-    sub_query: str, action: Optional[dict], category: str
+    sub_query: str,
+    action: Optional[dict],
+    category: str,
+    acceptable_ids: list[int],
 ) -> Optional[tuple[bool, str]]:
     """Returns (correct, reason) when code can decide this sub-query, or None to keep
     the LLM judge's verdict."""
@@ -218,6 +221,16 @@ def deterministic_override(
             False,
             f"Place doesn't exist, but the system returned '{action.get('cmd')}'.",
         )
+
+    # The client picks whichever candidate is nearest, so the action is only
+    # correct if every candidate is an acceptable place.
+    if action.get("cmd") == "resolve_nearest":
+        wrong = [pois[i]["name"] for i in ids if i not in acceptable_ids]
+        if not ids:
+            return False, "resolve_nearest has no candidates."
+        if wrong:
+            return False, f"resolve_nearest includes unacceptable POIs: {wrong}."
+        return True, "Every resolve_nearest candidate is an acceptable POI."
 
     rooms = ROOM_RE.findall(sub_query)
     if len(rooms) == 1:
@@ -386,7 +399,9 @@ async def subquery_correctness(
 
         for i, sv in enumerate(sub_verdicts):
             action = actions[i] if i < len(actions) else None
-            override = deterministic_override(sv.sub_query, action, category)
+            override = deterministic_override(
+                sv.sub_query, action, category, sv.acceptable_ids
+            )
             correct, reason = override if override else (sv.correct, sv.reason)
             flags.append(correct)
             rubric_scores.append(
